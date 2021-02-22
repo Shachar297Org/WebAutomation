@@ -1,0 +1,6 @@
+.allure_results
+.pytest_cache
+.idea
+__pycache__
+geckodriver.log
+*.pyc

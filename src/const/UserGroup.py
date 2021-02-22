@@ -1,0 +1,5 @@
+FOTA_ADMIN = "FOTA Admin"
+SERVICE_ADMIN = "Service Admin"
+SERVICE_MANAGER = "Service Manager"
+SERVICE_TECHNICIAN = "Service Technician"
+TECH_SUPPORT = "Tech Support"
