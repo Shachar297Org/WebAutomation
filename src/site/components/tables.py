@@ -59,3 +59,36 @@ class UsersTable(_BaseTable):
         USER_GROUP = "User Group"
         MANAGER = "Manager"
         ACTION_BUTTON = ""
+
+
+class DeviceAssignmentTable(_BaseTable):
+    _EDIT_TEXT = "Edit"
+    _REMOVE_TEXT = "Remove"
+
+    @allure.step
+    def get_rows_by_region(self, region: str) -> []:
+        return self.get_rows_by_column_value(self.Headers.REGION, region)
+
+    @allure.step
+    def get_rows_by_device_types(self, device_types: str) -> []:
+        return self.get_rows_by_column_value(self.Headers.DEVICE_TYPES, device_types)
+
+    @allure.step
+    def get_row_by_device_types(self, device_types: str) -> []:
+        return self.get_row_by_column_value(self.Headers.DEVICE_TYPES, device_types)
+
+    @allure.step
+    def click_edit(self, device_types: str):
+        return self._get_row_button_with_name_by_column_value(self.Headers.DEVICE_TYPES, device_types, self._EDIT_TEXT)
+
+    @allure.step
+    def click_remove(self, device_types: str):
+        return self._get_row_button_with_name_by_column_value(self.Headers.DEVICE_TYPES, device_types,
+                                                              self._REMOVE_TEXT)
+
+    class Headers:
+        REGION = "Region"
+        DEVICE_TYPES = "Device Types"
+        ACTION_BUTTON = ""
+
+

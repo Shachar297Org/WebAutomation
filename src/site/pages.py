@@ -11,6 +11,7 @@ from selene.support.shared import browser
 from src.site.components.page_header import PageHeader
 from src.site.components.simple_components import SearchInput, SelectBox
 from src.site.components.tables import UsersTable
+from src.site.dialogs import CreateUserDialog
 
 
 class _BasePage:
@@ -102,9 +103,9 @@ class UsersPage(_BasePage):
         return self
 
     @allure.step
-    def click_add_user(self):
+    def click_add_user(self) -> CreateUserDialog:
         self.add_button.click()
-        return self
+        return CreateUserDialog()
 
     @allure.step
     def click_reset(self):

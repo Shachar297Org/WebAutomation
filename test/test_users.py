@@ -33,7 +33,7 @@ class TestUsers:
 
     @allure.title("Verify Users page web elements")
     @allure.severity(allure.severity_level.CRITICAL)
-    def test_page_element(self):
+    def test_page_elements(self):
         users_page = self.home_page.left_panel.open_users()
         headers = UsersTable.Headers
 
@@ -123,3 +123,19 @@ class TestUsers:
         users_page.click_reset()
 
         assert_that(table.rows).described_as("Table rows count after reset").is_length(init_rows_count)
+
+    @allure.title("Verify 'Create User' dialog web elements")
+    @allure.severity(allure.severity_level.CRITICAL)
+    def test_dialog_elements(self):
+        users_page = UsersPage().open()
+
+        dialog = users_page.click_add_user()
+
+        dialog.first_name_input.should(be.visible).should(be.enabled)
+        dialog.last_name_input.should(be.visible).should(be.enabled)
+        dialog.email_input.should(be.visible).should(be.enabled)
+        dialog.phone_number_input.should(be.visible).should(be.enabled)
+
+        dialog.close_button.should(be.visible).should(be.clickable)
+        dialog.create_button.should(be.visible).should(be.clickable)
+        dialog.cancel_button.should(be.visible).should(be.clickable)
