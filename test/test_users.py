@@ -56,7 +56,7 @@ class TestUsers:
 
     @allure.title("Verify that you can sort the user rows by any column")
     @allure.severity(allure.severity_level.NORMAL)
-    @allure.issue("wrong sorting order for the Name column")
+    @allure.issue("wrong sorting order if the item contains more than 1 word. The second word isn't taking into account")
     @pytest.mark.parametrize("column", table_columns_provider)
     def test_sort_users(self, column):
         users_page = UsersPage().open()
@@ -68,13 +68,13 @@ class TestUsers:
         sorted_asc_values = table.get_column_values(column)
 
         assert_that(table.is_up_icon_blue(column)).described_as("is blue sort icon up displayed").is_true()
-        assert_that(sorted_asc_values).is_sorted()
+        assert_that(sorted_asc_values).is_sorted(key=str.lower)
 
         users_page.sort_desc_by(column)
         sorted_desc_values = table.get_column_values(column)
 
         assert_that(table.is_down_icon_blue(column)).described_as("is blue sort icon down displayed").is_true()
-        assert_that(sorted_desc_values).is_sorted(reverse=True)
+        assert_that(sorted_desc_values).is_sorted(key=str.lower, reverse=True)
 
     @allure.title("Verify that you can search in the search field by all fields")
     @allure.severity(allure.severity_level.NORMAL)
@@ -113,7 +113,7 @@ class TestUsers:
     def test_filter_by_user_group(self):
         users_page = UsersPage().open()
         table = users_page.table.wait_to_load()
-        init_rows_count = len(table.row)
+        init_rows_count = len(table.rows)
         random_group = get_random_item(table.get_column_values(UsersTable.Headers.USER_GROUP))
 
         users_page.filter_by_group(random_group)
