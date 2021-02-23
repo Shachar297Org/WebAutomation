@@ -5,6 +5,7 @@ from selene.core.entity import Element
 from selene.support.conditions import be
 from selene.support.shared.jquery_style import s
 
+from src.site.components._base_table import PaginationElement
 from src.site.components.simple_components import SelectBox, TreeSelector
 from src.site.components.tables import DeviceAssignmentTable
 
@@ -12,9 +13,12 @@ from src.site.components.tables import DeviceAssignmentTable
 class CreateUserDialog:
     TITLE = "Create User"
     DEVICE_ASSIGNMENT_LABEL = "Device assignment"
+    FIELD_IS_REQUIRED_MESSAGE = "This field is required"
+    INVALID_EMAIL_MESSAGE = "The input is not valid E-mail!"
 
     def __init__(self):
         self.dialog = s("//*[@class='ant-modal-content'][.//text()='Create User']")
+        self.title = self.dialog.s(".ant-modal-title")
 
         self.first_name_input = self.dialog.s("#createUserForm_firstName")
         self.last_name_input = self.dialog.s("#createUserForm_lastName")
@@ -24,17 +28,19 @@ class CreateUserDialog:
         self.user_group_select = SelectBox("#createUserForm_group", ".ant-select-dropdown ul li")
         self.manager_select = SelectBox("#createUserForm_manager", ".ant-select-dropdown ul li")
 
-        self.location_tree_picker = TreeSelector("//span[contains(@class, 'TreeSelector')][.//text()='Locations']")
-        self.device_types_tree_picker = TreeSelector("//span[contains(@class, 'TreeSelector')]"
-                                                     "[.//text()='Device Types']")
+        self.location_tree_picker = TreeSelector(".//span[contains(@class, 'TreeSelector')][.//text()='Locations']",
+                                                 "//div[contains(@style, 'position')][2]//ul/li")
+        self.device_types_tree_picker = TreeSelector(".//span[contains(@class, 'TreeSelector')]"
+                                                     "[.//text()='Device Types']",
+                                                     "//div[contains(@style, 'position')][3]//ul/li")
 
         self.device_table = DeviceAssignmentTable(".ant-modal-content .ant-table-wrapper")
+        self.pagination_element = PaginationElement(".ant-modal-content ul.ant-table-pagination")
 
         self.add_device_button = self.dialog.s(".//button[span[text()='Add']]")
         self.remove_device_button = self.dialog.s(".//button[span[text()='X']]")
         self.cancel_button = self.dialog.s(".//button[span[text()='Cancel']]")
         self.create_button = self.dialog.s(".//button[span[text()='Create']]")
-
         self.close_button = self.dialog.s("button.ant-modal-close")
 
     def wait_to_load(self):
@@ -44,7 +50,11 @@ class CreateUserDialog:
 
     @allure.step
     def get_element_label(self, element: Element) -> str:
-        return element.s("./ancestor::*[@class='ant-row ant-form-item']//label").get(query.text)
+        return element.s("./ancestor::*[contains(@class,'ant-row ant-form-item')]//label").get(query.text)
+
+    @allure.step
+    def get_element_error_message(self, element: Element) -> str:
+        return element.s("./parent::span/following-sibling::div[@class='ant-form-explain']").get(query.text)
 
     @allure.step
     def set_first_name(self, text: str):

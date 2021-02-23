@@ -125,8 +125,8 @@ class _BaseTable(object):
 
 
 class PaginationElement(object):
-    def __init__(self):
-        self.pagination_element = s("ul.ant-table-pagination")
+    def __init__(self, locator: str):
+        self.pagination_element = s(locator)
         self.counter = s("li.ant-pagination-item a")
         self.left_arrow = s("i.anticon-left")
         self.left_right = s("i.anticon-right")
