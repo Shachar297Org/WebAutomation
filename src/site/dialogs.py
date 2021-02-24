@@ -6,7 +6,7 @@ from selene.support.shared.jquery_style import s
 
 from src.site.components.base_table import PaginationElement
 from src.site.components.simple_components import SelectBox
-from src.site.components.tree_selector import BaseTreeSelector
+from src.site.components.tree_selector import _BaseTreeSelector, DeviceLocationTreeSelector, DeviceTypesTreeSelector
 from src.site.components.tables import DeviceAssignmentTable
 
 
@@ -28,9 +28,10 @@ class CreateUserDialog:
         self.user_group_select = SelectBox("#createUserForm_group")
         self.manager_select = SelectBox("#createUserForm_manager")
 
-        self.location_tree_picker = BaseTreeSelector(".//span[contains(@class, 'TreeSelector')][.//text()='Locations']")
-        self.device_types_tree_picker = BaseTreeSelector(".//span[contains(@class, 'TreeSelector')]"
-                                                         "[.//text()='Device Types']")
+        self.location_tree_picker = DeviceLocationTreeSelector(".//span[contains(@class, 'TreeSelector')]"
+                                                               "[.//text()='Locations']")
+        self.device_types_tree_picker = DeviceTypesTreeSelector(".//span[contains(@class, 'TreeSelector')]"
+                                                                "[.//text()='Device Types']")
 
         self.device_table = DeviceAssignmentTable(".ant-modal-content .ant-table-wrapper")
         self.pagination_element = PaginationElement(".ant-modal-content ul.ant-table-pagination")

@@ -86,7 +86,7 @@ class _ChildTree:
         return extract_text(self.tree.ss("./li/span[@title]"))
 
 
-class BaseTreeSelector:
+class _BaseTreeSelector:
     def __init__(self, tree_selector_locator):
         self.tree_selector = s(tree_selector_locator)
         self.selected_items = ss("li.ant-select-selection__choice")
@@ -122,7 +122,7 @@ class BaseTreeSelector:
         return [el.get(query.attribute("title")) for el in elements]
 
 
-class DeviceLocationTreeSelector(BaseTreeSelector):
+class DeviceLocationTreeSelector(_BaseTreeSelector):
     def __init__(self, tree_selector_locator):
         super().__init__(tree_selector_locator)
         self.all_tree = _ChildTree("ul")
@@ -150,7 +150,7 @@ class DeviceLocationTreeSelector(BaseTreeSelector):
         self.country_tree.get_node_by_name(text).check()
 
 
-class DeviceTypesTreeSelector(BaseTreeSelector):
+class DeviceTypesTreeSelector(_BaseTreeSelector):
     def __init__(self, tree_selector_locator):
         super().__init__(tree_selector_locator)
         self.all_tree = _ChildTree("ul")
