@@ -66,7 +66,7 @@ class UsersPage(_BasePage):
         super().__init__()
         self.add_button = s("//button[span[text()='+']]")
         self.search_input = SearchInput("input[placeholder='Search']")
-        self.user_group_select = SelectBox("#entityToolbarFilters_userGroupFilter", ".ant-select-dropdown ul li")
+        self.user_group_select = SelectBox("#entityToolbarFilters_userGroupFilter")
         self.reset_button = s("//button[span[text()='Reset']]")
         self.reload_button = s("i.anticon-reload")
         self.table = UsersTable(".ant-table-wrapper")

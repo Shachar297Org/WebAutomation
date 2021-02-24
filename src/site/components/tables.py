@@ -2,7 +2,7 @@ import allure
 from selene.core.entity import Element
 from selene.support.conditions import have, be
 
-from src.site.components._base_table import _BaseTable
+from src.site.components.base_table import _BaseTable
 
 
 class UsersTable(_BaseTable):

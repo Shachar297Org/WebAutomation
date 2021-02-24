@@ -6,6 +6,8 @@ from selene.core.entity import Element
 from selene.support.conditions import be, have
 from selene.support.shared.jquery_style import s
 
+from src.util.elements_util import extract_text
+
 
 class _BaseTable(object):
     _HEADER_XPATH = ".//th//span[@class='ant-table-column-title']"
@@ -22,13 +24,13 @@ class _BaseTable(object):
     @allure.step
     def get_headers(self) -> []:
         headers = self.table.ss(self._HEADER_XPATH)
-        return _BaseTable._extract_text(headers)
+        return extract_text(headers)
 
     @allure.step
     def get_column_values(self, column_name: str, ) -> []:
         self.wait_to_load()
         cells = self.table.ss(".//tbody/tr/td[{0}]".format(self._get_column_index(column_name)))
-        return _BaseTable._extract_text(cells)
+        return extract_text(cells)
 
     @allure.step
     def get_row_by_column_value(self, column_name: str, column_value: str) -> Element:
@@ -76,7 +78,7 @@ class _BaseTable(object):
 
     @allure.step
     def is_any_row_cell_contains_text_ignoring_case(self, table_row: Element, text: str) -> bool:
-        for cell_text in self._extract_text(self._get_raw_cells(table_row)):
+        for cell_text in extract_text(self._get_raw_cells(table_row)):
             if text.lower() in cell_text.lower():
                 return True
 
@@ -118,10 +120,6 @@ class _BaseTable(object):
     @staticmethod
     def _get_raw_cells(table_row: Element) -> []:
         return table_row.ss("td")
-
-    @staticmethod
-    def _extract_text(elements: []) -> []:
-        return [el.get(query.text) for el in elements]
 
 
 class PaginationElement(object):

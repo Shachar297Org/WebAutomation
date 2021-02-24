@@ -1,12 +1,12 @@
-
 import allure
 from selene.core import query
 from selene.core.entity import Element
 from selene.support.conditions import be
 from selene.support.shared.jquery_style import s
 
-from src.site.components._base_table import PaginationElement
-from src.site.components.simple_components import SelectBox, TreeSelector
+from src.site.components.base_table import PaginationElement
+from src.site.components.simple_components import SelectBox
+from src.site.components.tree_selector import BaseTreeSelector
 from src.site.components.tables import DeviceAssignmentTable
 
 
@@ -25,14 +25,12 @@ class CreateUserDialog:
         self.email_input = self.dialog.s("#createUserForm_email")
         self.phone_number_input = self.dialog.s("#createUserForm_phone")
 
-        self.user_group_select = SelectBox("#createUserForm_group", ".ant-select-dropdown ul li")
-        self.manager_select = SelectBox("#createUserForm_manager", ".ant-select-dropdown ul li")
+        self.user_group_select = SelectBox("#createUserForm_group")
+        self.manager_select = SelectBox("#createUserForm_manager")
 
-        self.location_tree_picker = TreeSelector(".//span[contains(@class, 'TreeSelector')][.//text()='Locations']",
-                                                 "//div[contains(@style, 'position')][2]//ul/li")
-        self.device_types_tree_picker = TreeSelector(".//span[contains(@class, 'TreeSelector')]"
-                                                     "[.//text()='Device Types']",
-                                                     "//div[contains(@style, 'position')][3]//ul/li")
+        self.location_tree_picker = BaseTreeSelector(".//span[contains(@class, 'TreeSelector')][.//text()='Locations']")
+        self.device_types_tree_picker = BaseTreeSelector(".//span[contains(@class, 'TreeSelector')]"
+                                                         "[.//text()='Device Types']")
 
         self.device_table = DeviceAssignmentTable(".ant-modal-content .ant-table-wrapper")
         self.pagination_element = PaginationElement(".ant-modal-content ul.ant-table-pagination")
