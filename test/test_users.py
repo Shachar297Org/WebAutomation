@@ -4,8 +4,9 @@ from assertpy import assert_that
 from selene.support.conditions import be, have
 
 from src.const import Feature
+from src.site.dialogs import CreateUserDialog
 from src.site.login_page import LoginPage
-from src.site.components.tables import UsersTable
+from src.site.components.tables import UsersTable, DeviceAssignmentTable
 from src.site.pages import UsersPage
 from src.util.random_util import get_random_item
 from test.test_data_provider import fota_admin_credentials
@@ -127,15 +128,56 @@ class TestUsers:
     @allure.title("Verify 'Create User' dialog web elements")
     @allure.severity(allure.severity_level.CRITICAL)
     def test_dialog_elements(self):
-        users_page = UsersPage().open()
+        headers = DeviceAssignmentTable.Headers
+        dialog = UsersPage().open().click_add_user()
 
-        dialog = users_page.click_add_user()
+        dialog.title.should(have.text(CreateUserDialog.TITLE))
 
-        dialog.first_name_input.should(be.visible).should(be.enabled)
-        dialog.last_name_input.should(be.visible).should(be.enabled)
-        dialog.email_input.should(be.visible).should(be.enabled)
-        dialog.phone_number_input.should(be.visible).should(be.enabled)
+        dialog.first_name_input.should(be.visible).should(be.enabled).should(be.blank)
+        assert_that(dialog.get_element_label(dialog.first_name_input)).is_equal_to(CreateUserDialog.FIRST_NAME_LABEL)
+        dialog.last_name_input.should(be.visible).should(be.enabled).should(be.blank)
+        assert_that(dialog.get_element_label(dialog.last_name_input)).is_equal_to(CreateUserDialog.LAST_NAME_LABEL)
+        dialog.email_input.should(be.visible).should(be.enabled).should(be.blank)
+        assert_that(dialog.get_element_label(dialog.email_input)).is_equal_to(CreateUserDialog.EMAIL_LABEL)
+        dialog.phone_number_input.should(be.visible).should(be.enabled).should(be.blank)
+        assert_that(dialog.get_element_label(dialog.phone_number_input)).is_equal_to(CreateUserDialog.PHONE_NUMBER_LABEL)
 
+        dialog.user_group_select.select.should(be.visible)
+        assert_that(dialog.user_group_select.is_enabled())\
+            .described_as("'User Group' select to be enabled").is_true()
+        assert_that(dialog.user_group_select.is_empty())\
+            .described_as("'User Group' select to be empty").is_true()
+        assert_that(dialog.get_element_label(dialog.user_group_select.select))\
+            .is_equal_to(CreateUserDialog.USER_GROUP_LABEL)
+
+        dialog.manager_select.select.should(be.visible)
+        assert_that(dialog.manager_select.is_disabled())\
+            .described_as("'Manager' select to be disabled").is_true()
+        assert_that(dialog.manager_select.is_empty())\
+            .described_as("'Manager' select to be empty").is_true()
+        assert_that(dialog.get_element_label(dialog.manager_select.select))\
+            .is_equal_to(CreateUserDialog.MANAGER_LABEL)
+
+        dialog.location_tree_picker.tree_selector.should(be.visible).should(be.enabled)
+        assert_that(dialog.location_tree_picker.is_enabled())\
+            .described_as("'Location' tree picker to be enabled").is_true()
+        assert_that(dialog.location_tree_picker.selected_items()) \
+            .described_as("'Location' tree picker to be empty").is_empty()
+        assert_that(dialog.get_element_label(dialog.location_tree_picker.tree_selector)) \
+            .is_equal_to(CreateUserDialog.DEVICE_ASSIGNMENT_LABEL)
+
+        dialog.device_types_tree_picker.tree_selector.should(be.visible).should(be.enabled)
+        assert_that(dialog.device_types_tree_picker.is_enabled())\
+            .described_as("'Device Types' tree picker to be enabled").is_true()
+        assert_that(dialog.device_types_tree_picker.selected_items()) \
+            .described_as("'Device Types' tree picker to be empty").is_empty()
+
+        dialog.device_table.table.should(be.visible).should(be.enabled)
+        assert_that(dialog.device_table.rows).described_as("Device table to be empty").is_empty()
+        assert_that(dialog.device_table.get_headers()).contains_only(headers.REGION, headers.DEVICE_TYPES,
+                                                                     headers.ACTION_BUTTON)
+
+        dialog.add_device_button.should(be.visible).should(be.disabled)
         dialog.close_button.should(be.visible).should(be.clickable)
         dialog.create_button.should(be.visible).should(be.clickable)
         dialog.cancel_button.should(be.visible).should(be.clickable)

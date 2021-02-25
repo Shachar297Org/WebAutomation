@@ -74,4 +74,8 @@ class SelectBox:
 
     @allure.step
     def is_enabled(self) -> bool:
-        return self.select.matching(be.enabled)
+        return self.select.matching(have.css_class("ant-select-enabled"))
+
+    @allure.step
+    def is_disabled(self) -> bool:
+        return self.select.matching(have.css_class("ant-select-disabled"))

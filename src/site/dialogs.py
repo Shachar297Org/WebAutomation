@@ -13,6 +13,13 @@ from src.site.components.tables import DeviceAssignmentTable
 class CreateUserDialog:
     TITLE = "Create User"
     DEVICE_ASSIGNMENT_LABEL = "Device assignment"
+    FIRST_NAME_LABEL = "First Name"
+    LAST_NAME_LABEL = "Last Name"
+    EMAIL_LABEL = "Email"
+    PHONE_NUMBER_LABEL = "Phone Number"
+    USER_GROUP_LABEL = "User Group"
+    MANAGER_LABEL = "Manager"
+
     FIELD_IS_REQUIRED_MESSAGE = "This field is required"
     INVALID_EMAIL_MESSAGE = "The input is not valid E-mail!"
 

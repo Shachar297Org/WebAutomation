@@ -114,6 +114,10 @@ class _BaseTreeSelector:
         return self
 
     @allure.step
+    def is_enabled(self) -> bool:
+        return self.tree_selector.matching(have.css_class("ant-select-enabled"))
+
+    @allure.step
     def _get_selected_item_element(self, item_name: str):
         return self.selected_items.filtered_by(have.attribute("title").value(item_name))
 
