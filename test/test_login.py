@@ -9,10 +9,10 @@ from src.site.login_page import LoginPage
 from selene.api import be
 
 from src.util.driver_util import *
-from test.test_data_provider import fota_admin_credentials
+from test.test_data_provider import super_admin_credentials
 
-USERNAME = fota_admin_credentials.username
-PASSWORD = fota_admin_credentials.password
+USERNAME = super_admin_credentials.username
+PASSWORD = super_admin_credentials.password
 
 
 # TODO Extends the test suite with all documented login tests

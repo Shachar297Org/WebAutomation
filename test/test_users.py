@@ -9,13 +9,13 @@ from src.site.login_page import LoginPage
 from src.site.components.tables import UsersTable, DeviceAssignmentTable
 from src.site.pages import UsersPage
 from src.util.random_util import get_random_item
-from test.test_data_provider import fota_admin_credentials
+from test.test_data_provider import super_admin_credentials
 
 
 @pytest.fixture(scope="class")
 def login_as_fota_admin(request):
-    home_page = LoginPage().open().login(fota_admin_credentials.username,
-                                         fota_admin_credentials.password)
+    home_page = LoginPage().open().login(super_admin_credentials.username,
+                                         super_admin_credentials.password)
     if request.cls is not None:
         request.cls.home_page = home_page
     yield home_page
