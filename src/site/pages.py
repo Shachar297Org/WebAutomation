@@ -7,11 +7,12 @@ from selene.core import query
 from selene.support.conditions import be, have
 from selene.support.shared import browser
 
-
+from src.domain.user import User
 from src.site.components.page_header import PageHeader
 from src.site.components.simple_components import SearchInput, SelectBox
 from src.site.components.tables import UsersTable
-from src.site.dialogs import CreateUserDialog
+from src.site.dialogs import CreateUserDialog, EditUserDialog
+from src.util.elements_util import JS_CLICK
 
 
 class _BasePage:
@@ -21,6 +22,9 @@ class _BasePage:
 
         self.left_panel = _LeftPanel(".ant-menu.ant-menu-inline")
         self.header = PageHeader("ant-layout-header")
+
+        self.notification_msg = s(".ant-notification-notice-message")
+        self.notification_description = s(".ant-notification-notice-description")
 
         self.style = s("body style")
 
@@ -40,6 +44,20 @@ class _BasePage:
     @allure.step
     def get_logo_img_url(self) -> str:
         return self.logo_img.get(query.attribute("src"))
+
+    @allure.step
+    def get_notification_message(self):
+        self._wait_for_notification()
+        return self.notification_msg.get(query.text)
+
+    @allure.step
+    def get_notification_description(self):
+        self._wait_for_notification()
+        return self.notification_description.get(query.text)
+
+    @allure.step
+    def _wait_for_notification(self):
+        self.notification_msg.wait.until(be.visible)
 
 
 class HomePage(_BasePage):
@@ -61,6 +79,8 @@ class HomePage(_BasePage):
 class UsersPage(_BasePage):
     SEARCH_LABEL = "Search"
     SELECT_USERS_GROUP_LABEL = "Select User Group..."
+
+    USER_CREATED_MESSAGE = "Create User successful"
 
     def __init__(self):
         super().__init__()
@@ -103,9 +123,18 @@ class UsersPage(_BasePage):
         return self
 
     @allure.step
+    def add_user(self, user: User):
+        self.click_add_user().set_user_fields(user).click_create()
+        return self
+
+    def open_edit_user_dialog(self, email):
+        self.table.click_edit(email)
+        return EditUserDialog().wait_to_load()
+
+    @allure.step
     def click_add_user(self) -> CreateUserDialog:
         self.add_button.click()
-        return CreateUserDialog()
+        return CreateUserDialog().wait_to_load()
 
     @allure.step
     def click_reset(self):
@@ -115,7 +144,7 @@ class UsersPage(_BasePage):
 
     @allure.step
     def reload(self):
-        self.reload_button.click()
+        self.reload_button.execute_script(JS_CLICK)
         return UsersPage()
 
 

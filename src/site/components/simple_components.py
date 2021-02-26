@@ -62,7 +62,10 @@ class SelectBox:
 
     @allure.step
     def get_selected_item(self) -> str:
-        return self.select.s(".ant-select-selection-selected-value").get(query.text)
+        if self.is_empty():
+            return ""
+        else:
+            return self.select.s(".ant-select-selection-selected-value").get(query.text)
 
     @allure.step
     def get_placeholder(self) -> str:
@@ -71,6 +74,11 @@ class SelectBox:
     @allure.step
     def get_label(self) -> str:
         return self.select.s("./ancestor::*[@class='ant-row ant-form-item']//label").get(query.text)
+
+    @allure.step
+    def wait_to_be_enabled(self):
+        self.select.wait.until(have.css_class("ant-select-enabled"))
+        return self
 
     @allure.step
     def is_enabled(self) -> bool:

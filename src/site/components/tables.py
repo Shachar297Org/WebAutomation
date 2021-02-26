@@ -10,44 +10,44 @@ class UsersTable(_BaseTable):
     _VIEW_TEXT = "View"
 
     @allure.step
-    def get_email_by_name(self, name: str) -> str:
-        return self.get_user_column_value(name, self.Headers.EMAIL)
+    def get_name_by_email(self, email: str) -> str:
+        return self.get_user_column_value(email, self.Headers.NAME)
 
     @allure.step
-    def get_phone_by_name(self, name: str) -> str:
-        return self.get_user_column_value(name, self.Headers.PHONE)
+    def get_phone_by_email(self, email: str) -> str:
+        return self.get_user_column_value(email, self.Headers.PHONE)
 
     @allure.step
-    def get_user_group_by_name(self, name: str) -> str:
-        return self.get_user_column_value(name, self.Headers.USER_GROUP)
+    def get_user_group_by_email(self, email: str) -> str:
+        return self.get_user_column_value(email, self.Headers.USER_GROUP)
 
     @allure.step
-    def get_manager_by_name(self, name: str) -> str:
-        return self.get_user_column_value(name, self.Headers.MANAGER)
+    def get_manager_by_email(self, email: str) -> str:
+        return self.get_user_column_value(email, self.Headers.MANAGER)
 
     @allure.step
-    def is_user_editable(self, name: str) -> bool:
-        return self._get_row_button_by_column_value(self.Headers.NAME, name).matching(have.text(self._EDIT_TEXT))
+    def is_user_editable(self, email: str) -> bool:
+        return self._get_row_button_by_column_value(self.Headers.EMAIL, email).matching(have.text(self._EDIT_TEXT))
 
     @allure.step
-    def is_lock_icon_displayed(self, name: str) -> bool:
-        return self.get_row_by_name(name).s(".anticon-lock").matching(be.visible)
+    def is_lock_icon_displayed(self, email: str) -> bool:
+        return self.get_row_by_name(email).s(".anticon-lock").matching(be.visible)
 
     @allure.step
-    def click_edit(self, name: str):
-        return self._get_row_button_with_name_by_column_value(self.Headers.NAME, name, self._EDIT_TEXT)
+    def click_edit(self, email: str):
+        self._get_row_button_with_name_by_column_value(self.Headers.EMAIL, email, self._EDIT_TEXT).click()
 
     @allure.step
-    def click_view(self, name: str):
-        return self._get_row_button_with_name_by_column_value(self.Headers.NAME, name, self._VIEW_TEXT)
+    def click_view(self, email: str):
+        self._get_row_button_with_name_by_column_value(self.Headers.EMAIL, email, self._VIEW_TEXT).click()
 
     @allure.step
-    def get_row_by_name(self, name: str) -> Element:
-        return self.get_row_by_column_value(self.Headers.NAME, name)
+    def get_row_by_name(self, email: str) -> Element:
+        return self.get_row_by_column_value(self.Headers.EMAIL, email)
 
     @allure.step
-    def get_user_column_value(self, user_name: str, column) -> str:
-        row = self.get_row_by_column_value(self.Headers.NAME, user_name)
+    def get_user_column_value(self, email: str, column) -> str:
+        row = self.get_row_by_column_value(self.Headers.EMAIL, email)
         column_index = self._get_column_index(column)
 
         return self.get_row_cell_text_by_index(row, column_index)

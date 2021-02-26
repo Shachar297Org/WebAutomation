@@ -12,3 +12,4 @@ class User(object):
         self.phone_number = phone_number
         self.user_group = user_group
         self.manager = manager
+        self.name = self.first_name + " " + self.last_name

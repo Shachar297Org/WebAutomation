@@ -8,12 +8,12 @@ from src.site.dialogs import CreateUserDialog
 from src.site.login_page import LoginPage
 from src.site.components.tables import UsersTable, DeviceAssignmentTable
 from src.site.pages import UsersPage
-from src.util.random_util import get_random_item
-from test.test_data_provider import super_admin_credentials
+from src.util.random_util import random_list_item
+from test.test_data_provider import super_admin_credentials, generate_random_user
 
 
 @pytest.fixture(scope="class")
-def login_as_fota_admin(request):
+def login(request):
     home_page = LoginPage().open().login(super_admin_credentials.username,
                                          super_admin_credentials.password)
     if request.cls is not None:
@@ -21,7 +21,7 @@ def login_as_fota_admin(request):
     yield home_page
 
 
-@pytest.mark.usefixtures("login_as_fota_admin")
+@pytest.mark.usefixtures("login")
 @allure.feature(Feature.USERS)
 class TestUsers:
     table_columns_provider = [
@@ -57,7 +57,7 @@ class TestUsers:
 
     @allure.title("Verify that you can sort the user rows by any column")
     @allure.severity(allure.severity_level.NORMAL)
-    @allure.issue("wrong sorting order if the item contains more than 1 word. The second word isn't taking into account")
+    @allure.issue("wrong sorting order if the item contains more than 1 word. The second word isn't considered")
     @pytest.mark.parametrize("column", table_columns_provider)
     def test_sort_users(self, column):
         users_page = UsersPage().open()
@@ -83,7 +83,7 @@ class TestUsers:
     def test_filter_users_by_column_value(self, column):
         users_page = UsersPage().open()
         table = users_page.table.wait_to_load()
-        random_item = get_random_item(table.get_column_values(column)).split()[0]
+        random_item = random_list_item(table.get_column_values(column)).split()[0]
 
         users_page.search_by(random_item)
 
@@ -96,7 +96,7 @@ class TestUsers:
         users_page = UsersPage().open()
         table = users_page.table.wait_to_load()
         init_rows_count = len(table.rows)
-        random_name = get_random_item(table.get_column_values(UsersTable.Headers.NAME))
+        random_name = random_list_item(table.get_column_values(UsersTable.Headers.NAME))
         substring = random_name[1:3]
 
         users_page.search_by(substring)
@@ -115,7 +115,7 @@ class TestUsers:
         users_page = UsersPage().open()
         table = users_page.table.wait_to_load()
         init_rows_count = len(table.rows)
-        random_group = get_random_item(table.get_column_values(UsersTable.Headers.USER_GROUP))
+        random_group = random_list_item(table.get_column_values(UsersTable.Headers.USER_GROUP))
 
         users_page.filter_by_group(random_group)
 
@@ -140,26 +140,27 @@ class TestUsers:
         dialog.email_input.should(be.visible).should(be.enabled).should(be.blank)
         assert_that(dialog.get_element_label(dialog.email_input)).is_equal_to(CreateUserDialog.EMAIL_LABEL)
         dialog.phone_number_input.should(be.visible).should(be.enabled).should(be.blank)
-        assert_that(dialog.get_element_label(dialog.phone_number_input)).is_equal_to(CreateUserDialog.PHONE_NUMBER_LABEL)
+        assert_that(dialog.get_element_label(dialog.phone_number_input)).is_equal_to(
+            CreateUserDialog.PHONE_NUMBER_LABEL)
 
         dialog.user_group_select.select.should(be.visible)
-        assert_that(dialog.user_group_select.is_enabled())\
+        assert_that(dialog.user_group_select.is_enabled()) \
             .described_as("'User Group' select to be enabled").is_true()
-        assert_that(dialog.user_group_select.is_empty())\
+        assert_that(dialog.user_group_select.is_empty()) \
             .described_as("'User Group' select to be empty").is_true()
-        assert_that(dialog.get_element_label(dialog.user_group_select.select))\
+        assert_that(dialog.get_element_label(dialog.user_group_select.select)) \
             .is_equal_to(CreateUserDialog.USER_GROUP_LABEL)
 
         dialog.manager_select.select.should(be.visible)
-        assert_that(dialog.manager_select.is_disabled())\
+        assert_that(dialog.manager_select.is_disabled()) \
             .described_as("'Manager' select to be disabled").is_true()
-        assert_that(dialog.manager_select.is_empty())\
+        assert_that(dialog.manager_select.is_empty()) \
             .described_as("'Manager' select to be empty").is_true()
-        assert_that(dialog.get_element_label(dialog.manager_select.select))\
+        assert_that(dialog.get_element_label(dialog.manager_select.select)) \
             .is_equal_to(CreateUserDialog.MANAGER_LABEL)
 
         dialog.location_tree_picker.tree_selector.should(be.visible).should(be.enabled)
-        assert_that(dialog.location_tree_picker.is_enabled())\
+        assert_that(dialog.location_tree_picker.is_enabled()) \
             .described_as("'Location' tree picker to be enabled").is_true()
         assert_that(dialog.location_tree_picker.selected_items()) \
             .described_as("'Location' tree picker to be empty").is_empty()
@@ -167,7 +168,7 @@ class TestUsers:
             .is_equal_to(CreateUserDialog.DEVICE_ASSIGNMENT_LABEL)
 
         dialog.device_types_tree_picker.tree_selector.should(be.visible).should(be.enabled)
-        assert_that(dialog.device_types_tree_picker.is_enabled())\
+        assert_that(dialog.device_types_tree_picker.is_enabled()) \
             .described_as("'Device Types' tree picker to be enabled").is_true()
         assert_that(dialog.device_types_tree_picker.selected_items()) \
             .described_as("'Device Types' tree picker to be empty").is_empty()
@@ -181,3 +182,33 @@ class TestUsers:
         dialog.close_button.should(be.visible).should(be.clickable)
         dialog.create_button.should(be.visible).should(be.clickable)
         dialog.cancel_button.should(be.visible).should(be.clickable)
+
+    @allure.title("Create a new user")
+    @allure.severity(allure.severity_level.CRITICAL)
+    def test_create_user(self):
+        headers = UsersTable.Headers
+        new_user = generate_random_user()
+
+        users_page = UsersPage().open()
+        users_page.add_user(new_user)
+
+        assert_that(users_page.get_notification_message()).is_equal_to(UsersPage.USER_CREATED_MESSAGE)
+
+        users_page.reload().search_by(new_user.email)
+
+        assert_that(users_page.table.get_column_values(headers.EMAIL)).contains_only(new_user.email)
+        assert_that(users_page.table.get_name_by_email(new_user.email)).is_equal_to(new_user.name)
+        assert_that(users_page.table.get_phone_by_email(new_user.email)).is_equal_to(new_user.phone_number)
+        assert_that(users_page.table.get_user_group_by_email(new_user.email)).is_equal_to(new_user.user_group)
+        assert_that(users_page.table.get_manager_by_email(new_user.email)).is_equal_to(new_user.manager)
+
+        assert_that(users_page.table.is_user_editable(new_user.email)).described_as("Edit link").is_true()
+
+        edit_dialog = users_page.open_edit_user_dialog(new_user.email)
+
+        assert_that(edit_dialog.get_first_name()).is_equal_to(new_user.first_name)
+        assert_that(edit_dialog.get_last_name()).is_equal_to(new_user.last_name)
+        assert_that(edit_dialog.get_email()).is_equal_to(new_user.email)
+        assert_that(edit_dialog.get_phone_number()).is_equal_to(new_user.phone_number)
+        assert_that(edit_dialog.get_user_group()).is_equal_to(new_user.user_group)
+        assert_that(edit_dialog.get_manager()).is_equal_to(new_user.manager)

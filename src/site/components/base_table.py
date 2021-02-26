@@ -16,9 +16,11 @@ class _BaseTable(object):
         self.table = s(locator)
         self.table_body = self.table.s("tbody.ant-table-tbody")
         self.rows = self.table_body.ss("tr")
+        self.spinner = s('.ant-spin-blur')
 
     def wait_to_load(self):
         self.table_body.wait.until(be.visible)
+        self.spinner.wait.until(be.not_.visible)
         return self
 
     @allure.step
@@ -106,7 +108,7 @@ class _BaseTable(object):
     def _get_row_button_with_name_by_column_value(self, column_name: str, column_value: str,
                                                   button_name: str) -> Element:
         return self.get_row_by_column_value(column_name, column_value) \
-            .s("./button[span[text()='{}']]".format(button_name))
+            .s(".//button[span[text()='{}']]".format(button_name))
 
     @staticmethod
     def get_row_cell_text_by_index(row: Element, index: int) -> str:
