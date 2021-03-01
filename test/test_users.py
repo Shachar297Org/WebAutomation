@@ -3,7 +3,8 @@ import pytest
 from assertpy import assert_that
 from selene.support.conditions import be, have
 
-from src.const import Feature
+from src.const import Feature, Region, APAC_Country, DeviceGroup
+from src.site.components.tree_selector import SEPARATOR, get_formatted_selected_plus_item
 from src.site.dialogs import CreateUserDialog
 from src.site.login_page import LoginPage
 from src.site.components.tables import UsersTable, DeviceAssignmentTable
@@ -167,10 +168,10 @@ class TestUsers:
         assert_that(dialog.get_element_label(dialog.location_tree_picker.tree_selector)) \
             .is_equal_to(CreateUserDialog.DEVICE_ASSIGNMENT_LABEL)
 
-        dialog.device_types_tree_picker.tree_selector.should(be.visible).should(be.enabled)
-        assert_that(dialog.device_types_tree_picker.is_enabled()) \
+        dialog.device_tree_picker.tree_selector.should(be.visible).should(be.enabled)
+        assert_that(dialog.device_tree_picker.is_enabled()) \
             .described_as("'Device Types' tree picker to be enabled").is_true()
-        assert_that(dialog.device_types_tree_picker.selected_items()) \
+        assert_that(dialog.device_tree_picker.selected_items()) \
             .described_as("'Device Types' tree picker to be empty").is_empty()
 
         dialog.device_table.table.should(be.visible).should(be.enabled)
@@ -215,12 +216,28 @@ class TestUsers:
 
     @allure.title("Create a new user with added device")
     @allure.severity(allure.severity_level.CRITICAL)
-    def test_create_user_with_device(self):
-        new_user = generate_random_user()
+    def test_add_device(self):
+        test_region = Region.APAC
+        test_country1 = APAC_Country.AUSTRALIA
+        test_countries_count = 3
+        test_device_group1 = DeviceGroup.ACUPULSE
+        test_device_group1_model1 = "Acupulse - 30W"
+        test_device_group1_model1_device = "GA-0000070CN"
+        test_devices_count = 4
 
         users_page = UsersPage().open()
-        dialog = users_page.click_add_user().set_user_fields(new_user)
-        dialog.location_tree_picker.select_usa_states("Alabama", "Colorado", "Montana")
-        dialog.device_types_tree_picker.select_devices("ALLEGRETTO", "Allegretto 400Hz- Sy", "1043", "1331")
-        dialog.click_add_device()
-#         TODO Continue the test. Add country & devices constants
+        dialog = users_page.click_add_user()
+        dialog.location_tree_picker.select_countries(test_region, test_country1, APAC_Country.INDONESIA,
+                                                     APAC_Country.SINGAPORE)
+        dialog.device_tree_picker.select_devices(DeviceGroup.ACUPULSE, test_device_group1_model1,
+                                                 test_device_group1_model1_device, "GA-0000070DE", "GA-0000070GR",
+                                                 "RG-0000070")
+
+        assert_that(dialog.location_tree_picker.get_all_selected_items()).contains_only(
+            test_region + SEPARATOR + test_country1,
+            get_formatted_selected_plus_item(test_countries_count - 1)
+        )
+        assert_that(dialog.device_tree_picker.get_all_selected_items()).contains_only(
+            test_device_group1 + SEPARATOR + test_device_group1_model1 + SEPARATOR + test_device_group1_model1_device,
+            get_formatted_selected_plus_item(test_devices_count - 1)
+        )

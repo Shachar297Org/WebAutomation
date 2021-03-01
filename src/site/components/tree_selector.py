@@ -8,8 +8,13 @@ from selene.support.shared.jquery_style import s, ss
 
 from src.util.elements_util import extract_text
 
+SEPARATOR = "/"
 ALL_NODE = "ALL"
 _SELECT_TREE_LOCATOR = ".tree-selector-drop-down:not(.ant-select-dropdown-hidden)"
+
+
+def get_formatted_selected_plus_item(number) -> str:
+    return "+ {} ...".format(number)
 
 
 class _TreeNodeWrapper:
@@ -93,16 +98,20 @@ class _ChildTree:
 class _BaseTreeSelector:
     def __init__(self, tree_selector_locator):
         self.tree_selector = s(tree_selector_locator)
-        self.selected_items = ss("li.ant-select-selection__choice")
+        self.selected_items = self.tree_selector.ss("li.ant-select-selection__choice")
 
         self.select_tree = s(_SELECT_TREE_LOCATOR)
 
     def open(self):
-        is_another_tree_selector_open = self._is_another_tree_selector_is_opened()
-        self.tree_selector.click()
-        if is_another_tree_selector_open:
-            time.sleep(2)
+        if not self.is_opened():
+            is_another_tree_selector_open = self._is_another_tree_selector_is_opened()
+            self.tree_selector.click()
+            if is_another_tree_selector_open:
+                time.sleep(1)
         return self
+
+    def is_opened(self) -> bool:
+        return self.tree_selector.matching(have.css_class("ant-select-open"))
 
     @allure.step
     def get_all_selected_items(self) -> []:
@@ -231,6 +240,13 @@ class DeviceTypesTreeSelector(_BaseTreeSelector):
 
         for dev_type in device_types:
             self._check_device_type(dev_type)
+
+    @allure.step
+    def get_all_device_types(self) -> []:
+        self.open()
+        self._get_all_node().open()
+
+        return self.device_type_tree.get_node_names()
 
     @allure.step
     def select_device_model(self, device_type, *device_models):

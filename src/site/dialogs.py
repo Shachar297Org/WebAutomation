@@ -37,8 +37,8 @@ class _BaseCreateEditUserDialog:
 
         self.location_tree_picker = DeviceLocationTreeSelector(".//span[contains(@class, 'TreeSelector')]"
                                                                "[.//text()='Locations']")
-        self.device_types_tree_picker = DeviceTypesTreeSelector(".//span[contains(@class, 'TreeSelector')]"
-                                                                "[.//text()='Device Types']")
+        self.device_tree_picker = DeviceTypesTreeSelector(".//span[contains(@class, 'TreeSelector')]"
+                                                          "[.//text()='Device Types']")
 
         self.device_table = DeviceAssignmentTable(".ant-modal-content .ant-table-wrapper")
         self.pagination_element = PaginationElement(".ant-modal-content ul.ant-table-pagination")
