@@ -44,6 +44,7 @@ class _BaseCreateEditUserDialog:
         self.pagination_element = PaginationElement(".ant-modal-content ul.ant-table-pagination")
 
         self.add_device_button = self.dialog.s(".//button[span[text()='Add']]")
+        self.save_device_button = self.dialog.s(".//button[span[text()='Save']]")
         self.remove_device_button = self.dialog.s(".//button[span[text()='X']]")
         self.cancel_button = self.dialog.s(".//button[span[text()='Cancel']]")
         self.close_button = self.dialog.s("button.ant-modal-close")
@@ -133,8 +134,13 @@ class _BaseCreateEditUserDialog:
         self.cancel_button.click()
 
     @allure.step
-    def _click_add_device(self):
+    def click_add_device(self):
         self.add_device_button.click()
+        return self
+
+    @allure.step
+    def click_save_device(self):
+        self.save_device_button.click()
         return self
 
     @allure.step

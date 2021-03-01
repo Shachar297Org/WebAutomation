@@ -212,3 +212,15 @@ class TestUsers:
         assert_that(edit_dialog.get_phone_number()).is_equal_to(new_user.phone_number)
         assert_that(edit_dialog.get_user_group()).is_equal_to(new_user.user_group)
         assert_that(edit_dialog.get_manager()).is_equal_to(new_user.manager)
+
+    @allure.title("Create a new user with added device")
+    @allure.severity(allure.severity_level.CRITICAL)
+    def test_create_user_with_device(self):
+        new_user = generate_random_user()
+
+        users_page = UsersPage().open()
+        dialog = users_page.click_add_user().set_user_fields(new_user)
+        dialog.location_tree_picker.select_usa_states("Alabama", "Colorado", "Montana")
+        dialog.device_types_tree_picker.select_devices("ALLEGRETTO", "Allegretto 400Hz- Sy", "1043", "1331")
+        dialog.click_add_device()
+#         TODO Continue the test. Add country & devices constants

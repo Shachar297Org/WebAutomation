@@ -1,7 +1,9 @@
+import time
+
 import allure
 from selene.core import query, command
 from selene.core.entity import Element
-from selene.support.conditions import have
+from selene.support.conditions import have, be
 from selene.support.shared.jquery_style import s, ss
 
 from src.util.elements_util import extract_text
@@ -62,11 +64,13 @@ class _TreeNodeWrapper:
     def get_item(self) -> str:
         return self.content.get(query.attribute("title"))
 
-    def _click_tree_switcher(self):
-        self.switcher.perform(command.js.scroll_into_view()).click()
+    def _click_tree_switcher(self) -> Element:
+        self.switcher.perform(command.js.scroll_into_view)
+        return self.switcher.click()
 
     def _click_checkbox(self) -> Element:
-        return self.tree_checkbox.perform(command.js.scroll_into_view()).click()
+        self.tree_checkbox.perform(command.js.scroll_into_view)
+        return self.tree_checkbox.click()
 
 
 class _ChildTree:
@@ -94,7 +98,10 @@ class _BaseTreeSelector:
         self.select_tree = s(_SELECT_TREE_LOCATOR)
 
     def open(self):
+        is_another_tree_selector_open = self._is_another_tree_selector_is_opened()
         self.tree_selector.click()
+        if is_another_tree_selector_open:
+            time.sleep(2)
         return self
 
     @allure.step
@@ -121,6 +128,9 @@ class _BaseTreeSelector:
     def _get_selected_item_element(self, item_name: str):
         return self.selected_items.filtered_by(have.attribute("title").value(item_name))
 
+    def _is_another_tree_selector_is_opened(self) -> bool:
+        return self.tree_selector.matching(be.present)
+
     @staticmethod
     def _extract_titles(elements: []) -> []:
         return [el.get(query.attribute("title")) for el in elements]
@@ -132,26 +142,68 @@ class DeviceLocationTreeSelector(_BaseTreeSelector):
         self.all_tree = _ChildTree("ul")
         self.region_tree = _ChildTree("ul ul")
         self.country_tree = _ChildTree("ul ul ul")
+        self.state_tree = _ChildTree("ul ul ul ul")
 
     @allure.step
     def select_all(self):
         self.open()
-        self.all_tree.get_node_by_name(ALL_NODE).check()
+        self._get_all_node().check()
 
     @allure.step
     def deselect_all(self):
         self.open()
-        self.all_tree.get_node_by_name(ALL_NODE).uncheck()
+        self._get_all_node().uncheck()
 
     @allure.step
-    def select_region(self, text):
+    def select_regions(self, *regions):
         self.open()
+        self._get_all_node().open()
+
+        for region in regions:
+            self._check_region(region)
+
+    @allure.step
+    def select_countries(self, region, *countries):
+        self.open()
+        self._get_all_node().open()
+        self._open_region(region)
+
+        for country in countries:
+            self._check_country(country)
+
+    @allure.step
+    def select_usa_states(self, *states):
+        self.open()
+        self._get_all_node().open()
+        self._open_region("Americas")
+        self._open_country("USA")
+
+        for state in states:
+            self._check_state(state)
+
+    @allure.step
+    def _get_all_node(self):
+        return self.all_tree.get_node_by_name(ALL_NODE)
+
+    @allure.step
+    def _check_region(self, text):
         self.region_tree.get_node_by_name(text).check()
 
     @allure.step
-    def select_country(self, text):
-        self.open()
+    def _open_region(self, text):
+        self.region_tree.get_node_by_name(text).open()
+
+    @allure.step
+    def _check_country(self, text):
         self.country_tree.get_node_by_name(text).check()
+
+    @allure.step
+    def _open_country(self, text):
+        self.country_tree.get_node_by_name(text).open()
+
+    @allure.step
+    def _check_state(self, text):
+        self.state_tree.get_node_by_name(text).check()
 
 
 class DeviceTypesTreeSelector(_BaseTreeSelector):
@@ -172,4 +224,53 @@ class DeviceTypesTreeSelector(_BaseTreeSelector):
         self.open()
         self.all_tree.get_node_by_name(ALL_NODE).uncheck()
 
-    # TODO add all needed methods
+    @allure.step
+    def select_device_type(self, *device_types):
+        self.open()
+        self._get_all_node().open()
+
+        for dev_type in device_types:
+            self._check_device_type(dev_type)
+
+    @allure.step
+    def select_device_model(self, device_type, *device_models):
+        self.open()
+        self._get_all_node().open()
+        self._open_device_type(device_type)
+
+        for model in device_models:
+            self._check_device_model(model)
+
+    @allure.step
+    def select_devices(self, device_type, device_model, *devices):
+        self.open()
+        self._get_all_node().open()
+        self._open_device_type(device_type)
+        self._open_device_model(device_model)
+
+        for device in devices:
+            self._check_device(device)
+
+    @allure.step
+    def _get_all_node(self):
+        return self.all_tree.get_node_by_name(ALL_NODE)
+
+    @allure.step
+    def _check_device_type(self, text):
+        self.device_type_tree.get_node_by_name(text).check()
+
+    @allure.step
+    def _open_device_type(self, text):
+        self.device_type_tree.get_node_by_name(text).open()
+
+    @allure.step
+    def _check_device_model(self, text):
+        self.device_model_tree.get_node_by_name(text).check()
+
+    @allure.step
+    def _open_device_model(self, text):
+        self.device_model_tree.get_node_by_name(text).open()
+
+    @allure.step
+    def _check_device(self, text):
+        self.device_tree.get_node_by_name(text).check()
