@@ -66,6 +66,12 @@ class DeviceAssignmentTable(_BaseTable):
     _REMOVE_TEXT = "Remove"
 
     @allure.step
+    def get_row_by_column_value(self, column_name: str, column_value: str) -> Element:
+        self.wait_to_load()
+        return self.table.s(".//tbody/tr[td[{0}][.//text()='{1}']]"
+                            .format(self._get_column_index(column_name), column_value))
+
+    @allure.step
     def get_rows_by_region(self, region: str) -> []:
         return self.get_rows_by_column_value(self.Headers.REGION, region)
 
@@ -85,6 +91,14 @@ class DeviceAssignmentTable(_BaseTable):
     def click_remove(self, device_types: str):
         return self._get_row_button_with_name_by_column_value(self.Headers.DEVICE_TYPES, device_types,
                                                               self._REMOVE_TEXT)
+
+    @allure.step
+    def is_row_contains_edit_button(self, row) -> bool:
+        return self._is_row_contains_button_by_text(row, self._EDIT_TEXT)
+
+    @allure.step
+    def is_row_contains_remove_button(self, row) -> bool:
+        return self._is_row_contains_button_by_text(row, self._REMOVE_TEXT)
 
     class Headers:
         REGION = "Region"

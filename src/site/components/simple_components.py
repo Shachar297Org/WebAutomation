@@ -6,6 +6,8 @@ from selene.support.conditions import be, have
 from selene.support.conditions.be import not_
 from selene.support.shared.jquery_style import s, ss
 
+from src.util.elements_util import extract_text
+
 
 class SearchInput:
     def __init__(self, locator):
@@ -87,3 +89,28 @@ class SelectBox:
     @allure.step
     def is_disabled(self) -> bool:
         return self.select.matching(have.css_class("ant-select-disabled"))
+
+
+class Tooltip:
+    _TOOLTIP_LOCATOR = ".ant-tooltip:not(.ant-tooltip-hidden)"
+
+    def __init__(self):
+        self.tooltip = s(self._TOOLTIP_LOCATOR)
+
+    @allure.step
+    def wait_to_be_loaded(self):
+        time.sleep(3)
+        self.tooltip.wait.until(be.present)
+        return self
+
+    @allure.step
+    def is_displayed(self) -> bool:
+        return self.tooltip.matching(be.present)
+
+    @allure.step
+    def get_items(self) -> []:
+        return self.tooltip.ss("li span")
+
+    @allure.step
+    def get_items_text(self) -> []:
+        return extract_text(self.get_items())

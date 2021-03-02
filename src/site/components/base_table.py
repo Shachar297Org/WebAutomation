@@ -6,6 +6,7 @@ from selene.core.entity import Element
 from selene.support.conditions import be, have
 from selene.support.shared.jquery_style import s
 
+from src.site.components.simple_components import Tooltip
 from src.util.elements_util import extract_text
 
 
@@ -46,13 +47,21 @@ class _BaseTable(object):
         return self.table.ss(".//tbody/tr[td[{0}][text()='{1}']]"
                              .format(self._get_column_index(column_name), column_value))
 
-    @allure.step("Get table row by source column value and return the target column value")
-    def get_column_value(self, src_column_name: str, src_column_value: str,
-                         target_column: str) -> str:
+    @allure.step("Get table row by source column value and return the target column cell")
+    def get_column_cell(self, src_column_name: str, src_column_value: str, target_column: str) -> Element:
         self.wait_to_load()
         target_column_index = self._get_column_index(target_column)
         return self.get_row_by_column_value(src_column_name, src_column_value) \
-            .s("./td[{0}]".format(target_column_index)).get(query.text)
+            .s("./td[{0}]".format(target_column_index))
+
+    @allure.step("Get table row by source column value and return the target column value")
+    def get_column_value(self, src_column_name: str, src_column_value: str, target_column: str) -> str:
+        return self.get_column_cell(src_column_name, src_column_value, target_column).get(query.text)
+
+    @allure.step
+    def hover_column_cell(self, src_column_name: str, src_column_value: str, target_column: str) -> Tooltip:
+        self.get_column_cell(src_column_name, src_column_value, target_column).hover()
+        return Tooltip()
 
     @allure.step("Sort table rows by column value in Ascending (A to Z) order")
     def sort_asc(self, column_name):
@@ -83,6 +92,10 @@ class _BaseTable(object):
         for cell_text in extract_text(self._get_raw_cells(table_row)):
             if text.lower() in cell_text.lower():
                 return True
+
+    @allure.step
+    def _is_row_contains_button_by_text(self, row: Element, button_name: str) -> bool:
+        return row.s(".//button[span[text()='{}']]".format(button_name)).matching(be.visible)
 
     def _get_header(self, header_name) -> Element:
         return self.table.s(self._HEADER_XPATH + "[text()='{}']".format(header_name))

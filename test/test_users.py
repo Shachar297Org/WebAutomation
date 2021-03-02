@@ -10,13 +10,13 @@ from src.site.login_page import LoginPage
 from src.site.components.tables import UsersTable, DeviceAssignmentTable
 from src.site.pages import UsersPage
 from src.util.random_util import random_list_item
-from test.test_data_provider import super_admin_credentials, generate_random_user
+from test.test_data_provider import super_admin_credentials, generate_random_user, fota_admin_credentials
 
 
 @pytest.fixture(scope="class")
 def login(request):
-    home_page = LoginPage().open().login(super_admin_credentials.username,
-                                         super_admin_credentials.password)
+    home_page = LoginPage().open().login(fota_admin_credentials.username,
+                                         fota_admin_credentials.password)
     if request.cls is not None:
         request.cls.home_page = home_page
     yield home_page
@@ -219,25 +219,53 @@ class TestUsers:
     def test_add_device(self):
         test_region = Region.APAC
         test_country1 = APAC_Country.AUSTRALIA
+        test_country2 = APAC_Country.INDONESIA
+        test_country3 = APAC_Country.SINGAPORE
         test_countries_count = 3
-        test_device_group1 = DeviceGroup.ACUPULSE
-        test_device_group1_model1 = "Acupulse - 30W"
-        test_device_group1_model1_device = "GA-0000070CN"
+        test_device_group = DeviceGroup.ACUPULSE
+        test_device_model = "Acupulse - 30W"
+        test_device1 = "GA-0000070CN"
+        test_device2 = "GA-0000070DE"
+        test_device3 = "GA-0000070GR"
+        test_device4 = "GA-0000070"
         test_devices_count = 4
+
+        expected_region = "{reg}/{country1}, {reg}/{country2}, {reg}/{country3}".format \
+            (reg=test_region, country1=test_country1, country2=test_country2, country3=test_country3)
+        expected_device_types = "{group}/{model}/{device1}, {group}/{model}/{device2}, {group}/{model}/{device3}," \
+                                " {group}/{model}/{device4}".format(group=test_device_group, model=test_device_model,
+                                                                    device1=test_device1, device2=test_device2,
+                                                                    device3=test_device3, device4=test_device4)
+        expected_device_tooltip_prefix = test_device_group + SEPARATOR + test_device_model + SEPARATOR
 
         users_page = UsersPage().open()
         dialog = users_page.click_add_user()
-        dialog.location_tree_picker.select_countries(test_region, test_country1, APAC_Country.INDONESIA,
-                                                     APAC_Country.SINGAPORE)
-        dialog.device_tree_picker.select_devices(DeviceGroup.ACUPULSE, test_device_group1_model1,
-                                                 test_device_group1_model1_device, "GA-0000070DE", "GA-0000070GR",
-                                                 "RG-0000070")
+        dialog.location_tree_picker.select_countries(test_region, test_country1, test_country2, test_country3)
+        dialog.device_tree_picker.select_devices(DeviceGroup.ACUPULSE, test_device_model,
+                                                 test_device1, test_device2, test_device3, test_device4)
 
         assert_that(dialog.location_tree_picker.get_all_selected_items()).contains_only(
             test_region + SEPARATOR + test_country1,
             get_formatted_selected_plus_item(test_countries_count - 1)
         )
         assert_that(dialog.device_tree_picker.get_all_selected_items()).contains_only(
-            test_device_group1 + SEPARATOR + test_device_group1_model1 + SEPARATOR + test_device_group1_model1_device,
+            test_device_group + SEPARATOR + test_device_model + SEPARATOR + test_device1,
             get_formatted_selected_plus_item(test_devices_count - 1)
         )
+
+        dialog.click_add_device()
+        assert_that(dialog.device_table.get_column_values(DeviceAssignmentTable.Headers.REGION)) \
+            .contains_only(expected_region)
+        assert_that(dialog.device_table.get_column_values(DeviceAssignmentTable.Headers.DEVICE_TYPES))\
+            .contains_only(expected_device_types)
+
+        for row in dialog.device_table.rows:
+            assert_that(dialog.device_table.is_row_contains_edit_button(row)).described_as("Edit button").is_true()
+            assert_that(dialog.device_table.is_row_contains_remove_button(row)).described_as("Remove button").is_true()
+
+        tooltip = dialog.device_table.hover_column_cell(DeviceAssignmentTable.Headers.REGION, expected_region,
+                                                        DeviceAssignmentTable.Headers.DEVICE_TYPES).wait_to_be_loaded()
+        # TODO debug why tooltip isn't hovered
+        # assert_that(tooltip.get_items_text()).described_as("Tooltip device type values").contains_only(
+        #     expected_device_tooltip_prefix + test_device1, expected_device_tooltip_prefix + test_device2,
+        #     expected_device_tooltip_prefix + test_device3, expected_device_tooltip_prefix + test_device4)

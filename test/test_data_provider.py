@@ -5,7 +5,8 @@ from src.util.random_util import random_first_name, random_last_name, \
     random_phone_number, random_list_item, random_gmail_alias_from
 
 
-TEST_USER_NAME = "Victor savchyn"
+TEST_SUPER_ADMIN = "Victor savchyn"
+TEST_FOTA_ADMIN = "Victor AQA FOTA Admin"
 
 TEST_GMAIL_ACCOUNT = "lumenisauto@gmail.com"
 super_admin_credentials = Credentials("victor.savchyn@gmail.com", "LumenisX225")
@@ -20,4 +21,4 @@ def generate_random_user():
                 phone_number=random_phone_number(),
                 user_group=random_list_item([UserGroup.SERVICE_MANAGER, UserGroup.TECH_SUPPORT,
                                              UserGroup.SERVICE_TECHNICIAN]),
-                manager=TEST_USER_NAME)
+                manager=TEST_FOTA_ADMIN)
