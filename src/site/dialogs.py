@@ -165,6 +165,13 @@ class CreateUserDialog(_BaseCreateEditUserDialog):
     def click_create(self):
         self.create_button.click()
 
+    @allure.step
+    def add_device_type_for_country(self, region: str, country: str, device_group: str):
+        self.location_tree_picker.select_countries(region, country)
+        self.device_tree_picker.select_device_types(device_group)
+        self.click_add_device()
+        return self
+
 
 class EditUserDialog(_BaseCreateEditUserDialog):
     TITLE = "Edit User"

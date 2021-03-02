@@ -4,7 +4,7 @@ import allure
 from selene.core import query
 from selene.core.entity import Element
 from selene.support.conditions import be, have
-from selene.support.shared.jquery_style import s
+from selene.support.shared.jquery_style import s, ss
 
 from src.site.components.simple_components import Tooltip
 from src.util.elements_util import extract_text
@@ -138,11 +138,33 @@ class _BaseTable(object):
 
 
 class PaginationElement(object):
-    def __init__(self, locator: str):
-        self.pagination_element = s(locator)
-        self.counter = s("li.ant-pagination-item a")
-        self.left_arrow = s("i.anticon-left")
-        self.left_right = s("i.anticon-right")
+    _DISABLED_ARROW_CLASS = "ant-pagination-disabled"
 
-    def get_counter(self) -> int:
-        return int(self.pagination_element.get(query.text))
+    def __init__(self, locator: str):
+        self.element = s(locator)
+        self.pagination_active_item = self.element.s("li.ant-pagination-item-active a")
+        self.pagination_items = self.element.ss("li.ant-pagination-item a")
+        self.left_arrow = self.element.s("li.ant-pagination-prev")
+        self.right_arrow = self.element.s("li.ant-pagination-next")
+
+    @allure.step
+    def get_active_item_number(self) -> int:
+        return int(self.pagination_active_item.get(query.text))
+
+    @allure.step
+    def get_all_page_numbers(self) -> []:
+        return extract_text(self.pagination_items)
+
+    @allure.step
+    def open_page(self, number: int):
+        self.element.s(".//li[@title='{}']".format(number))
+        return self
+
+    @allure.step
+    def is_left_arrow_disabled(self) -> bool:
+        return self.left_arrow.matching(have.css_class(self._DISABLED_ARROW_CLASS))
+
+    @allure.step
+    def is_right_arrow_disabled(self) -> bool:
+        return self.right_arrow.matching(have.css_class(self._DISABLED_ARROW_CLASS))
+

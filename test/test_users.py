@@ -3,20 +3,19 @@ import pytest
 from assertpy import assert_that
 from selene.support.conditions import be, have
 
-from src.const import Feature, Region, APAC_Country, DeviceGroup
+from src.const import Feature, Region, APAC_Country, DeviceType
 from src.site.components.tree_selector import SEPARATOR, get_formatted_selected_plus_item
 from src.site.dialogs import CreateUserDialog
 from src.site.login_page import LoginPage
 from src.site.components.tables import UsersTable, DeviceAssignmentTable
 from src.site.pages import UsersPage
 from src.util.random_util import random_list_item
-from test.test_data_provider import super_admin_credentials, generate_random_user, fota_admin_credentials
+from test.test_data_provider import generate_random_user, fota_admin_credentials
 
 
 @pytest.fixture(scope="class")
 def login(request):
-    home_page = LoginPage().open().login(fota_admin_credentials.username,
-                                         fota_admin_credentials.password)
+    home_page = LoginPage().open().login_as(fota_admin_credentials)
     if request.cls is not None:
         request.cls.home_page = home_page
     yield home_page
@@ -35,7 +34,7 @@ class TestUsers:
 
     @allure.title("Verify Users page web elements")
     @allure.severity(allure.severity_level.CRITICAL)
-    def test_page_elements(self):
+    def test_user_page_elements(self):
         users_page = self.home_page.left_panel.open_users()
         headers = UsersTable.Headers
 
@@ -128,7 +127,7 @@ class TestUsers:
 
     @allure.title("Verify 'Create User' dialog web elements")
     @allure.severity(allure.severity_level.CRITICAL)
-    def test_dialog_elements(self):
+    def test_create_user_dialog_elements(self):
         headers = DeviceAssignmentTable.Headers
         dialog = UsersPage().open().click_add_user()
 
@@ -215,14 +214,14 @@ class TestUsers:
         assert_that(edit_dialog.get_manager()).is_equal_to(new_user.manager)
 
     @allure.title("Create a new user with added device")
-    @allure.severity(allure.severity_level.CRITICAL)
+    @allure.severity(allure.severity_level.NORMAL)
     def test_add_device(self):
         test_region = Region.APAC
         test_country1 = APAC_Country.AUSTRALIA
         test_country2 = APAC_Country.INDONESIA
         test_country3 = APAC_Country.SINGAPORE
         test_countries_count = 3
-        test_device_group = DeviceGroup.ACUPULSE
+        test_device_group = DeviceType.ACUPULSE
         test_device_model = "Acupulse - 30W"
         test_device1 = "GA-0000070CN"
         test_device2 = "GA-0000070DE"
@@ -241,7 +240,7 @@ class TestUsers:
         users_page = UsersPage().open()
         dialog = users_page.click_add_user()
         dialog.location_tree_picker.select_countries(test_region, test_country1, test_country2, test_country3)
-        dialog.device_tree_picker.select_devices(DeviceGroup.ACUPULSE, test_device_model,
+        dialog.device_tree_picker.select_devices(DeviceType.ACUPULSE, test_device_model,
                                                  test_device1, test_device2, test_device3, test_device4)
 
         assert_that(dialog.location_tree_picker.get_all_selected_items()).contains_only(
@@ -269,3 +268,34 @@ class TestUsers:
         # assert_that(tooltip.get_items_text()).described_as("Tooltip device type values").contains_only(
         #     expected_device_tooltip_prefix + test_device1, expected_device_tooltip_prefix + test_device2,
         #     expected_device_tooltip_prefix + test_device3, expected_device_tooltip_prefix + test_device4)
+
+    @allure.title("Create a new user with added device")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_create_user_dialog_pagination(self):
+        test_region = Region.APAC
+        test_device_group = DeviceType.ACUPULSE
+
+        users_page = UsersPage().open()
+        dialog = users_page.click_add_user()
+        for country in [APAC_Country.AUSTRALIA, APAC_Country.SINGAPORE, APAC_Country.INDONESIA, APAC_Country.MALAYSIA,
+                        APAC_Country.CHINA, APAC_Country.INDIA, APAC_Country.HONG_KONG]:
+            dialog.add_device_type_for_country(test_region, country, test_device_group)
+
+        dialog.pagination_element.element.should(be.visible).should(be.enabled)
+        assert_that(dialog.pagination_element.get_active_item_number()).is_equal_to(1)
+        assert_that(dialog.pagination_element.get_all_page_numbers()).contains_only("1")
+        dialog.pagination_element.left_arrow.should(be.visible)
+        dialog.pagination_element.right_arrow.should(be.visible)
+        assert_that(dialog.pagination_element.is_left_arrow_disabled()).described_as(
+            "left arrow for 7 items to be disabled").is_true()
+        assert_that(dialog.pagination_element.is_right_arrow_disabled()).described_as(
+            "right arrow for 7 items to be disabled").is_true()
+
+        dialog.add_device_type_for_country(test_region, APAC_Country.THAILAND, test_device_group)
+
+        assert_that(dialog.pagination_element.get_all_page_numbers()).contains_only("1", "2")
+        dialog.pagination_element.right_arrow.should(be.clickable)
+        assert_that(dialog.pagination_element.is_left_arrow_disabled()).described_as(
+            "left arrow for 8 items to be disabled").is_true()
+        assert_that(dialog.pagination_element.is_right_arrow_disabled()).described_as(
+            "right arrow for 8 items to be disabled").is_false()
