@@ -81,6 +81,7 @@ class UsersPage(_BasePage):
     SELECT_USERS_GROUP_LABEL = "Select User Group..."
 
     USER_CREATED_MESSAGE = "Create User successful"
+    USER_UPDATED_MESSAGE = "Update User successful"
 
     def __init__(self):
         super().__init__()

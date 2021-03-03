@@ -316,3 +316,36 @@ class TestUsers:
         assert_that(all_managers).described_as("Managers list available for " + UserGroup.SERVICE_ADMIN + " group") \
             .contains(TEST_FOTA_ADMIN).does_not_contain(TEST_SUPER_ADMIN, TEST_SYSTEM_ENGINEER, TEST_SERVICE_ADMIN,
                                                         TEST_TECH_SUPPORT)
+
+    @allure.title("Edit user: device assignment")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_edit_user_assign_device(self):
+        test_region = Region.AMERICAS
+        test_country = "USA"
+        test_state = "Colorado"
+        test_device_group = DeviceType.ACUPULSE
+        test_device_model = "Acupulse - 30W"
+        test_device1 = "GA-0000070CN"
+
+        expected_region = "{reg}/{country}/{state}".format(reg=test_region, country=test_country, state=test_state)
+        expected_device_type = "{group}/{model}/{device}".format(group=test_device_group, model=test_device_model,
+                                                                 device=test_device1)
+
+        users_page = UsersPage().open()
+        users_page.search_by(TEST_USERS_PREFIX)
+
+        first_test_user = users_page.table.get_column_values(UsersTable.Headers.EMAIL)[0]
+        edit_dialog = users_page.open_edit_user_dialog(first_test_user)
+
+        edit_dialog.location_tree_picker.select_usa_states(test_state)
+        edit_dialog.device_tree_picker.select_devices(DeviceType.ACUPULSE, test_device_model, test_device1)
+        edit_dialog.click_add_device()
+
+        assert_that(edit_dialog.device_table.get_column_values(DeviceAssignmentTable.Headers.REGION)) \
+            .contains(expected_region)
+        assert_that(edit_dialog.device_table.get_column_values(DeviceAssignmentTable.Headers.DEVICE_TYPES)) \
+            .contains(expected_device_type)
+
+        edit_dialog.click_update()
+
+        assert_that(users_page.get_notification_message()).is_equal_to(UsersPage.USER_UPDATED_MESSAGE)
