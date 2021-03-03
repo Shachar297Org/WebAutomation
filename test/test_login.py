@@ -16,6 +16,7 @@ PASSWORD = super_admin_credentials.password
 
 
 # TODO Extends the test suite with all documented login tests
+@pytest.mark.usefixtures("setup_driver")
 @allure.feature(Feature.LOGIN)
 class TestLogin:
     wrong_credentials_provider = [
@@ -24,12 +25,6 @@ class TestLogin:
         (USERNAME, " ", LoginPage.INVALID_PASSWORD_MESSAGE),
         (USERNAME[:-1], PASSWORD, LoginPage.USER_DOESNT_EXIST_MESSAGE),
     ]
-
-    @pytest.fixture
-    def cleanup_browser_session(self):
-        yield
-        clear_session_storage()
-        clear_local_storage()
 
     @allure.title("Verify Login page web elements")
     @allure.severity(allure.severity_level.NORMAL)
