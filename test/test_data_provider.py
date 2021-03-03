@@ -7,11 +7,22 @@ from src.util.random_util import random_first_name, random_last_name, \
 
 TEST_SUPER_ADMIN = "Victor savchyn"
 TEST_FOTA_ADMIN = "Victor AQA FOTA Admin"
+TEST_SYSTEM_ENGINEER = "Victor AQA System Engineer"
+TEST_SERVICE_ADMIN = "Victor AQA Service Admin"
+TEST_TECH_SUPPORT = "Victor AQA Tech Support"
 
+TEST_USER_FOR_DISABLING = "Victor AQA User For Disabling"
+
+TEST_USERS_PREFIX = "lumenisauto+test"
 TEST_GMAIL_ACCOUNT = "lumenisauto@gmail.com"
+
 super_admin_credentials = Credentials("victor.savchyn@gmail.com", "LumenisX225")
 fota_admin_credentials = Credentials("lumenisauto+FotaAdmin@gmail.com", "LumenisX225@")
-service_manager_credentials = Credentials("victor.savchyn+serviceManager@gmail.com", "LumenisX225")
+system_engineer_credentials = Credentials("lumenisauto+SystemEngineer@gmail.com", "LumenisX225@")
+service_admin_credentials = Credentials("lumenisauto+ServiceAdmin@gmail.com", "LumenisX225@")
+tech_support_credentials = Credentials("lumenisauto+TechSupport@gmail.com", "LumenisX225@")
+
+user_for_disabling_credentials = Credentials("lumenisauto+Disabled@gmail.com", "LumenisX225@")
 
 
 def generate_random_user():

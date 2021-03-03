@@ -127,6 +127,7 @@ class UsersPage(_BasePage):
         self.click_add_user().set_user_fields(user).click_create()
         return self
 
+    @allure.step
     def open_edit_user_dialog(self, email):
         self.table.click_edit(email)
         return EditUserDialog().wait_to_load()

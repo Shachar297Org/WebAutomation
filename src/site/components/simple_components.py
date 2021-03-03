@@ -63,6 +63,11 @@ class SelectBox:
         # self.select_box.s("//li[@role='option'][text()='{}']".format(item)).click()
 
     @allure.step
+    def get_items(self) -> []:
+        self.open()
+        return filter(None, extract_text(ss(".ant-select-dropdown ul li")))
+
+    @allure.step
     def get_selected_item(self) -> str:
         if self.is_empty():
             return ""
@@ -80,6 +85,12 @@ class SelectBox:
     @allure.step
     def wait_to_be_enabled(self):
         self.select.wait.until(have.css_class("ant-select-enabled"))
+        return self
+
+    @allure.step
+    def wait_to_be_not_empty(self):
+        self.wait_to_be_enabled()
+        self.items.wait.until(have.size_greater_than_or_equal(1))
         return self
 
     @allure.step

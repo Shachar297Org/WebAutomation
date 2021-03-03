@@ -3,14 +3,15 @@ import pytest
 from assertpy import assert_that
 from selene.support.conditions import be, have
 
-from src.const import Feature, Region, APAC_Country, DeviceType
+from src.const import Feature, Region, APAC_Country, DeviceType, UserGroup
 from src.site.components.tree_selector import SEPARATOR, get_formatted_selected_plus_item
 from src.site.dialogs import CreateUserDialog
 from src.site.login_page import LoginPage
 from src.site.components.tables import UsersTable, DeviceAssignmentTable
 from src.site.pages import UsersPage
 from src.util.random_util import random_list_item
-from test.test_data_provider import generate_random_user, fota_admin_credentials
+from test.test_data_provider import generate_random_user, fota_admin_credentials, TEST_USERS_PREFIX, TEST_SUPER_ADMIN, \
+    TEST_FOTA_ADMIN, TEST_SYSTEM_ENGINEER, TEST_SERVICE_ADMIN, TEST_TECH_SUPPORT
 
 
 @pytest.fixture(scope="class")
@@ -255,7 +256,7 @@ class TestUsers:
         dialog.click_add_device()
         assert_that(dialog.device_table.get_column_values(DeviceAssignmentTable.Headers.REGION)) \
             .contains_only(expected_region)
-        assert_that(dialog.device_table.get_column_values(DeviceAssignmentTable.Headers.DEVICE_TYPES))\
+        assert_that(dialog.device_table.get_column_values(DeviceAssignmentTable.Headers.DEVICE_TYPES)) \
             .contains_only(expected_device_types)
 
         for row in dialog.device_table.rows:
@@ -269,7 +270,7 @@ class TestUsers:
         #     expected_device_tooltip_prefix + test_device1, expected_device_tooltip_prefix + test_device2,
         #     expected_device_tooltip_prefix + test_device3, expected_device_tooltip_prefix + test_device4)
 
-    @allure.title("Create a new user with added device")
+    @allure.title("Add 8 devices. Verify pagination")
     @allure.severity(allure.severity_level.NORMAL)
     def test_create_user_dialog_pagination(self):
         test_region = Region.APAC
@@ -299,3 +300,19 @@ class TestUsers:
             "left arrow for 8 items to be disabled").is_true()
         assert_that(dialog.pagination_element.is_right_arrow_disabled()).described_as(
             "right arrow for 8 items to be disabled").is_false()
+
+    @allure.title("Create a new user with added device")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_associating_with_user_groups(self):  # TODO Probably it make sense to run this test under super admin
+        users_page = UsersPage().open()
+        users_page.search_by(TEST_USERS_PREFIX)
+
+        first_test_user = users_page.table.get_column_values(UsersTable.Headers.EMAIL)[0]
+        edit_dialog = users_page.open_edit_user_dialog(first_test_user)
+        edit_dialog.select_user_group(UserGroup.SERVICE_ADMIN)
+
+        all_managers = edit_dialog.manager_select.open().wait_to_be_not_empty().get_items()
+
+        assert_that(all_managers).described_as("Managers list available for " + UserGroup.SERVICE_ADMIN + " group") \
+            .contains(TEST_FOTA_ADMIN).does_not_contain(TEST_SUPER_ADMIN, TEST_SYSTEM_ENGINEER, TEST_SERVICE_ADMIN,
+                                                        TEST_TECH_SUPPORT)
