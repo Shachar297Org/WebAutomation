@@ -4,6 +4,7 @@ from assertpy import assert_that
 from selene.support.conditions import be, have
 
 from src.const import Feature, Region, APAC_Country, DeviceType, UserGroup
+from src.domain.user import User
 from src.site.components.tree_selector import SEPARATOR, get_formatted_selected_plus_item
 from src.site.dialogs import CreateUserDialog
 from src.site.login_page import LoginPage
@@ -20,6 +21,20 @@ def login(request):
     if request.cls is not None:
         request.cls.home_page = home_page
     yield home_page
+
+
+@allure.step
+def create_random_user_with_device(users_page: UsersPage, region: str, device_type: str) -> User:
+    user = generate_random_user()
+
+    create_dialog = users_page.click_add_user().set_user_fields(user)
+    create_dialog.location_tree_picker.select_regions(region)
+    create_dialog.device_tree_picker.select_device_types(device_type)
+    create_dialog.click_add_device()
+
+    create_dialog.click_create()
+    users_page.wait_for_notification()
+    return user
 
 
 @pytest.mark.usefixtures("login")
@@ -230,8 +245,8 @@ class TestUsers:
         test_device4 = "GA-0000070"
         test_devices_count = 4
 
-        expected_region = "{reg}/{country1}, {reg}/{country2}, {reg}/{country3}".format \
-            (reg=test_region, country1=test_country1, country2=test_country2, country3=test_country3)
+        expected_region = "{reg}/{country1}, {reg}/{country2}, {reg}/{country3}".format(
+            reg=test_region, country1=test_country1, country2=test_country2, country3=test_country3)
         expected_device_types = "{group}/{model}/{device1}, {group}/{model}/{device2}, {group}/{model}/{device3}," \
                                 " {group}/{model}/{device4}".format(group=test_device_group, model=test_device_model,
                                                                     device1=test_device1, device2=test_device2,
@@ -269,6 +284,59 @@ class TestUsers:
         # assert_that(tooltip.get_items_text()).described_as("Tooltip device type values").contains_only(
         #     expected_device_tooltip_prefix + test_device1, expected_device_tooltip_prefix + test_device2,
         #     expected_device_tooltip_prefix + test_device3, expected_device_tooltip_prefix + test_device4)
+
+    @allure.title("Edit a user")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_edit_user(self):
+        existing_region = Region.JAPAN
+        existing_device_type = DeviceType.BODYCONTOURING
+        new_user = generate_random_user()
+        new_device_type = DeviceType.CLEARLIGHT
+
+        users_page = UsersPage().open()
+        existing_user = create_random_user_with_device(users_page, existing_region, existing_device_type)
+
+        edit_dialog = users_page.reload().search_by(existing_user.email)\
+            .open_edit_user_dialog(existing_user.email)
+
+        edit_dialog.set_user_fields(new_user)
+        edit_dialog.device_table.click_edit(existing_device_type)
+        edit_dialog.add_device_button.should(be.not_.visible)
+        edit_dialog.save_button.should(be.visible).should(be.clickable)
+        edit_dialog.remove_device_button.should(be.visible).should(be.clickable)
+
+        assert_that(edit_dialog.location_tree_picker.get_all_selected_items()).contains_only(existing_region)
+        assert_that(edit_dialog.device_tree_picker.get_all_selected_items()).contains_only(existing_device_type)
+        existing_device_row = edit_dialog.device_table.get_row_by_device_types(existing_device_type)
+        assert_that(edit_dialog.device_table.is_row_selected(existing_device_row))\
+            .described_as("Edited row to be selected(grayed)").is_true()
+        assert_that(edit_dialog.device_table.is_row_edit_button_enabled(existing_device_row))\
+            .described_as("Edited row 'Edit' button to be enabled").is_false()
+        assert_that(edit_dialog.device_table.is_row_remove_button_enabled(existing_device_row)) \
+            .described_as("Edited row 'Remove' button to be enabled").is_false()
+
+        edit_dialog.device_tree_picker.remove_selected_item(existing_device_type)
+        assert_that(edit_dialog.device_tree_picker.get_all_selected_items()).is_empty()
+
+        edit_dialog.device_tree_picker.select_device_types(new_device_type)
+        edit_dialog.click_save()
+        assert_that(edit_dialog.device_table.get_column_values(DeviceAssignmentTable.Headers.DEVICE_TYPES)) \
+            .contains_only(new_device_type)
+
+        edit_dialog.device_table.click_remove(new_device_type)
+        assert_that(edit_dialog.device_table.rows).is_empty()
+
+        edit_dialog.click_update()
+
+        assert_that(users_page.get_notification_message()).is_equal_to(UsersPage.USER_UPDATED_MESSAGE)
+
+        users_page.reload().search_by(new_user.email)
+
+        assert_that(users_page.table.get_column_values(UsersTable.Headers.EMAIL)).contains_only(new_user.email)
+        assert_that(users_page.table.get_name_by_email(new_user.email)).is_equal_to(new_user.name)
+        assert_that(users_page.table.get_phone_by_email(new_user.email)).is_equal_to(new_user.phone_number)
+        assert_that(users_page.table.get_user_group_by_email(new_user.email)).is_equal_to(new_user.user_group)
+        assert_that(users_page.table.get_manager_by_email(new_user.email)).is_equal_to(new_user.manager)
 
     @allure.title("Add 8 devices. Verify pagination")
     @allure.severity(allure.severity_level.NORMAL)
@@ -349,3 +417,19 @@ class TestUsers:
         edit_dialog.click_update()
 
         assert_that(users_page.get_notification_message()).is_equal_to(UsersPage.USER_UPDATED_MESSAGE)
+
+    @allure.title("Reset password test")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_reset_users_password(self):
+        users_page = UsersPage().open()
+        users_page.search_by(TEST_USERS_PREFIX)
+
+        first_test_user = users_page.table.get_column_values(UsersTable.Headers.EMAIL)[0]
+        edit_dialog = users_page.open_edit_user_dialog(first_test_user)
+
+        edit_dialog.click_reset_password()
+
+        assert_that(users_page.get_notification_message()).is_equal_to(UsersPage.RESET_PASSWORD_MESSAGE)
+        print("")
+        # TODO implement email client and add verification that 'Reset Password' email is received.
+        #  Update the test to run under user with permissions to update the password

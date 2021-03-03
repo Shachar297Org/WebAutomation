@@ -31,7 +31,7 @@ class UsersTable(_BaseTable):
 
     @allure.step
     def is_lock_icon_displayed(self, email: str) -> bool:
-        return self.get_row_by_name(email).s(".anticon-lock").matching(be.visible)
+        return self._get_row_by_name(email).s(".anticon-lock").matching(be.visible)
 
     @allure.step
     def click_edit(self, email: str):
@@ -42,7 +42,7 @@ class UsersTable(_BaseTable):
         self._get_row_button_with_name_by_column_value(self.Headers.EMAIL, email, self._VIEW_TEXT).click()
 
     @allure.step
-    def get_row_by_name(self, email: str) -> Element:
+    def _get_row_by_name(self, email: str) -> Element:
         return self.get_row_by_column_value(self.Headers.EMAIL, email)
 
     @allure.step
@@ -85,12 +85,11 @@ class DeviceAssignmentTable(_BaseTable):
 
     @allure.step
     def click_edit(self, device_types: str):
-        return self._get_row_button_with_name_by_column_value(self.Headers.DEVICE_TYPES, device_types, self._EDIT_TEXT)
+        self._get_row_edit_button(device_types).click()
 
     @allure.step
     def click_remove(self, device_types: str):
-        return self._get_row_button_with_name_by_column_value(self.Headers.DEVICE_TYPES, device_types,
-                                                              self._REMOVE_TEXT)
+        self._get_row_remove_button(device_types).click()
 
     @allure.step
     def is_row_contains_edit_button(self, row) -> bool:
@@ -100,9 +99,23 @@ class DeviceAssignmentTable(_BaseTable):
     def is_row_contains_remove_button(self, row) -> bool:
         return self._is_row_contains_button_by_text(row, self._REMOVE_TEXT)
 
+    @allure.step
+    def is_row_edit_button_enabled(self, device_types: str) -> bool:
+        return self._get_row_edit_button(device_types).matching(be.enabled)
+
+    @allure.step
+    def is_row_remove_button_enabled(self, device_types: str) -> bool:
+        return self._get_row_remove_button(device_types).matching(be.enabled)
+
+    @allure.step
+    def _get_row_edit_button(self, device_types: str):
+        return self._get_row_button_with_name_by_column_value(self.Headers.DEVICE_TYPES, device_types, self._EDIT_TEXT)
+
+    @allure.step
+    def _get_row_remove_button(self, device_types: str):
+        return self._get_row_button_with_name_by_column_value(self.Headers.DEVICE_TYPES, device_types, self._REMOVE_TEXT)
+
     class Headers:
         REGION = "Region"
         DEVICE_TYPES = "Device Types"
         ACTION_BUTTON = ""
-
-

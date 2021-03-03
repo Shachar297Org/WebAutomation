@@ -47,16 +47,16 @@ class _BasePage:
 
     @allure.step
     def get_notification_message(self):
-        self._wait_for_notification()
+        self.wait_for_notification()
         return self.notification_msg.get(query.text)
 
     @allure.step
     def get_notification_description(self):
-        self._wait_for_notification()
+        self.wait_for_notification()
         return self.notification_description.get(query.text)
 
     @allure.step
-    def _wait_for_notification(self):
+    def wait_for_notification(self):
         self.notification_msg.wait.until(be.visible)
 
 
@@ -82,6 +82,7 @@ class UsersPage(_BasePage):
 
     USER_CREATED_MESSAGE = "Create User successful"
     USER_UPDATED_MESSAGE = "Update User successful"
+    RESET_PASSWORD_MESSAGE = "Reset Password Successful"
 
     def __init__(self):
         super().__init__()
@@ -147,6 +148,7 @@ class UsersPage(_BasePage):
     @allure.step
     def reload(self):
         self.reload_button.execute_script(JS_CLICK)
+        time.sleep(1)
         return UsersPage()
 
 

@@ -4,7 +4,7 @@ import allure
 from selene.core import query
 from selene.core.entity import Element
 from selene.support.conditions import be, have
-from selene.support.shared.jquery_style import s, ss
+from selene.support.shared.jquery_style import s
 
 from src.site.components.simple_components import Tooltip
 from src.util.elements_util import extract_text
@@ -92,6 +92,10 @@ class _BaseTable(object):
         for cell_text in extract_text(self._get_raw_cells(table_row)):
             if text.lower() in cell_text.lower():
                 return True
+
+    @allure.step
+    def is_row_selected(self, row) -> bool:
+        return row.matching(have.css_class("selected"))
 
     @allure.step
     def _is_row_contains_button_by_text(self, row: Element, button_name: str) -> bool:

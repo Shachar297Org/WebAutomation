@@ -178,14 +178,19 @@ class EditUserDialog(_BaseCreateEditUserDialog):
 
     def __init__(self):
         super().__init__()
+        self.save_button = self.dialog.s(".//button[span[text()='Save']]")
         self.reset_password_button = self.dialog.s(".//button[span[text()='Reset Password']]")
         self.update_button = self.dialog.s(".//button[span[text()='Update']]")
         self.user_disabled_switcher = self.dialog.s("button#createUserForm_locked")
 
     def wait_to_load(self):
-        self.phone_number_input.wait_until(be.visible)
+        self.manager_select.select.wait_until(be.visible)
         self.update_button.wait_until(be.clickable)
         return self
+
+    @allure.step
+    def click_save(self):
+        self.save_button.click()
 
     @allure.step
     def click_update(self):

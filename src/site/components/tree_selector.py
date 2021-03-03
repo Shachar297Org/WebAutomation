@@ -4,7 +4,7 @@ import allure
 from selene.core import query, command
 from selene.core.entity import Element
 from selene.support.conditions import have, be
-from selene.support.shared.jquery_style import s, ss
+from selene.support.shared.jquery_style import s
 
 from src.util.elements_util import extract_text
 
@@ -126,7 +126,9 @@ class _BaseTreeSelector:
 
     @allure.step
     def remove_selected_item(self, item_name: str):
+        existing_items_count = len(self.selected_items)
         self._get_selected_item_element(item_name).s("i.ant-select-remove-icon").click()
+        self.selected_items.wait_until(have.size_less_than(existing_items_count))
         return self
 
     @allure.step
@@ -135,7 +137,7 @@ class _BaseTreeSelector:
 
     @allure.step
     def _get_selected_item_element(self, item_name: str):
-        return self.selected_items.filtered_by(have.attribute("title").value(item_name))
+        return self.selected_items.filtered_by(have.attribute("title").value(item_name)).first
 
     def _is_another_tree_selector_is_opened(self) -> bool:
         return self.tree_selector.matching(be.present)
