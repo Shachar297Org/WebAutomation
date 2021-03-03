@@ -17,7 +17,7 @@ class SearchInput:
     @allure.step
     def search(self, text: str):
         self.input.set_value(text)
-        time.sleep(1)  # TODO workaround, replace with the waiter
+        time.sleep(1)
 
     @allure.step
     def clear(self):
@@ -110,7 +110,7 @@ class Tooltip:
 
     @allure.step
     def wait_to_be_loaded(self):
-        time.sleep(3)
+        time.sleep(3)  # TODO replaces with waiter
         self.tooltip.wait.until(be.present)
         return self
 

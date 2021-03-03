@@ -73,6 +73,7 @@ class _BaseTable(object):
     def sort_desc(self, column_name):
         icon = self._get_column_sort_icon_down(column_name)
         self._click_sort_icon(icon)
+        self.wait_to_load()
         icon.wait.until(have.css_class("on"))
 
     @allure.step
@@ -134,7 +135,6 @@ class _BaseTable(object):
     @staticmethod
     def _click_sort_icon(icon: Element):
         icon.s("svg").click()
-        time.sleep(1)
 
     @staticmethod
     def _get_raw_cells(table_row: Element) -> []:

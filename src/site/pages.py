@@ -116,12 +116,13 @@ class UsersPage(_BasePage):
     @allure.step
     def search_by(self, text: str):
         self.search_input.search(text)
+        self.table.wait_to_load()
         return self
 
     @allure.step
     def filter_by_group(self, user_group: str):
         self.user_group_select.select_item(user_group)
-        time.sleep(2)  # TODO workaround, replace with the waiter
+        self.table.wait_to_load()
         return self
 
     @allure.step
@@ -148,7 +149,7 @@ class UsersPage(_BasePage):
     @allure.step
     def reload(self):
         self.reload_button.execute_script(JS_CLICK)
-        time.sleep(1)
+        self.table.wait_to_load()
         return UsersPage()
 
 

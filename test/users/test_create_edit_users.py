@@ -4,23 +4,21 @@ from assertpy import assert_that
 from selene.support.conditions import be, have
 
 from src.const import Feature, Region, APAC_Country, DeviceType, UserGroup
+from src.domain.credentials import Credentials
 from src.domain.user import User
 from src.site.components.tree_selector import SEPARATOR, get_formatted_selected_plus_item
 from src.site.dialogs import CreateUserDialog
 from src.site.login_page import LoginPage
 from src.site.components.tables import UsersTable, DeviceAssignmentTable
 from src.site.pages import UsersPage
-from src.util.random_util import random_list_item
+from src.util.driver_util import clear_session_storage, clear_local_storage
 from test.test_data_provider import generate_random_user, fota_admin_credentials, TEST_USERS_PREFIX, TEST_SUPER_ADMIN, \
-    TEST_FOTA_ADMIN, TEST_SYSTEM_ENGINEER, TEST_SERVICE_ADMIN, TEST_TECH_SUPPORT
+    TEST_FOTA_ADMIN, TEST_SYSTEM_ENGINEER, TEST_SERVICE_ADMIN, TEST_TECH_SUPPORT, super_admin_credentials
 
 
-@pytest.fixture(scope="class")
-def login(request):
-    home_page = LoginPage().open().login_as(fota_admin_credentials)
-    if request.cls is not None:
-        request.cls.home_page = home_page
-    yield home_page
+def login_as(credentials: Credentials):
+    LoginPage().open().login_as(credentials)
+    return UsersPage().open()
 
 
 @allure.step
@@ -37,115 +35,21 @@ def create_random_user_with_device(users_page: UsersPage, region: str, device_ty
     return user
 
 
-@pytest.mark.usefixtures("login")
 @allure.feature(Feature.USERS)
-class TestUsers:
-    table_columns_provider = [
-        UsersTable.Headers.NAME,
-        UsersTable.Headers.EMAIL,
-        UsersTable.Headers.PHONE,
-        UsersTable.Headers.USER_GROUP,
-        UsersTable.Headers.MANAGER,
-    ]
+class TestCreateUsers:
 
-    @allure.title("Verify Users page web elements")
-    @allure.severity(allure.severity_level.CRITICAL)
-    def test_user_page_elements(self):
-        users_page = self.home_page.left_panel.open_users()
-        headers = UsersTable.Headers
-
-        users_page.add_button.should(be.visible).should(be.clickable)
-
-        users_page.search_input.input.should(be.visible).should(be.enabled).should(be.blank)
-        assert_that(users_page.search_input.get_placeholder()).is_equal_to(users_page.SEARCH_LABEL)
-
-        users_page.user_group_select.select.should(be.visible).should(be.enabled)
-        assert_that(users_page.user_group_select.is_empty()).is_true()
-        assert_that(users_page.user_group_select.get_placeholder()).is_equal_to(users_page.SELECT_USERS_GROUP_LABEL)
-
-        users_page.reset_button.should(be.visible).should(be.clickable)
-        users_page.reload_button.should(be.visible).should(be.clickable)
-
-        users_page.table.table.should(be.visible).should(be.enabled)
-        assert_that(users_page.table.get_headers()).contains_only(headers.NAME, headers.EMAIL, headers.PHONE,
-                                                                  headers.USER_GROUP, headers.MANAGER,
-                                                                  headers.ACTION_BUTTON)
-
-    @allure.title("Verify that you can sort the user rows by any column")
-    @allure.severity(allure.severity_level.NORMAL)
-    @allure.issue("wrong sorting order if the item contains more than 1 word. The second word isn't considered")
-    @pytest.mark.parametrize("column", table_columns_provider)
-    def test_sort_users(self, column):
-        users_page = UsersPage().open()
-        table = users_page.table.wait_to_load()
-
-        assert_that(table.is_column_sorted(column)).described_as("is column sorted by default").is_false()
-
-        users_page.sort_asc_by(column)
-        sorted_asc_values = table.get_column_values(column)
-
-        assert_that(table.is_up_icon_blue(column)).described_as("is blue sort icon up displayed").is_true()
-        assert_that(sorted_asc_values).is_sorted(key=str.lower)
-
-        users_page.sort_desc_by(column)
-        sorted_desc_values = table.get_column_values(column)
-
-        assert_that(table.is_down_icon_blue(column)).described_as("is blue sort icon down displayed").is_true()
-        assert_that(sorted_desc_values).is_sorted(key=str.lower, reverse=True)
-
-    @allure.title("Verify that you can search in the search field by all fields")
-    @allure.severity(allure.severity_level.NORMAL)
-    @pytest.mark.parametrize("column", table_columns_provider)
-    def test_filter_users_by_column_value(self, column):
-        users_page = UsersPage().open()
-        table = users_page.table.wait_to_load()
-        random_item = random_list_item(table.get_column_values(column)).split()[0]
-
-        users_page.search_by(random_item)
-
-        for table_row in table.rows:
-            assert_that(table.is_any_row_cell_contains_text_ignoring_case(table_row, random_item)).is_true()
-
-    @allure.title("Verify that you can search in the search field by substring")
-    @allure.severity(allure.severity_level.NORMAL)
-    def test_filter_users_by_substring(self):
-        users_page = UsersPage().open()
-        table = users_page.table.wait_to_load()
-        init_rows_count = len(table.rows)
-        random_name = random_list_item(table.get_column_values(UsersTable.Headers.NAME))
-        substring = random_name[1:3]
-
-        users_page.search_by(substring)
-
-        for table_row in table.rows:
-            assert_that(table.is_any_row_cell_contains_text_ignoring_case(table_row, substring)).is_true()
-
-        users_page.click_reset()
-
-        assert_that(users_page.search_input.is_empty()).described_as("Search input to be empty after reset").is_true()
-        assert_that(table.rows).described_as("Table rows count after reset").is_length(init_rows_count)
-
-    @allure.title("Verify that you can filter users by 'User Group'")
-    @allure.severity(allure.severity_level.NORMAL)
-    def test_filter_by_user_group(self):
-        users_page = UsersPage().open()
-        table = users_page.table.wait_to_load()
-        init_rows_count = len(table.rows)
-        random_group = random_list_item(table.get_column_values(UsersTable.Headers.USER_GROUP))
-
-        users_page.filter_by_group(random_group)
-
-        assert_that(table.get_column_values(UsersTable.Headers.USER_GROUP)).contains_only(random_group)
-
-        users_page.click_reset()
-
-        assert_that(table.rows).described_as("Table rows count after reset").is_length(init_rows_count)
+    @pytest.fixture(autouse=True)
+    def cleanup_browser_session(self):
+        yield
+        clear_session_storage()
+        clear_local_storage()
 
     @allure.title("Verify 'Create User' dialog web elements")
     @allure.severity(allure.severity_level.CRITICAL)
     def test_create_user_dialog_elements(self):
+        users_page = login_as(fota_admin_credentials)
         headers = DeviceAssignmentTable.Headers
-        dialog = UsersPage().open().click_add_user()
+        dialog = users_page.click_add_user()
 
         dialog.title.should(have.text(CreateUserDialog.TITLE))
 
@@ -202,10 +106,10 @@ class TestUsers:
     @allure.title("Create a new user")
     @allure.severity(allure.severity_level.CRITICAL)
     def test_create_user(self):
+        users_page = login_as(fota_admin_credentials)
         headers = UsersTable.Headers
         new_user = generate_random_user()
 
-        users_page = UsersPage().open()
         users_page.add_user(new_user)
 
         assert_that(users_page.get_notification_message()).is_equal_to(UsersPage.USER_CREATED_MESSAGE)
@@ -229,9 +133,9 @@ class TestUsers:
         assert_that(edit_dialog.get_user_group()).is_equal_to(new_user.user_group)
         assert_that(edit_dialog.get_manager()).is_equal_to(new_user.manager)
 
-    @allure.title("Create a new user with added device")
+    @allure.title("Create a new user: add devices")
     @allure.severity(allure.severity_level.NORMAL)
-    def test_add_device(self):
+    def test_create_user_add_devices(self):
         test_region = Region.APAC
         test_country1 = APAC_Country.AUSTRALIA
         test_country2 = APAC_Country.INDONESIA
@@ -253,7 +157,7 @@ class TestUsers:
                                                                     device3=test_device3, device4=test_device4)
         expected_device_tooltip_prefix = test_device_group + SEPARATOR + test_device_model + SEPARATOR
 
-        users_page = UsersPage().open()
+        users_page = login_as(fota_admin_credentials)
         dialog = users_page.click_add_user()
         dialog.location_tree_picker.select_countries(test_region, test_country1, test_country2, test_country3)
         dialog.device_tree_picker.select_devices(DeviceType.ACUPULSE, test_device_model,
@@ -293,10 +197,10 @@ class TestUsers:
         new_user = generate_random_user()
         new_device_type = DeviceType.CLEARLIGHT
 
-        users_page = UsersPage().open()
+        users_page = login_as(fota_admin_credentials)
         existing_user = create_random_user_with_device(users_page, existing_region, existing_device_type)
 
-        edit_dialog = users_page.reload().search_by(existing_user.email)\
+        edit_dialog = users_page.reload().search_by(existing_user.email) \
             .open_edit_user_dialog(existing_user.email)
 
         edit_dialog.set_user_fields(new_user)
@@ -308,9 +212,9 @@ class TestUsers:
         assert_that(edit_dialog.location_tree_picker.get_all_selected_items()).contains_only(existing_region)
         assert_that(edit_dialog.device_tree_picker.get_all_selected_items()).contains_only(existing_device_type)
         existing_device_row = edit_dialog.device_table.get_row_by_device_types(existing_device_type)
-        assert_that(edit_dialog.device_table.is_row_selected(existing_device_row))\
+        assert_that(edit_dialog.device_table.is_row_selected(existing_device_row)) \
             .described_as("Edited row to be selected(grayed)").is_true()
-        assert_that(edit_dialog.device_table.is_row_edit_button_enabled(existing_device_row))\
+        assert_that(edit_dialog.device_table.is_row_edit_button_enabled(existing_device_row)) \
             .described_as("Edited row 'Edit' button to be enabled").is_false()
         assert_that(edit_dialog.device_table.is_row_remove_button_enabled(existing_device_row)) \
             .described_as("Edited row 'Remove' button to be enabled").is_false()
@@ -344,7 +248,7 @@ class TestUsers:
         test_region = Region.APAC
         test_device_group = DeviceType.ACUPULSE
 
-        users_page = UsersPage().open()
+        users_page = login_as(fota_admin_credentials)
         dialog = users_page.click_add_user()
         for country in [APAC_Country.AUSTRALIA, APAC_Country.SINGAPORE, APAC_Country.INDONESIA, APAC_Country.MALAYSIA,
                         APAC_Country.CHINA, APAC_Country.INDIA, APAC_Country.HONG_KONG]:
@@ -371,8 +275,8 @@ class TestUsers:
 
     @allure.title("Create a new user with added device")
     @allure.severity(allure.severity_level.NORMAL)
-    def test_associating_with_user_groups(self):  # TODO Probably it make sense to run this test under super admin
-        users_page = UsersPage().open()
+    def test_associating_with_user_groups(self):
+        users_page = login_as(super_admin_credentials)
         users_page.search_by(TEST_USERS_PREFIX)
 
         first_test_user = users_page.table.get_column_values(UsersTable.Headers.EMAIL)[0]
@@ -382,8 +286,8 @@ class TestUsers:
         all_managers = edit_dialog.manager_select.open().wait_to_be_not_empty().get_items()
 
         assert_that(all_managers).described_as("Managers list available for " + UserGroup.SERVICE_ADMIN + " group") \
-            .contains(TEST_FOTA_ADMIN).does_not_contain(TEST_SUPER_ADMIN, TEST_SYSTEM_ENGINEER, TEST_SERVICE_ADMIN,
-                                                        TEST_TECH_SUPPORT)
+            .contains(TEST_FOTA_ADMIN, TEST_SUPER_ADMIN) \
+            .does_not_contain(TEST_SYSTEM_ENGINEER, TEST_SERVICE_ADMIN, TEST_TECH_SUPPORT)
 
     @allure.title("Edit user: device assignment")
     @allure.severity(allure.severity_level.NORMAL)
@@ -399,7 +303,7 @@ class TestUsers:
         expected_device_type = "{group}/{model}/{device}".format(group=test_device_group, model=test_device_model,
                                                                  device=test_device1)
 
-        users_page = UsersPage().open()
+        users_page = login_as(fota_admin_credentials)
         users_page.search_by(TEST_USERS_PREFIX)
 
         first_test_user = users_page.table.get_column_values(UsersTable.Headers.EMAIL)[0]
@@ -421,7 +325,7 @@ class TestUsers:
     @allure.title("Reset password test")
     @allure.severity(allure.severity_level.NORMAL)
     def test_reset_users_password(self):
-        users_page = UsersPage().open()
+        users_page = login_as(super_admin_credentials)
         users_page.search_by(TEST_USERS_PREFIX)
 
         first_test_user = users_page.table.get_column_values(UsersTable.Headers.EMAIL)[0]
@@ -430,6 +334,4 @@ class TestUsers:
         edit_dialog.click_reset_password()
 
         assert_that(users_page.get_notification_message()).is_equal_to(UsersPage.RESET_PASSWORD_MESSAGE)
-        print("")
         # TODO implement email client and add verification that 'Reset Password' email is received.
-        #  Update the test to run under user with permissions to update the password
