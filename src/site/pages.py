@@ -21,10 +21,11 @@ class _BasePage:
         self.version = s("//section[contains(@class, 'Logo__Version')]")
 
         self.left_panel = _LeftPanel(".ant-menu.ant-menu-inline")
-        self.header = PageHeader("ant-layout-header")
+        self.header = PageHeader(".ant-layout-header")
 
         self.notification_msg = s(".ant-notification-notice-message")
         self.notification_description = s(".ant-notification-notice-description")
+        self.notification_close_button = s(".ant-notification-close-icon")
 
         self.style = s("body style")
 
@@ -56,8 +57,18 @@ class _BasePage:
         return self.notification_description.get(query.text)
 
     @allure.step
+    def close_notification(self):
+        self.notification_msg.wait.until(be.visible)
+        self.notification_close_button.click()
+        self.notification_msg.wait.until(be.not_.visible)
+        return self
+
+    @allure.step
     def wait_for_notification(self):
         self.notification_msg.wait.until(be.visible)
+
+    def logout(self):
+        self.header.logout()
 
 
 class HomePage(_BasePage):
@@ -131,7 +142,7 @@ class UsersPage(_BasePage):
         return self
 
     @allure.step
-    def open_edit_user_dialog(self, email):
+    def open_edit_user_dialog(self, email) -> EditUserDialog:
         self.table.click_edit(email)
         return EditUserDialog().wait_to_load()
 
@@ -139,6 +150,11 @@ class UsersPage(_BasePage):
     def click_add_user(self) -> CreateUserDialog:
         self.add_button.click()
         return CreateUserDialog().wait_to_load()
+
+    @allure.step
+    def search_and_edit_user(self, email) -> EditUserDialog:
+        self.search_by(email)
+        return self.open_edit_user_dialog(email)
 
     @allure.step
     def click_reset(self):

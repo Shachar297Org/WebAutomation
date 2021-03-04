@@ -56,6 +56,7 @@ def setup_driver():
         else:
             raise Exception(config.browser_name + " local browser run isn't supported by automation framework")
     config.driver = EventFiringWebDriver(driver, DriverEventListener())
+    config.driver.set_window_size(1920, 1080)
     yield
     browser.quit()
 

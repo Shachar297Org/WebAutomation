@@ -202,18 +202,20 @@ class EditUserDialog(_BaseCreateEditUserDialog):
         return self
 
     @allure.step
-    def is_user_enabled(self) -> bool:
+    def is_user_disabled(self) -> bool:
         return self.user_disabled_switcher.matching(have.css_class("ant-switch-checked"))
 
     @allure.step
     def enable_user(self):
-        if not self.is_user_enabled():
+        if self.is_user_disabled():
             self._click_user_disabled_switcher()
+        return self
 
     @allure.step
     def disable_user(self):
-        if self.is_user_enabled():
+        if not self.is_user_disabled():
             self._click_user_disabled_switcher()
+        return self
 
     @allure.step
     def _click_user_disabled_switcher(self):

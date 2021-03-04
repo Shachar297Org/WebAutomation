@@ -13,7 +13,8 @@ from src.site.components.tables import UsersTable, DeviceAssignmentTable
 from src.site.pages import UsersPage
 from src.util.driver_util import clear_session_storage, clear_local_storage
 from test.test_data_provider import generate_random_user, fota_admin_credentials, TEST_USERS_PREFIX, TEST_SUPER_ADMIN, \
-    TEST_FOTA_ADMIN, TEST_SYSTEM_ENGINEER, TEST_SERVICE_ADMIN, TEST_TECH_SUPPORT, super_admin_credentials
+    TEST_FOTA_ADMIN, TEST_SYSTEM_ENGINEER, TEST_SERVICE_ADMIN, TEST_TECH_SUPPORT, super_admin_credentials, \
+    user_for_disabling_credentials
 
 
 def login_as(credentials: Credentials):
@@ -335,3 +336,53 @@ class TestCreateUsers:
 
         assert_that(users_page.get_notification_message()).is_equal_to(UsersPage.RESET_PASSWORD_MESSAGE)
         # TODO implement email client and add verification that 'Reset Password' email is received.
+
+
+@allure.feature(Feature.USERS)
+class TestDisableEnableUser:
+
+    @allure.title("Disable user test")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_disable_user(self):
+        user_email = user_for_disabling_credentials.username
+
+        users_page = login_as(super_admin_credentials)
+        edit_dialog = users_page.search_and_edit_user(user_email)
+        edit_dialog.disable_user().click_update()
+        users_page.table.wait_to_load()
+
+        assert_that(users_page.get_notification_message()).is_equal_to(UsersPage.USER_UPDATED_MESSAGE)
+        users_page.close_notification()
+
+        assert_that(users_page.table.is_lock_icon_displayed(user_email))\
+            .described_as("Lock icon to be displayed for the user " + user_email).is_true()
+
+        users_page.logout()
+
+        login_page = LoginPage().wait_to_load()
+        login_page.unsuccessful_login(user_for_disabling_credentials.username, user_for_disabling_credentials.password)
+
+        assert_that(login_page.get_notification_message()).is_equal_to(LoginPage.LOGIN_FAILURE_MESSAGE)
+        assert_that(login_page.is_loaded()).described_as("Login Page to be opened").is_true()
+
+    @allure.title("Enable user test")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_enable_user(self):
+        user_email = user_for_disabling_credentials.username
+
+        users_page = login_as(super_admin_credentials)
+        edit_dialog = users_page.search_and_edit_user(user_email)
+        edit_dialog.enable_user().click_update()
+        users_page.table.wait_to_load()
+
+        assert_that(users_page.get_notification_message()).is_equal_to(UsersPage.USER_UPDATED_MESSAGE)
+        users_page.close_notification()
+
+        assert_that(users_page.table.is_lock_icon_displayed(user_email))\
+            .described_as("Lock icon to be displayed for the user " + user_email).is_false()
+
+        users_page.logout()
+
+        home_page = LoginPage().wait_to_load().login_as(user_for_disabling_credentials)
+
+        home_page.background_image.should(be.visible)

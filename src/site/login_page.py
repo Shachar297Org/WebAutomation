@@ -11,6 +11,7 @@ class LoginPage(object):
 
     INVALID_PASSWORD_MESSAGE = "Password is not valid"
     USER_DOESNT_EXIST_MESSAGE = 'User does not exist'
+    LOGIN_FAILURE_MESSAGE = 'Login Failure'
 
     def __init__(self):
         self.username_input = s("#loginForm_username")
@@ -20,6 +21,7 @@ class LoginPage(object):
 
         self.notification_msg = s(".ant-notification-notice-message")
         self.notification_description = s(".ant-notification-notice-description")
+        self.notification_close_button = s(".ant-notification-close-icon")
 
         self.welcome_title = s("h2.ant-typography")
         self.logo = s("//img[@alt='LumenisX']")
@@ -31,6 +33,12 @@ class LoginPage(object):
         browser.driver.set_page_load_timeout(10)
 
         self.username_input.wait.until(be.visible)
+        return self
+
+    @allure.step
+    def wait_to_load(self):
+        self.password_input.wait_until(be.visible)
+        self.login_button.matching(be.clickable)
         return self
 
     @allure.step
