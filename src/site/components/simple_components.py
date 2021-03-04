@@ -125,3 +125,37 @@ class Tooltip:
     @allure.step
     def get_items_text(self) -> []:
         return extract_text(self.get_items())
+
+
+class TopRightNotification:
+    def __init__(self):
+        self.notification = s(".ant-notification-topRight")
+        self.message = self.notification.s(".ant-notification-notice-message")
+        self.description = self.notification.s(".ant-notification-notice-description")
+        self.close_button = self.notification.s(".ant-notification-close-icon")
+
+    @allure.step
+    def wait_to_load(self):
+        self.message.wait.until(be.visible)
+
+    @allure.step
+    def get_message(self) -> str:
+        self.wait_to_load()
+        return self.message.get(query.text)
+
+    @allure.step
+    def get_description(self) -> str:
+        self.wait_to_load()
+        return self.description.get(query.text)
+
+    @allure.step
+    def close(self):
+        self.wait_to_load()
+        self.close_button.click()
+        self.message.wait.until(be.not_.visible)
+
+    def should_be_visible(self):
+        self.notification.should(be.visible)
+
+    def should_not_be_visible(self):
+        self.notification.should(be.not_.visible)

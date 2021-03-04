@@ -46,7 +46,7 @@ class TestLogin:
         login_page.version.should(be.visible)
         assert_that(login_page.version.get(query.text)).is_not_empty()
 
-        login_page.notification_msg.should(be._not_.visible)
+        login_page.notification.should_not_be_visible()
 
     @allure.title("Verify that a user can login into the portal")
     @allure.severity(allure.severity_level.CRITICAL)
@@ -64,5 +64,5 @@ class TestLogin:
         login_page = LoginPage().open()
         login_page.unsuccessful_login(username, password)
 
-        assert login_page.get_notification_description() == error
-        assert login_page.is_loaded()
+        assert_that(login_page.notification.get_description()).is_equal_to(error)
+        assert_that(login_page.is_loaded()).described_as("Login page to be opened").is_true()

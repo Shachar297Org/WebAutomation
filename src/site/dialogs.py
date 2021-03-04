@@ -55,6 +55,7 @@ class _BaseCreateEditUserDialog:
         return self
 
     def set_user_fields(self, user: User):
+        self.first_name_input.clear()
         self.set_first_name(user.first_name)
         self.set_last_name(user.last_name)
         self.set_email(user.email)

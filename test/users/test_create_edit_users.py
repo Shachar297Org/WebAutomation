@@ -32,12 +32,12 @@ def create_random_user_with_device(users_page: UsersPage, region: str, device_ty
     create_dialog.click_add_device()
 
     create_dialog.click_create()
-    users_page.wait_for_notification()
+    users_page.notification.wait_to_load()
     return user
 
 
 @allure.feature(Feature.USERS)
-class TestCreateUsers:
+class TestCreateEditUsers:
 
     @pytest.fixture(autouse=True)
     def cleanup_browser_session(self):
@@ -105,6 +105,7 @@ class TestCreateUsers:
         dialog.cancel_button.should(be.visible).should(be.clickable)
 
     @allure.title("Create a new user")
+    @allure.issue("Some token is displayed for few secs instead of the manager in the Manager menu")
     @allure.severity(allure.severity_level.CRITICAL)
     def test_create_user(self):
         users_page = login_as(fota_admin_credentials)
@@ -113,7 +114,7 @@ class TestCreateUsers:
 
         users_page.add_user(new_user)
 
-        assert_that(users_page.get_notification_message()).is_equal_to(UsersPage.USER_CREATED_MESSAGE)
+        assert_that(users_page.notification.get_message()).is_equal_to(UsersPage.USER_CREATED_MESSAGE)
 
         users_page.reload().search_by(new_user.email)
 
@@ -233,7 +234,7 @@ class TestCreateUsers:
 
         edit_dialog.click_update()
 
-        assert_that(users_page.get_notification_message()).is_equal_to(UsersPage.USER_UPDATED_MESSAGE)
+        assert_that(users_page.notification.get_message()).is_equal_to(UsersPage.USER_UPDATED_MESSAGE)
 
         users_page.reload().search_by(new_user.email)
 
@@ -321,7 +322,7 @@ class TestCreateUsers:
 
         edit_dialog.click_update()
 
-        assert_that(users_page.get_notification_message()).is_equal_to(UsersPage.USER_UPDATED_MESSAGE)
+        assert_that(users_page.notification.get_message()).is_equal_to(UsersPage.USER_UPDATED_MESSAGE)
 
     @allure.title("Reset password test")
     @allure.severity(allure.severity_level.NORMAL)
@@ -334,7 +335,7 @@ class TestCreateUsers:
 
         edit_dialog.click_reset_password()
 
-        assert_that(users_page.get_notification_message()).is_equal_to(UsersPage.RESET_PASSWORD_MESSAGE)
+        assert_that(users_page.notification.get_message()).is_equal_to(UsersPage.RESET_PASSWORD_MESSAGE)
         # TODO implement email client and add verification that 'Reset Password' email is received.
 
 
@@ -351,8 +352,8 @@ class TestDisableEnableUser:
         edit_dialog.disable_user().click_update()
         users_page.table.wait_to_load()
 
-        assert_that(users_page.get_notification_message()).is_equal_to(UsersPage.USER_UPDATED_MESSAGE)
-        users_page.close_notification()
+        assert_that(users_page.notification.get_message()).is_equal_to(UsersPage.USER_UPDATED_MESSAGE)
+        users_page.notification.close()
 
         assert_that(users_page.table.is_lock_icon_displayed(user_email))\
             .described_as("Lock icon to be displayed for the user " + user_email).is_true()
@@ -362,7 +363,7 @@ class TestDisableEnableUser:
         login_page = LoginPage().wait_to_load()
         login_page.unsuccessful_login(user_for_disabling_credentials.username, user_for_disabling_credentials.password)
 
-        assert_that(login_page.get_notification_message()).is_equal_to(LoginPage.LOGIN_FAILURE_MESSAGE)
+        assert_that(login_page.notification.get_message()).is_equal_to(LoginPage.LOGIN_FAILURE_MESSAGE)
         assert_that(login_page.is_loaded()).described_as("Login Page to be opened").is_true()
 
     @allure.title("Enable user test")
@@ -375,8 +376,8 @@ class TestDisableEnableUser:
         edit_dialog.enable_user().click_update()
         users_page.table.wait_to_load()
 
-        assert_that(users_page.get_notification_message()).is_equal_to(UsersPage.USER_UPDATED_MESSAGE)
-        users_page.close_notification()
+        assert_that(users_page.notification.get_message()).is_equal_to(UsersPage.USER_UPDATED_MESSAGE)
+        users_page.notification.close()
 
         assert_that(users_page.table.is_lock_icon_displayed(user_email))\
             .described_as("Lock icon to be displayed for the user " + user_email).is_false()

@@ -1,5 +1,3 @@
-import time
-
 import allure
 from selene.core import query
 from selene.core.entity import Element
@@ -19,6 +17,7 @@ class _BaseTable(object):
         self.rows = self.table_body.ss("tr")
         self.spinner = s('.ant-spin-blur')
 
+    @allure.step
     def wait_to_load(self):
         self.table_body.wait.until(be.visible)
         self.spinner.wait.until(be.not_.visible)

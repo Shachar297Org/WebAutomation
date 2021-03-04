@@ -3,6 +3,7 @@ from selene.api import *
 from selene.support.shared import browser
 
 from src.domain.credentials import Credentials
+from src.site.components.simple_components import TopRightNotification
 from src.site.pages import HomePage
 
 
@@ -19,9 +20,7 @@ class LoginPage(object):
         self.login_button = s(by.xpath("//button[@type='submit']"))
         self.forgot_password_link = s(by.xpath("//button[@type='button']"))
 
-        self.notification_msg = s(".ant-notification-notice-message")
-        self.notification_description = s(".ant-notification-notice-description")
-        self.notification_close_button = s(".ant-notification-close-icon")
+        self.notification = TopRightNotification()
 
         self.welcome_title = s("h2.ant-typography")
         self.logo = s("//img[@alt='LumenisX']")
@@ -64,16 +63,6 @@ class LoginPage(object):
         return self
 
     @allure.step
-    def get_notification_message(self):
-        self._wait_for_notification()
-        return self.notification_msg.get(query.text)
-
-    @allure.step
-    def get_notification_description(self):
-        self._wait_for_notification()
-        return self.notification_description.get(query.text)
-
-    @allure.step
     def _enter_username(self, username: str):
         self.username_input.set_value(username)
 
@@ -84,7 +73,3 @@ class LoginPage(object):
     @allure.step
     def _click_login(self):
         self.login_button.click()
-
-    @allure.step
-    def _wait_for_notification(self):
-        self.notification_msg.wait.until(be.visible)

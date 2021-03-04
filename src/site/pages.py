@@ -1,5 +1,4 @@
 import abc
-import time
 
 import allure
 from selene.api import s
@@ -9,7 +8,7 @@ from selene.support.shared import browser
 
 from src.domain.user import User
 from src.site.components.page_header import PageHeader
-from src.site.components.simple_components import SearchInput, SelectBox
+from src.site.components.simple_components import SearchInput, SelectBox, TopRightNotification
 from src.site.components.tables import UsersTable
 from src.site.dialogs import CreateUserDialog, EditUserDialog
 from src.util.elements_util import JS_CLICK
@@ -22,10 +21,7 @@ class _BasePage:
 
         self.left_panel = _LeftPanel(".ant-menu.ant-menu-inline")
         self.header = PageHeader(".ant-layout-header")
-
-        self.notification_msg = s(".ant-notification-notice-message")
-        self.notification_description = s(".ant-notification-notice-description")
-        self.notification_close_button = s(".ant-notification-close-icon")
+        self.notification = TopRightNotification()
 
         self.style = s("body style")
 
@@ -47,26 +43,6 @@ class _BasePage:
         return self.logo_img.get(query.attribute("src"))
 
     @allure.step
-    def get_notification_message(self):
-        self.wait_for_notification()
-        return self.notification_msg.get(query.text)
-
-    @allure.step
-    def get_notification_description(self):
-        self.wait_for_notification()
-        return self.notification_description.get(query.text)
-
-    @allure.step
-    def close_notification(self):
-        self.notification_msg.wait.until(be.visible)
-        self.notification_close_button.click()
-        self.notification_msg.wait.until(be.not_.visible)
-        return self
-
-    @allure.step
-    def wait_for_notification(self):
-        self.notification_msg.wait.until(be.visible)
-
     def logout(self):
         self.header.logout()
 
@@ -82,6 +58,7 @@ class HomePage(_BasePage):
         self.wait_to_load()
         return self
 
+    @allure.step
     def wait_to_load(self):
         self.background_image.wait_until(be.visible)
         return self
@@ -110,6 +87,7 @@ class UsersPage(_BasePage):
         self.wait_to_load()
         return self
 
+    @allure.step
     def wait_to_load(self):
         self.add_button.wait_until(be.visible)
         return self
@@ -182,6 +160,7 @@ class DevicesPage(_BasePage):
         self.wait_to_load()
         return self
 
+    @allure.step
     def wait_to_load(self):
         self.add_button.wait_until(be.visible)
         return self
@@ -204,6 +183,7 @@ class AlarmsPage(_BasePage):
         self.wait_to_load()
         return self
 
+    @allure.step
     def wait_to_load(self):
         self.reset_button.wait_until(be.visible)
         return self
@@ -221,7 +201,7 @@ class QlikPage(_BasePage):
         return self
 
     def wait_to_load(self):
-        print("TBD")
+        raise Exception("The method isn't implemented yet")
 
 
 class _LeftPanel(object):

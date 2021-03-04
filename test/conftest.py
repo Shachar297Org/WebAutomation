@@ -44,7 +44,7 @@ def _get_firefox_driver():
     return webdriver.Chrome(executable_path=GeckoDriverManager().install())
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def setup_driver():
     if remote:
         driver = _get_remote_web_driver()
@@ -61,7 +61,7 @@ def setup_driver():
     browser.quit()
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True, scope="class")
 def cleanup_browser_session():
     yield
     clear_session_storage()
