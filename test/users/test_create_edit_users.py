@@ -36,6 +36,13 @@ def create_random_user_with_device(users_page: UsersPage, region: str, device_ty
     return user
 
 
+def open_first_test_user_from_table_to_edit(users_page: UsersPage):
+    users_page.search_by(TEST_USERS_PREFIX)
+
+    first_test_user = users_page.table.get_column_values(UsersTable.Headers.EMAIL)[0]
+    return users_page.open_edit_user_dialog(first_test_user)
+
+
 @allure.feature(Feature.USERS)
 class TestCreateEditUsers:
 
@@ -279,10 +286,7 @@ class TestCreateEditUsers:
     @allure.severity(allure.severity_level.NORMAL)
     def test_associating_with_user_groups(self):
         users_page = login_as(super_admin_credentials)
-        users_page.search_by(TEST_USERS_PREFIX)
-
-        first_test_user = users_page.table.get_column_values(UsersTable.Headers.EMAIL)[0]
-        edit_dialog = users_page.open_edit_user_dialog(first_test_user)
+        edit_dialog = open_first_test_user_from_table_to_edit(users_page)
         edit_dialog.select_user_group(UserGroup.SERVICE_ADMIN)
 
         all_managers = edit_dialog.manager_select.open().wait_to_be_not_empty().get_items()
@@ -306,10 +310,7 @@ class TestCreateEditUsers:
                                                                  device=test_device1)
 
         users_page = login_as(fota_admin_credentials)
-        users_page.search_by(TEST_USERS_PREFIX)
-
-        first_test_user = users_page.table.get_column_values(UsersTable.Headers.EMAIL)[0]
-        edit_dialog = users_page.open_edit_user_dialog(first_test_user)
+        edit_dialog = open_first_test_user_from_table_to_edit(users_page)
 
         edit_dialog.location_tree_picker.select_usa_states(test_state)
         edit_dialog.device_tree_picker.select_devices(DeviceType.ACUPULSE, test_device_model, test_device1)
@@ -328,10 +329,7 @@ class TestCreateEditUsers:
     @allure.severity(allure.severity_level.NORMAL)
     def test_reset_users_password(self):
         users_page = login_as(super_admin_credentials)
-        users_page.search_by(TEST_USERS_PREFIX)
-
-        first_test_user = users_page.table.get_column_values(UsersTable.Headers.EMAIL)[0]
-        edit_dialog = users_page.open_edit_user_dialog(first_test_user)
+        edit_dialog = open_first_test_user_from_table_to_edit(users_page)
 
         edit_dialog.click_reset_password()
 

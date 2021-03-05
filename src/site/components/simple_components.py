@@ -59,13 +59,12 @@ class SelectBox:
     @allure.step
     def select_item(self, item: str):
         self.open()
-        self.items.filtered_by(have.text(item))[0].click()
-        # self.select_box.s("//li[@role='option'][text()='{}']".format(item)).click()
+        self.items.filtered_by(have.text(item)).first.click()
 
     @allure.step
     def get_items(self) -> []:
         self.open()
-        return filter(None, extract_text(ss(".ant-select-dropdown ul li")))
+        return list(filter(None, extract_text(ss(".ant-select-dropdown ul li"))))
 
     @allure.step
     def get_selected_item(self) -> str:
@@ -111,7 +110,7 @@ class Tooltip:
     @allure.step
     def wait_to_be_loaded(self):
         time.sleep(3)  # TODO replaces with waiter
-        self.tooltip.wait.until(be.present)
+        self.tooltip.wait.until(be.visible)
         return self
 
     @allure.step
