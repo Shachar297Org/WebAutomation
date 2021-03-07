@@ -15,6 +15,13 @@ USERNAME = super_admin_credentials.username
 PASSWORD = super_admin_credentials.password
 
 
+@pytest.fixture(autouse=True)
+def cleanup_browser_session():
+    yield
+    clear_session_storage()
+    clear_local_storage()
+
+
 # TODO Extends the test suite with all documented login tests
 @pytest.mark.usefixtures("setup_driver")
 @allure.feature(Feature.LOGIN)

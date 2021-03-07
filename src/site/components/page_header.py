@@ -41,8 +41,9 @@ class PageHeader:
 
     @allure.step
     def logout(self):
-        self.user_avatar.hover()
+        self.user_avatar.click()
         self.logout_button.wait_until(be.clickable)
+        self.logout_button.wait_until(be.visible)
         self.logout_button.click()
 
 

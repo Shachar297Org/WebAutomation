@@ -13,7 +13,7 @@ from webdriver_manager.firefox import GeckoDriverManager
 from src.util.driver_util import clear_session_storage, clear_local_storage
 from src.listeners import DriverEventListener
 
-config.timeout = int(os.getenv('SELENE_TIMEOUT', 4))
+config.timeout = int(os.getenv('SELENE_TIMEOUT', 5))
 config.browser_name = os.getenv('SELENE_BROWSER_NAME', 'chrome')
 config.base_url = os.getenv('SELENE_BASE_URL', 'https://web.int.lumenisx.lumenis.com')
 config.hold_browser_open = os.getenv('SELENE_HOLD_BROWSER_OPEN')

@@ -105,7 +105,7 @@ class _BaseCreateEditUserDialog:
 
     @allure.step
     def set_phone_number(self, text: str):
-        self.phone_number_input.set_value(text)
+        self.phone_number_input.clear().set_value(text)
         return self
 
     @allure.step
