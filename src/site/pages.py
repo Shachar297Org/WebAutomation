@@ -7,10 +7,12 @@ from selene.support.conditions import be, have
 from selene.support.shared import browser
 
 from src.domain.user import User
+from src.site.components.base_table import PaginationElement
 from src.site.components.page_header import PageHeader
 from src.site.components.simple_components import SearchInput, SelectBox, TopRightNotification
-from src.site.components.tables import UsersTable
-from src.site.dialogs import CreateUserDialog, EditUserDialog
+from src.site.components.tables import UsersTable, DevicesTable
+from src.site.components.tree_selector import DeviceTypesTreeSelector, DeviceLocationTreeSelector
+from src.site.dialogs import CreateUserDialog, EditUserDialog, CreateDeviceDialog, DevicePropertiesDialog
 from src.util.elements_util import JS_CLICK
 
 
@@ -80,6 +82,7 @@ class UsersPage(_BasePage):
         self.reset_button = s("//button[span[text()='Reset']]")
         self.reload_button = s("i.anticon-reload")
         self.table = UsersTable(".ant-table-wrapper")
+        self.pagination_element = PaginationElement("ul.ant-table-pagination")
 
     @allure.step
     def open(self):
@@ -151,8 +154,15 @@ class DevicesPage(_BasePage):
     def __init__(self):
         super().__init__()
         self.add_button = s("//button[span[text()='+']]")
+        self.search_input = SearchInput("input[placeholder='Search']")
+        self.device_tree_picker = DeviceTypesTreeSelector(".//span[contains(@class, 'TreeSelector')]"
+                                                          "[.//text()='Device Types']")
+        self.location_tree_picker = DeviceLocationTreeSelector(".//span[contains(@class, 'TreeSelector')]"
+                                                               "[.//text()='Locations']")
         self.reset_button = s("//button[span[text()='Reset']]")
-        self.reload_button = s("i.anticon - reload")
+        self.reload_button = s("i.anticon-reload")
+        self.table = DevicesTable(".ant-table-wrapper")
+        self.pagination_element = PaginationElement("ul.ant-table-pagination")
 
     @allure.step
     def open(self):
@@ -162,8 +172,47 @@ class DevicesPage(_BasePage):
 
     @allure.step
     def wait_to_load(self):
-        self.add_button.wait_until(be.visible)
+        self.location_tree_picker.tree_selector.wait_until(be.visible)
+        self.reset_button.wait_until(be.clickable)
         return self
+
+    @allure.step
+    def sort_asc_by(self, column: str):
+        self.table.sort_asc(column)
+        return self
+
+    @allure.step
+    def sort_desc_by(self, column: str):
+        self.table.sort_desc(column)
+        return self
+
+    @allure.step
+    def search_by(self, text: str):
+        self.search_input.search(text)
+        self.table.wait_to_load()
+        return self
+
+    @allure.step
+    def open_device_properties_dialog(self, serial_number) -> DevicePropertiesDialog:
+        self.table.click_properties(serial_number)
+        return DevicePropertiesDialog().wait_to_load()
+
+    @allure.step
+    def click_add_device(self) -> CreateDeviceDialog:
+        self.add_button.click()
+        return CreateDeviceDialog().wait_to_load()
+
+    @allure.step
+    def click_reset(self):
+        self.reset_button.click()
+        self.reset_button.wait.until(have.attribute("ant-click-animating-without-extra-node").value("false"))
+        return self
+
+    @allure.step
+    def reload(self):
+        self.reload_button.execute_script(JS_CLICK)
+        self.table.wait_to_load()
+        return UsersPage()
 
     @allure.step
     def _click_add_device(self):

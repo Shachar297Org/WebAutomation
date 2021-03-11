@@ -6,7 +6,7 @@ from selene.core.entity import Element
 from selene.support.conditions import have, be
 from selene.support.shared.jquery_style import s
 
-from src.util.elements_util import extract_text
+from src.util.elements_util import extract_text, extract_titles
 
 SEPARATOR = "/"
 ALL_NODE = "ALL"
@@ -98,10 +98,12 @@ class _ChildTree:
 class _BaseTreeSelector:
     def __init__(self, tree_selector_locator):
         self.tree_selector = s(tree_selector_locator)
+        self.search_input = self.tree_selector.s("input.ant-select-search__field")
         self.selected_items = self.tree_selector.ss("li.ant-select-selection__choice")
 
         self.select_tree = s(_SELECT_TREE_LOCATOR)
 
+    @allure.step
     def open(self):
         if not self.is_opened():
             is_another_tree_selector_open = self._is_another_tree_selector_is_opened()
@@ -110,13 +112,19 @@ class _BaseTreeSelector:
                 time.sleep(1)
         return self
 
+    @allure.step
     def is_opened(self) -> bool:
         return self.tree_selector.matching(have.css_class("ant-select-open"))
 
     @allure.step
+    def filter(self, text):
+        self.search_input.set_value(text)
+        return self
+
+    @allure.step
     def get_all_selected_items(self) -> []:
         if len(self.selected_items) > 0:
-            return self._extract_titles(self.selected_items)
+            return extract_titles(self.selected_items)
         else:
             return []
 
@@ -141,10 +149,6 @@ class _BaseTreeSelector:
 
     def _is_another_tree_selector_is_opened(self) -> bool:
         return self.tree_selector.matching(be.present)
-
-    @staticmethod
-    def _extract_titles(elements: []) -> []:
-        return [el.get(query.attribute("title")) for el in elements]
 
 
 class DeviceLocationTreeSelector(_BaseTreeSelector):

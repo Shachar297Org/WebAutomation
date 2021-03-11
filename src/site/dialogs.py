@@ -6,12 +6,44 @@ from selene.support.shared.jquery_style import s
 
 from src.domain.user import User
 from src.site.components.base_table import PaginationElement
+from src.site.components.cascader_picker import RegionCountryCascaderPicker, DeviceTypeCascaderPicker
 from src.site.components.simple_components import SelectBox
 from src.site.components.tree_selector import DeviceLocationTreeSelector, DeviceTypesTreeSelector
 from src.site.components.tables import DeviceAssignmentTable
 
 
-class _BaseCreateEditUserDialog:
+class _BaseDialog:
+    def __init__(self):
+        self.dialog = s("//*[@class='ant-modal-content']")
+        self.title = self.dialog.s(".ant-modal-title")
+
+        self.cancel_button = self.dialog.s(".//button[span[text()='Cancel']]")
+        self.close_button = self.dialog.s("button.ant-modal-close")
+
+    @allure.step
+    def wait_to_load(self):
+        self.title.wait_until(be.visible)
+        self.cancel_button.wait_until(be.clickable)
+        return self
+
+    @allure.step
+    def get_element_label(self, element: Element) -> str:
+        return element.s("./ancestor::*[contains(@class,'ant-row ant-form-item')]//label").get(query.text)
+
+    @allure.step
+    def get_element_error_message(self, element: Element) -> str:
+        return element.s("./parent::span/following-sibling::div[@class='ant-form-explain']").get(query.text)
+
+    @allure.step
+    def close(self):
+        self.close_button.click()
+
+    @allure.step
+    def click_cancel(self):
+        self.cancel_button.click()
+
+
+class _BaseCreateEditUserDialog(_BaseDialog):
     DEVICE_ASSIGNMENT_LABEL = "Device assignment"
     FIRST_NAME_LABEL = "First Name"
     LAST_NAME_LABEL = "Last Name"
@@ -24,9 +56,8 @@ class _BaseCreateEditUserDialog:
     FIELD_IS_REQUIRED_MESSAGE = "This field is required"
 
     def __init__(self):
+        super().__init__()
         self.dialog = s("//*[@class='ant-modal-content'][.//div[contains(text(),'User')]]")
-        self.title = self.dialog.s(".ant-modal-title")
-
         self.first_name_input = self.dialog.s("#createUserForm_firstName")
         self.last_name_input = self.dialog.s("#createUserForm_lastName")
         self.email_input = self.dialog.s("#createUserForm_email")
@@ -46,8 +77,6 @@ class _BaseCreateEditUserDialog:
         self.add_device_button = self.dialog.s(".//button[span[text()='Add']]")
         self.save_device_button = self.dialog.s(".//button[span[text()='Save']]")
         self.remove_device_button = self.dialog.s(".//button[span[text()='X']]")
-        self.cancel_button = self.dialog.s(".//button[span[text()='Cancel']]")
-        self.close_button = self.dialog.s("button.ant-modal-close")
 
     def wait_to_load(self):
         self.phone_number_input.wait_until(be.visible)
@@ -63,14 +92,6 @@ class _BaseCreateEditUserDialog:
         self.select_user_group(user.user_group)
         self.select_manager(user.manager)
         return self
-
-    @allure.step
-    def get_element_label(self, element: Element) -> str:
-        return element.s("./ancestor::*[contains(@class,'ant-row ant-form-item')]//label").get(query.text)
-
-    @allure.step
-    def get_element_error_message(self, element: Element) -> str:
-        return element.s("./parent::span/following-sibling::div[@class='ant-form-explain']").get(query.text)
 
     @allure.step
     def get_first_name(self) -> str:
@@ -125,14 +146,6 @@ class _BaseCreateEditUserDialog:
     def select_manager(self, text: str):
         self.manager_select.wait_to_be_enabled().select_item(text)
         return self
-
-    @allure.step
-    def close(self):
-        self.close_button.click()
-
-    @allure.step
-    def click_cancel(self):
-        self.cancel_button.click()
 
     @allure.step
     def click_add_device(self):
@@ -221,3 +234,173 @@ class EditUserDialog(_BaseCreateEditUserDialog):
     @allure.step
     def _click_user_disabled_switcher(self):
         self.user_disabled_switcher.click()
+
+
+class CreateDeviceDialog(_BaseDialog):
+    TITLE = "Create Device"
+
+    DEVICE_SERIAL_NUMBER_LABEL = "Device Serial Number"
+    DEVICE_TYPE_LABEL = "Device Type"
+    CLINIC_NAME_LABEL = "Clinic Name"
+    FIRST_NAME_LABEL = "First Name"
+    LAST_NAME_LABEL = "Last Name"
+    EMAIL_LABEL = "Email"
+    PHONE_NUMBER_LABEL = "Phone Number"
+    CLINIC_ID_LABEL = "Clinic ID"
+    STREET_LABEL = "Street"
+    STREET_NUMBER_LABEL = "Street Number"
+    CITY_LABEL = "City"
+    POSTAL_ZIP_LABEL = "Postal / Zip"
+    COMMENTS_LABEL = "Comments"
+    REGION_COUNTRY_LABEL = "Region / Country"
+    STATE_LABEL = "State"
+
+    def __init__(self):
+        super().__init__()
+        self.dialog = s("//*[@class='ant-modal-content'][.//span[text()='Create Device']]")
+
+        self.device_serial_number_input = self.dialog.s("#creatDeviceForm_deviceSerialNumber")
+        self.device_picker = DeviceTypeCascaderPicker(".//span[contains(@class, 'DeviceTypeSelector')]")
+
+        self.clinic_name_input = self.dialog.s("#creatDeviceForm_clinicName")
+        self.first_name_input = self.dialog.s("#creatDeviceForm_firstName")
+        self.last_name_input = self.dialog.s("#creatDeviceForm_lastName")
+        self.email_input = self.dialog.s("#creatDeviceForm_email")
+        self.phone_number_input = self.dialog.s("#creatDeviceForm_phoneNumber")
+
+        self.clinic_id_input = self.dialog.s("#creatDeviceForm_clinicId")
+        self.street_input = self.dialog.s("#ccreatDeviceForm_street")
+        self.street_number_input = self.dialog.s("#creatDeviceForm_streetNumber")
+        self.city_input = self.dialog.s("#creatDeviceForm_city")
+        self.postal_zip_input = self.dialog.s("#creatDeviceForm_zipCode")
+
+        self.comments_textarea = self.dialog.s("#creatDeviceForm_comments")
+        self.region_country_picker = RegionCountryCascaderPicker("//span[contains(@class, 'ant-cascader-picker')]"
+                                                                 "[input[@id='creatDeviceForm_country']]")
+        self.state_select = SelectBox("#creatDeviceForm_state")
+
+        self.create_device_button = self.dialog.s(".//button[span[text()='Create Device']]")
+
+    def wait_to_load(self):
+        self.device_serial_number_input.wait_until(be.visible)
+        self.comments_textarea.wait_until(be.clickable)
+        return self
+
+    @allure.step
+    def click_create(self):
+        self.create_device_button.click()
+
+    @allure.step
+    def get_device_serial_number(self) -> str:
+        return self.device_serial_number_input.get(query.value)
+
+    @allure.step
+    def set_device_serial_number(self, text: str):
+        self.device_serial_number_input.set_value(text)
+        return self
+
+    # Customer fields
+
+    @allure.step
+    def get_clinic_name(self) -> str:
+        return self.clinic_name_input.get(query.value)
+
+    @allure.step
+    def set_clinic_name(self, text: str):
+        self.clinic_name_input.set_value(text)
+        return self
+
+    @allure.step
+    def get_first_name(self) -> str:
+        return self.first_name_input.get(query.value)
+
+    @allure.step
+    def set_first_name(self, text: str):
+        self.first_name_input.set_value(text)
+        return self
+
+    @allure.step
+    def get_last_name(self) -> str:
+        return self.last_name_input.get(query.value)
+
+    @allure.step
+    def set_last_name(self, text: str):
+        self.last_name_input.set_value(text)
+        return self
+
+    @allure.step
+    def get_email(self) -> str:
+        return self.email_input.get(query.value)
+
+    @allure.step
+    def set_email(self, text: str):
+        self.email_input.set_value(text)
+        return self
+
+    @allure.step
+    def get_phone_number(self) -> str:
+        return self.phone_number_input.get(query.value)
+
+    @allure.step
+    def set_phone_number(self, text: str):
+        self.phone_number_input.clear().set_value(text)
+        return self
+
+    @allure.step
+    def get_clinic_id(self) -> str:
+        return self.clinic_id_input.get(query.value)
+
+    @allure.step
+    def set_clinic_id(self, text: str):
+        self.clinic_id_input.set_value(text)
+        return self
+
+    @allure.step
+    def get_street(self) -> str:
+        return self.street_input.get(query.value)
+
+    @allure.step
+    def set_street(self, text: str):
+        self.street_input.set_value(text)
+        return self
+
+    @allure.step
+    def get_street_number(self) -> str:
+        return self.street_number_input.get(query.value)
+
+    @allure.step
+    def set_street_number(self, text: str):
+        self.street_number_input.set_value(text)
+        return self
+
+    @allure.step
+    def get_city(self) -> str:
+        return self.city_input.get(query.value)
+
+    @allure.step
+    def set_city(self, text: str):
+        self.city_input.set_value(text)
+        return self
+
+    @allure.step
+    def get_postal_code_zip(self) -> str:
+        return self.postal_zip_input.get(query.value)
+
+    @allure.step
+    def set_postal_code_zip(self, text: str):
+        self.postal_zip_input.set_value(text)
+        return self
+
+    @allure.step
+    def get_comment(self) -> str:
+        return self.comments_textarea.get(query.value)
+
+    @allure.step
+    def set_comment(self, text: str):
+        self.comments_textarea.set_value(text)
+        return self
+
+
+class DevicePropertiesDialog(_BaseDialog):
+    TITLE = "Device Properties"
+

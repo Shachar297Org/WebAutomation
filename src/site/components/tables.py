@@ -66,12 +66,6 @@ class DeviceAssignmentTable(_BaseTable):
     _REMOVE_TEXT = "Remove"
 
     @allure.step
-    def get_row_by_column_value(self, column_name: str, column_value: str) -> Element:
-        self.wait_to_load()
-        return self.table.s(".//tbody/tr[td[{0}][.//text()='{1}']]"
-                            .format(self._get_column_index(column_name), column_value))
-
-    @allure.step
     def get_rows_by_region(self, region: str) -> []:
         return self.get_rows_by_column_value(self.Headers.REGION, region)
 
@@ -80,7 +74,7 @@ class DeviceAssignmentTable(_BaseTable):
         return self.get_rows_by_column_value(self.Headers.DEVICE_TYPES, device_types)
 
     @allure.step
-    def get_row_by_device_types(self, device_types: str) -> []:
+    def get_row_by_device_types(self, device_types: str) -> Element:
         return self.get_row_by_column_value(self.Headers.DEVICE_TYPES, device_types)
 
     @allure.step
@@ -118,4 +112,45 @@ class DeviceAssignmentTable(_BaseTable):
     class Headers:
         REGION = "Region"
         DEVICE_TYPES = "Device Types"
+        ACTION_BUTTON = ""
+
+
+class DevicesTable(_BaseTable):
+    _PROPERTIES_TEXT = "Properties"
+
+    @allure.step
+    def get_row_by_serial_number(self, serial_number: str) -> Element:
+        return self.get_row_by_column_value(self.Headers.SERIAL_NUMBER, serial_number)
+
+    @allure.step
+    def get_rows_by_device_type(self, device_type: str) -> []:
+        return self.get_rows_by_column_value(self.Headers.DEVICE_TYPE, device_type)
+
+    @allure.step
+    def get_rows_by_status(self, status: str) -> []:
+        return self.get_rows_by_column_value(self.Headers.STATUS, status)
+
+    @allure.step
+    def click_properties(self, serial_number: str):
+        self._get_row_properties_button(serial_number).click()
+
+    @allure.step
+    def is_row_contains_properties_button(self, row) -> bool:
+        return self._is_row_contains_button_by_text(row, self._PROPERTIES_TEXT)
+
+    @allure.step
+    def is_row_properties_button_enabled(self, serial_number: str) -> bool:
+        return self._get_row_properties_button(serial_number).matching(be.enabled)
+
+    @allure.step
+    def _get_row_properties_button(self, serial_number: str):
+        return self._get_row_button_with_name_by_column_value(self.Headers.SERIAL_NUMBER, serial_number, self._PROPERTIES_TEXT)
+
+    class Headers:
+        SERIAL_NUMBER = "Serial Number"
+        DEVICE_TYPE = "Device Type"
+        STATUS = "Status"
+        CLINIC_ID = "Clinic ID"
+        CLINIC_NAME = "Clinic Name"
+        COUNTRY = "Country"
         ACTION_BUTTON = ""
