@@ -104,7 +104,7 @@ class TestDevicesList:
     def test_filter_devices_by_column_value(self, column):
         devices_page = DevicesPage().open()
         table = devices_page.table.wait_to_load()
-        devices_page.sort_asc_by(column).sort_desc_by(column)
+        devices_page.sort_desc_by(column)
         item = table.get_column_values(column)[0].split()[0]
 
         devices_page.search_by(item)

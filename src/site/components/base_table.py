@@ -64,20 +64,15 @@ class _BaseTable(object):
 
     @allure.step("Sort table rows by column value in Ascending (A to Z) order")
     def sort_asc(self, column_name):
-        icon = self._get_column_sort_icon_up(column_name)
-        self._click_sort_icon(icon)
-        icon.wait.until(have.css_class("on"))
+        self._sort(self._get_column_sort_icon_up(column_name))
 
     @allure.step("Sort table rows by column value in Descending (Z to A) order")
     def sort_desc(self, column_name):
-        icon = self._get_column_sort_icon_down(column_name)
-        self._click_sort_icon(icon)
-        self.wait_to_load()
-        icon.wait.until(have.css_class("on"))
+        self._sort(self._get_column_sort_icon_down(column_name))
 
     @allure.step
     def is_column_sorted(self, column_name) -> bool:
-        return self.is_up_icon_blue(column_name) or self.is_up_icon_blue(column_name)
+        return self.is_up_icon_blue(column_name) or self.is_down_icon_blue(column_name)
 
     @allure.step("Check whether sorting blue icon up is displayed for the column header")
     def is_up_icon_blue(self, column_name) -> bool:
@@ -126,6 +121,12 @@ class _BaseTable(object):
                                                   button_name: str) -> Element:
         return self.get_row_by_column_value(column_name, column_value) \
             .s(".//button[span[text()='{}']]".format(button_name))
+
+    def _sort(self, icon):
+        for i in range(2):
+            if icon.matching(have.css_class("off")):
+                self._click_sort_icon(icon)
+                self.wait_to_load()
 
     @staticmethod
     def get_row_cell_text_by_index(row: Element, index: int) -> str:
