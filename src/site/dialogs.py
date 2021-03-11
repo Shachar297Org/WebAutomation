@@ -1,3 +1,5 @@
+import abc
+
 import allure
 from selene.core import query
 from selene.core.entity import Element
@@ -20,11 +22,10 @@ class _BaseDialog:
         self.cancel_button = self.dialog.s(".//button[span[text()='Cancel']]")
         self.close_button = self.dialog.s("button.ant-modal-close")
 
-    @allure.step
+    @abc.abstractmethod
     def wait_to_load(self):
-        self.title.wait_until(be.visible)
-        self.cancel_button.wait_until(be.clickable)
-        return self
+        """"Method should check if the dialog is loaded by some unique conditions
+        (wait to some element that exists only for the particular dialog)"""
 
     @allure.step
     def get_element_label(self, element: Element) -> str:

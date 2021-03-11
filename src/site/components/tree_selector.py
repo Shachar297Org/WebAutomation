@@ -100,6 +100,7 @@ class _BaseTreeSelector:
         self.tree_selector = s(tree_selector_locator)
         self.search_input = self.tree_selector.s("input.ant-select-search__field")
         self.selected_items = self.tree_selector.ss("li.ant-select-selection__choice")
+        self.placeholder = self.tree_selector.s(".ant-select-search__field__placeholder")
 
         self.select_tree = s(_SELECT_TREE_LOCATOR)
 
@@ -142,6 +143,10 @@ class _BaseTreeSelector:
     @allure.step
     def is_enabled(self) -> bool:
         return self.tree_selector.matching(have.css_class("ant-select-enabled"))
+
+    @allure.step
+    def get_placeholder(self) -> str:
+        return self.placeholder.get(query.text)
 
     @allure.step
     def _get_selected_item_element(self, item_name: str):

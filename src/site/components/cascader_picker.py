@@ -106,8 +106,6 @@ class DeviceTypeCascaderPicker(_BaseCascaderPicker):
 
 
 class RegionCountryCascaderPicker(_BaseCascaderPicker):
-    def __init__(self, picker_locator):
-        super().__init__(picker_locator)
 
     @allure.step
     def select_country(self, region: str, country: str):

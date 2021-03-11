@@ -39,11 +39,11 @@ class TestUsersList:
         users_page.add_button.should(be.visible).should(be.clickable)
 
         users_page.search_input.input.should(be.visible).should(be.enabled).should(be.blank)
-        assert_that(users_page.search_input.get_placeholder()).is_equal_to(users_page.SEARCH_LABEL)
+        assert_that(users_page.search_input.get_placeholder()).is_equal_to(users_page.SEARCH_TEXT)
 
         users_page.user_group_select.select.should(be.visible).should(be.enabled)
         assert_that(users_page.user_group_select.is_empty()).is_true()
-        assert_that(users_page.user_group_select.get_placeholder()).is_equal_to(users_page.SELECT_USERS_GROUP_LABEL)
+        assert_that(users_page.user_group_select.get_placeholder()).is_equal_to(users_page.SELECT_USERS_GROUP_TEXT)
 
         users_page.reset_button.should(be.visible).should(be.clickable)
         users_page.reload_button.should(be.visible).should(be.clickable)
@@ -85,6 +85,8 @@ class TestUsersList:
 
         users_page.search_by(random_item)
 
+        assert_that(table.rows).is_not_empty()
+
         for table_row in table.rows:
             assert_that(table.is_any_row_cell_contains_text_ignoring_case(table_row, random_item)).is_true()
 
@@ -98,6 +100,8 @@ class TestUsersList:
         substring = random_name[1:3]
 
         users_page.search_by(substring)
+
+        assert_that(table.rows).is_not_empty()
 
         for table_row in table.rows:
             assert_that(table.is_any_row_cell_contains_text_ignoring_case(table_row, substring)).is_true()

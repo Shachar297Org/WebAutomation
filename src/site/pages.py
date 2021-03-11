@@ -67,8 +67,8 @@ class HomePage(_BasePage):
 
 
 class UsersPage(_BasePage):
-    SEARCH_LABEL = "Search"
-    SELECT_USERS_GROUP_LABEL = "Select User Group..."
+    SEARCH_TEXT = "Search"
+    SELECT_USERS_GROUP_TEXT = "Select User Group..."
 
     USER_CREATED_MESSAGE = "Create User successful"
     USER_UPDATED_MESSAGE = "Update User successful"
@@ -151,6 +151,10 @@ class UsersPage(_BasePage):
 
 
 class DevicesPage(_BasePage):
+    SEARCH_TEXT = "Search"
+    DEVICE_TYPES_TEXT = "Device Types"
+    LOCATIONS_TEXT = "Locations"
+
     def __init__(self):
         super().__init__()
         self.add_button = s("//button[span[text()='+']]")

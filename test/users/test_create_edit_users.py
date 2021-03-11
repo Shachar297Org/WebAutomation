@@ -88,7 +88,7 @@ class TestCreateEditUsers:
         assert_that(dialog.get_element_label(dialog.manager_select.select)) \
             .is_equal_to(CreateUserDialog.MANAGER_LABEL)
 
-        dialog.location_tree_picker.tree_selector.should(be.visible).should(be.enabled)
+        dialog.location_tree_picker.tree_selector.should(be.visible)
         assert_that(dialog.location_tree_picker.is_enabled()) \
             .described_as("'Location' tree picker to be enabled").is_true()
         assert_that(dialog.location_tree_picker.selected_items()) \
@@ -96,7 +96,7 @@ class TestCreateEditUsers:
         assert_that(dialog.get_element_label(dialog.location_tree_picker.tree_selector)) \
             .is_equal_to(CreateUserDialog.DEVICE_ASSIGNMENT_LABEL)
 
-        dialog.device_tree_picker.tree_selector.should(be.visible).should(be.enabled)
+        dialog.device_tree_picker.tree_selector.should(be.visible)
         assert_that(dialog.device_tree_picker.is_enabled()) \
             .described_as("'Device Types' tree picker to be enabled").is_true()
         assert_that(dialog.device_tree_picker.selected_items()) \
