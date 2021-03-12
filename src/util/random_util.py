@@ -86,6 +86,11 @@ def random_address() -> str:
 
 
 @allure.step
+def random_street_address() -> str:
+    return _faker.street_address()
+
+
+@allure.step
 def random_city() -> str:
     return _faker.city()
 
@@ -95,5 +100,15 @@ def random_company() -> str:
     return _faker.company()
 
 
+@allure.step
+def random_zip_code() -> str:
+    return _faker.zipcode()
+
+
+@allure.step
+def random_state() -> str:
+    return _faker.state()
+
+
 if __name__ == '__main__':
-    print("")
+    print(random_zip_code())

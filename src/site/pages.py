@@ -6,6 +6,7 @@ from selene.core import query
 from selene.support.conditions import be, have
 from selene.support.shared import browser
 
+from src.domain.device import Device, Customer
 from src.domain.user import User
 from src.site.components.base_table import PaginationElement
 from src.site.components.page_header import PageHeader
@@ -155,6 +156,9 @@ class DevicesPage(_BasePage):
     DEVICE_TYPES_TEXT = "Device Types"
     LOCATIONS_TEXT = "Locations"
 
+    DEVICE_CREATED_MESSAGE = "Create Device successful"
+    DEVICE_UPDATED_MESSAGE = "Update Device successful"
+
     def __init__(self):
         super().__init__()
         self.add_button = s("//button[span[text()='+']]")
@@ -205,6 +209,28 @@ class DevicesPage(_BasePage):
     def click_add_device(self) -> CreateDeviceDialog:
         self.add_button.click()
         return CreateDeviceDialog().wait_to_load()
+
+    @allure.step
+    def add_device(self, device: Device):
+        dialog = self.click_add_device()
+
+        dialog.set_device_serial_number(device.serial_number)
+        dialog.select_device_type_by_keyword(device.device_type)
+
+        dialog.click_create()
+        return self
+
+    @allure.step
+    def add_device_with_customer(self, device: Device, customer: Customer):
+        dialog = self.click_add_device()
+
+        dialog.set_device_serial_number(device.serial_number)
+        dialog.select_device_type_by_keyword(device.device_type)
+
+        dialog.set_customer_fields(customer)
+
+        dialog.click_create()
+        return self
 
     @allure.step
     def click_reset(self):

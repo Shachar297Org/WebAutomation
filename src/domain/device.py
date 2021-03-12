@@ -11,6 +11,7 @@ class Customer(object):
                  city="",
                  postal_zip="",
                  region_country="",
+                 state="",
                  comments=''):
         self.clinic_name = clinic_name
         self.first_name = first_name
@@ -23,11 +24,11 @@ class Customer(object):
         self.city = city
         self.postal_zip = postal_zip
         self.region_country = region_country
+        self.state = state
         self.comments = comments
 
 
 class Device(object):
-    def __init__(self, serial_number: str, device_type: str, customer: Customer):
+    def __init__(self, serial_number: str, device_type: str):
         self.serial_number = serial_number
         self.device_type = device_type
-        self.customer = customer

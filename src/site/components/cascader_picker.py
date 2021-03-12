@@ -9,6 +9,9 @@ from selene.support.shared.jquery_style import s
 from src.util.elements_util import extract_titles
 
 
+SEPARATOR = "/"
+
+
 class _BaseCascaderPicker:
 
     def __init__(self, picker_locator):
@@ -42,7 +45,7 @@ class _BaseCascaderPicker:
     @allure.step
     def select_item_by_keyword(self, keyword: str):
         self.filter(keyword)
-        self.filtered_items.filtered_by(have.attribute("title").value(keyword)).first.click()
+        self.filtered_items.filtered_by(have.text(keyword)).first.click()
 
     @allure.step
     def expand_first_level_item(self, text) -> Element:
@@ -67,7 +70,7 @@ class _BaseCascaderPicker:
 
     @allure.step
     def filter(self, text):
-        self.input.set_value(text)
+        self.input.set_value(text).press_enter()
         return self
 
     @allure.step
@@ -106,6 +109,11 @@ class DeviceTypeCascaderPicker(_BaseCascaderPicker):
 
 
 class RegionCountryCascaderPicker(_BaseCascaderPicker):
+
+    @allure.step
+    def filter(self, text):
+        self.input.click().set_value(text)
+        return self
 
     @allure.step
     def select_country(self, region: str, country: str):

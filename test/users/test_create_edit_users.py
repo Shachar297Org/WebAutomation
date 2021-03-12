@@ -12,7 +12,7 @@ from src.site.login_page import LoginPage
 from src.site.components.tables import UsersTable, DeviceAssignmentTable
 from src.site.pages import UsersPage
 from src.util.driver_util import clear_session_storage, clear_local_storage
-from test.test_data_provider import generate_random_user, fota_admin_credentials, TEST_USERS_PREFIX, TEST_SUPER_ADMIN, \
+from test.test_data_provider import random_user, fota_admin_credentials, TEST_USERS_PREFIX, TEST_SUPER_ADMIN, \
     TEST_FOTA_ADMIN, TEST_SYSTEM_ENGINEER, TEST_SERVICE_ADMIN, TEST_TECH_SUPPORT, super_admin_credentials, \
     user_for_disabling_credentials
 
@@ -31,7 +31,7 @@ def cleanup_browser_session():
 
 @allure.step
 def create_random_user_with_device(users_page: UsersPage, region: str, device_type: str) -> User:
-    user = generate_random_user()
+    user = random_user()
 
     create_dialog = users_page.click_add_user().set_user_fields(user)
     create_dialog.location_tree_picker.select_regions(region)
@@ -60,7 +60,7 @@ class TestCreateEditUsers:
         headers = DeviceAssignmentTable.Headers
         dialog = users_page.click_add_user()
 
-        dialog.title.should(have.text(CreateUserDialog.TITLE))
+        dialog.title.should(have.exact_text(CreateUserDialog.TITLE))
 
         dialog.first_name_input.should(be.visible).should(be.enabled).should(be.blank)
         assert_that(dialog.get_element_label(dialog.first_name_input)).is_equal_to(CreateUserDialog.FIRST_NAME_LABEL)
@@ -118,7 +118,7 @@ class TestCreateEditUsers:
     def test_create_user(self):
         users_page = login_as(fota_admin_credentials)
         headers = UsersTable.Headers
-        new_user = generate_random_user()
+        new_user = random_user()
 
         users_page.add_user(new_user)
 
@@ -204,7 +204,7 @@ class TestCreateEditUsers:
     def test_edit_user(self):
         existing_region = Region.JAPAN
         existing_device_type = DeviceType.BODYCONTOURING
-        new_user = generate_random_user()
+        new_user = random_user()
         new_device_type = DeviceType.CLEARLIGHT
 
         users_page = login_as(fota_admin_credentials)

@@ -59,7 +59,7 @@ class SelectBox:
     @allure.step
     def select_item(self, item: str):
         self.open()
-        self.items.filtered_by(have.text(item)).first.click()
+        self.items.filtered_by(have.exact_text(item)).first.click()
 
     @allure.step
     def get_items(self) -> []:

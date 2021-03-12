@@ -6,6 +6,7 @@ from selene.core.entity import Element
 from selene.support.conditions import be, have
 from selene.support.shared.jquery_style import s
 
+from src.domain.device import Customer
 from src.domain.user import User
 from src.site.components.base_table import PaginationElement
 from src.site.components.cascader_picker import RegionCountryCascaderPicker, DeviceTypeCascaderPicker
@@ -270,7 +271,7 @@ class CreateDeviceDialog(_BaseDialog):
         self.phone_number_input = self.dialog.s("#creatDeviceForm_phoneNumber")
 
         self.clinic_id_input = self.dialog.s("#creatDeviceForm_clinicId")
-        self.street_input = self.dialog.s("#ccreatDeviceForm_street")
+        self.street_input = self.dialog.s("#creatDeviceForm_street")
         self.street_number_input = self.dialog.s("#creatDeviceForm_streetNumber")
         self.city_input = self.dialog.s("#creatDeviceForm_city")
         self.postal_zip_input = self.dialog.s("#creatDeviceForm_zipCode")
@@ -298,6 +299,11 @@ class CreateDeviceDialog(_BaseDialog):
     @allure.step
     def set_device_serial_number(self, text: str):
         self.device_serial_number_input.set_value(text)
+        return self
+
+    @allure.step
+    def select_device_type_by_keyword(self, keyword):
+        self.device_picker.select_item_by_keyword(keyword)
         return self
 
     # Customer fields
@@ -393,6 +399,20 @@ class CreateDeviceDialog(_BaseDialog):
         return self
 
     @allure.step
+    def select_country_by_keyword(self, keyword):
+        self.region_country_picker.select_item_by_keyword(keyword)
+        return self
+
+    @allure.step
+    def get_state(self) -> str:
+        return self.state_select.get_selected_item()
+
+    @allure.step
+    def select_state(self, text: str):
+        self.state_select.select_item(text)
+        return self
+
+    @allure.step
     def get_comment(self) -> str:
         return self.comments_textarea.get(query.value)
 
@@ -401,7 +421,41 @@ class CreateDeviceDialog(_BaseDialog):
         self.comments_textarea.set_value(text)
         return self
 
+    @allure.step
+    def set_customer_fields(self, customer: Customer):
+        if customer.clinic_name:
+            self.set_clinic_name(customer.clinic_name)
+        if customer.first_name:
+            self.set_first_name(customer.first_name)
+        if customer.last_name:
+            self.set_last_name(customer.last_name)
+        if customer.email:
+            self.set_email(customer.email)
+        if customer.phone_number:
+            self.set_phone_number(customer.phone_number)
+        if customer.clinic_id:
+            self.set_clinic_id(customer.clinic_id)
+        if customer.street:
+            self.set_street(customer.street)
+        if customer.street_number:
+            self.set_street_number(customer.street_number)
+
+        if customer.city:
+            self.set_city(customer.city)
+        if customer.postal_zip:
+            self.set_postal_code_zip(customer.postal_zip)
+        if customer.region_country:
+            self.select_country_by_keyword(customer.region_country)
+
+        if customer.state:
+            self.select_state(customer.state)
+
+        if customer.comments:
+            self.set_comment(customer.comments)
+
 
 class DevicePropertiesDialog(_BaseDialog):
     TITLE = "Device Properties"
 
+    def wait_to_load(self):
+        pass

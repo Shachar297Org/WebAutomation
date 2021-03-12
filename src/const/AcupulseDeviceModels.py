@@ -1,0 +1,6 @@
+ACUPULSE_40W_ST = "Acupulse - 40W ST"
+ACUPULSE_40W = "Acupulse - 40W"
+ACUPULSE_30W = "Acupulse - 30W"
+ACUPULSE_AEST_SYSTEM = "Acupulse Aest-System"
+ACUPULSE_DUO_SYST = "Acupulse Duo - Syst"
+ACUPULSE_WG_SYSTEM = "AcuPulse WG - System"

@@ -27,7 +27,7 @@ class UsersTable(_BaseTable):
 
     @allure.step
     def is_user_editable(self, email: str) -> bool:
-        return self._get_row_button_by_column_value(self.Headers.EMAIL, email).matching(have.text(self._EDIT_TEXT))
+        return self._get_row_button_by_column_value(self.Headers.EMAIL, email).matching(have.exact_text(self._EDIT_TEXT))
 
     @allure.step
     def is_lock_icon_displayed(self, email: str) -> bool:
@@ -117,6 +117,8 @@ class DeviceAssignmentTable(_BaseTable):
 
 class DevicesTable(_BaseTable):
     _PROPERTIES_TEXT = "Properties"
+    INACTIVE_STATUS = "Inactive"
+    ACTIVE_STATUS = "Active"
 
     @allure.step
     def get_row_by_serial_number(self, serial_number: str) -> Element:
@@ -133,6 +135,11 @@ class DevicesTable(_BaseTable):
     @allure.step
     def click_properties(self, serial_number: str):
         self._get_row_properties_button(serial_number).click()
+
+    @allure.step
+    def is_device_editable(self, serial_number: str) -> bool:
+        return self._get_row_button_by_column_value(self.Headers.SERIAL_NUMBER, serial_number).matching(
+            have.exact_text(self._PROPERTIES_TEXT))
 
     @allure.step
     def is_row_contains_properties_button(self, row) -> bool:

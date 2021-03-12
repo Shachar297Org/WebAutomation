@@ -49,7 +49,7 @@ class TestLogin:
         login_page.forgot_password_link.should(be.visible).should(be.clickable)
 
         login_page.logo.should(be.visible)
-        login_page.welcome_title.should(be.visible).should(have.text(LoginPage.WELCOME_TEXT))
+        login_page.welcome_title.should(be.visible).should(have.exact_text(LoginPage.WELCOME_TEXT))
         login_page.version.should(be.visible)
         assert_that(login_page.version.get(query.text)).is_not_empty()
 
