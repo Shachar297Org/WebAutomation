@@ -1,12 +1,12 @@
 import allure
 
-from src.const import UserGroup, Acupulse30Wdevices, EMEA_Country, AcupulseDeviceModels, DeviceType
+from src.const import UserGroup, Acupulse30Wdevices, EMEA_Country, AcupulseDeviceModels, DeviceGroup
 from src.domain.credentials import Credentials
 from src.domain.device import Device, Customer
 from src.domain.user import User
 from src.util.random_util import random_first_name, random_last_name, \
     random_phone_number, random_list_item, random_gmail_alias_from, random_numeric_string, random_email, random_city, \
-    random_string, random_alpha_numeric_string, random_company, random_user_name, random_zip_code, \
+    random_string, random_alpha_numeric_string, random_company, random_zip_code, \
     random_street_address, random_state
 
 TEST_SUPER_ADMIN = "Victor savchyn"
@@ -29,7 +29,7 @@ tech_support_credentials = Credentials("lumenisauto+TechSupport@gmail.com", "Lum
 
 user_for_disabling_credentials = Credentials("lumenisauto+Disabled@gmail.com", "LumenisX225@")
 
-test_device_group = DeviceType.ACUPULSE
+test_device_group = DeviceGroup.ACUPULSE
 test_device_model = AcupulseDeviceModels.ACUPULSE_30W
 
 
@@ -47,8 +47,10 @@ def random_user():
 @allure.step
 def random_device():
     return Device(serial_number=TEST_DEVICE_PREFIX + random_numeric_string(8),
-                  device_type=random_list_item([Acupulse30Wdevices.GA_0000070CN, Acupulse30Wdevices.GA_0000070DE,
-                                                Acupulse30Wdevices.GA_0000070GR, Acupulse30Wdevices.RG_0000070]))
+                  group=test_device_group,
+                  model=test_device_model,
+                  device=random_list_item([Acupulse30Wdevices.GA_0000070CN, Acupulse30Wdevices.GA_0000070DE,
+                                           Acupulse30Wdevices.GA_0000070GR, Acupulse30Wdevices.RG_0000070]))
 
 
 @allure.step

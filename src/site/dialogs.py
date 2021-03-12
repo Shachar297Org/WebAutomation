@@ -6,7 +6,7 @@ from selene.core.entity import Element
 from selene.support.conditions import be, have
 from selene.support.shared.jquery_style import s
 
-from src.domain.device import Customer
+from src.domain.device import Customer, Device
 from src.domain.user import User
 from src.site.components.base_table import PaginationElement
 from src.site.components.cascader_picker import RegionCountryCascaderPicker, DeviceTypeCascaderPicker
@@ -187,7 +187,7 @@ class CreateUserDialog(_BaseCreateEditUserDialog):
     @allure.step
     def add_device_type_for_country(self, region: str, country: str, device_group: str):
         self.location_tree_picker.select_countries(region, country)
-        self.device_tree_picker.select_device_types(device_group)
+        self.device_tree_picker.select_device_groups(device_group)
         self.click_add_device()
         return self
 
@@ -310,6 +310,10 @@ class CreateDeviceDialog(_BaseDialog):
     def select_device_type_by_keyword(self, keyword):
         self.device_picker.select_item_by_keyword(keyword)
         return self
+
+    @allure.step
+    def select_device_type(self, device: Device):
+        self.device_picker.open().select_device(device.group, device.model, device.device)
 
     # Customer fields
 

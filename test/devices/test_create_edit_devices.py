@@ -7,7 +7,7 @@ from src.site.components.cascader_picker import SEPARATOR
 from src.site.login_page import LoginPage
 from src.site.components.tables import DevicesTable
 from src.site.pages import DevicesPage
-from test.test_data_provider import super_admin_credentials, random_device, test_device_model, random_usa_customer
+from test.test_data_provider import super_admin_credentials, random_device, random_usa_customer
 
 
 @pytest.fixture(scope="class")
@@ -38,7 +38,7 @@ class TestCreateEditDevices:
 
         assert_that(devices_page.table.get_column_values(headers.SERIAL_NUMBER)).contains_only(new_device.serial_number)
         assert_that(devices_page.table.get_column_values(headers.DEVICE_TYPE)).contains_only(
-            test_device_model + SEPARATOR + new_device.device_type)
+            new_device.model + SEPARATOR + new_device.device)
         assert_that(devices_page.table.get_column_values(headers.STATUS)).contains_only(DevicesTable.INACTIVE_STATUS)
 
         assert_that(devices_page.table.is_device_editable(new_device.serial_number))\
@@ -66,7 +66,7 @@ class TestCreateEditDevices:
 
         assert_that(devices_page.table.get_column_values(headers.SERIAL_NUMBER)).contains_only(new_device.serial_number)
         assert_that(devices_page.table.get_column_values(headers.DEVICE_TYPE)).contains_only(
-            test_device_model + SEPARATOR + new_device.device_type)
+            new_device.model + SEPARATOR + new_device.device)
         assert_that(devices_page.table.get_column_values(headers.STATUS)).contains_only(DevicesTable.INACTIVE_STATUS)
         assert_that(devices_page.table.get_column_values(headers.CLINIC_ID)).contains_only(new_customer.clinic_id)
         assert_that(devices_page.table.get_column_values(headers.CLINIC_NAME)).contains_only(new_customer.clinic_name)

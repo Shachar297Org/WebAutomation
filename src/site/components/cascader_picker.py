@@ -36,7 +36,7 @@ class _BaseCascaderPicker:
 
     @allure.step
     def is_opened(self) -> bool:
-        return self.picker.matching(have.css_class("ant-cascader-picker-show-search"))
+        return self.picker.matching(have.css_class("ant-cascader-picker-focused"))
 
     @allure.step
     def is_disabled(self) -> bool:
@@ -48,24 +48,24 @@ class _BaseCascaderPicker:
         self.filtered_items.filtered_by(have.text(keyword)).first.click()
 
     @allure.step
-    def expand_first_level_item(self, text) -> Element:
+    def _expand_first_level_item(self, text) -> Element:
         self.open()
         return self._expand_menu_item(self.first_menu, text)
 
     @allure.step
-    def expand_second_level_item(self, first_level_item: str, second_level_item: str) -> Element:
-        second_level_menu = self.expand_first_level_item(first_level_item)
+    def _expand_second_level_item(self, first_level_item: str, second_level_item: str) -> Element:
+        second_level_menu = self._expand_first_level_item(first_level_item)
         return self._expand_menu_item(second_level_menu, second_level_item)
 
     @allure.step
-    def select_second_level_item(self, first_level_item: str, second_level_item: str) -> Element:
-        second_level_menu = self.expand_first_level_item(first_level_item)
+    def _select_second_level_item(self, first_level_item: str, second_level_item: str) -> Element:
+        second_level_menu = self._expand_first_level_item(first_level_item)
         return self._select_menu_item(second_level_menu, second_level_item)
 
     @allure.step
-    def select_third_level_item(self, first_level_item: str, second_level_item: str,
-                                third_level_item: str) -> Element:
-        third_level_menu = self.expand_second_level_item(first_level_item, second_level_item)
+    def _select_third_level_item(self, first_level_item: str, second_level_item: str,
+                                 third_level_item: str) -> Element:
+        third_level_menu = self._expand_second_level_item(first_level_item, second_level_item)
         return self._select_menu_item(third_level_menu, third_level_item)
 
     @allure.step
@@ -104,8 +104,9 @@ class _BaseCascaderPicker:
 class DeviceTypeCascaderPicker(_BaseCascaderPicker):
 
     @allure.step
-    def select_device(self, device_type: str, device_model: str, device: str):
-        self.select_third_level_item(device_type, device_model, device)
+    def select_device(self, group: str, model: str, device: str):
+        self._select_third_level_item(group, model, device)
+        return self
 
 
 class RegionCountryCascaderPicker(_BaseCascaderPicker):
@@ -117,4 +118,4 @@ class RegionCountryCascaderPicker(_BaseCascaderPicker):
 
     @allure.step
     def select_country(self, region: str, country: str):
-        self.select_second_level_item(region, country)
+        self._select_second_level_item(region, country)

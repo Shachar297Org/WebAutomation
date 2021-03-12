@@ -3,7 +3,7 @@ import pytest
 from assertpy import assert_that
 from selene.support.conditions import be, have
 
-from src.const import Feature, Region, APAC_Country, DeviceType, UserGroup
+from src.const import Feature, Region, APAC_Country, DeviceGroup, UserGroup, AcupulseDeviceModels, Acupulse30Wdevices
 from src.domain.credentials import Credentials
 from src.domain.user import User
 from src.site.components.tree_selector import SEPARATOR, get_formatted_selected_plus_item
@@ -30,12 +30,12 @@ def cleanup_browser_session():
 
 
 @allure.step
-def create_random_user_with_device(users_page: UsersPage, region: str, device_type: str) -> User:
+def create_random_user_with_device(users_page: UsersPage, region: str, device_group: str) -> User:
     user = random_user()
 
     create_dialog = users_page.click_add_user().set_user_fields(user)
     create_dialog.location_tree_picker.select_regions(region)
-    create_dialog.device_tree_picker.select_device_types(device_type)
+    create_dialog.device_tree_picker.select_device_groups(device_group)
     create_dialog.click_add_device()
 
     create_dialog.click_create()
@@ -151,12 +151,12 @@ class TestCreateEditUsers:
         test_country2 = APAC_Country.INDONESIA
         test_country3 = APAC_Country.SINGAPORE
         test_countries_count = 3
-        test_device_group = DeviceType.ACUPULSE
-        test_device_model = "Acupulse - 30W"
-        test_device1 = "GA-0000070CN"
-        test_device2 = "GA-0000070DE"
-        test_device3 = "GA-0000070GR"
-        test_device4 = "GA-0000070"
+        test_device_group = DeviceGroup.ACUPULSE
+        test_device_model = AcupulseDeviceModels.ACUPULSE_30W
+        test_device1 = Acupulse30Wdevices.GA_0000070CN
+        test_device2 = Acupulse30Wdevices.GA_0000070DE
+        test_device3 = Acupulse30Wdevices.GA_0000070GR
+        test_device4 = Acupulse30Wdevices.GA_0000070
         test_devices_count = 4
 
         expected_region = "{reg}/{country1}, {reg}/{country2}, {reg}/{country3}".format(
@@ -170,7 +170,7 @@ class TestCreateEditUsers:
         users_page = login_as(fota_admin_credentials)
         dialog = users_page.click_add_user()
         dialog.location_tree_picker.select_countries(test_region, test_country1, test_country2, test_country3)
-        dialog.device_tree_picker.select_devices(DeviceType.ACUPULSE, test_device_model,
+        dialog.device_tree_picker.select_devices(DeviceGroup.ACUPULSE, test_device_model,
                                                  test_device1, test_device2, test_device3, test_device4)
 
         assert_that(dialog.location_tree_picker.get_all_selected_items()).contains_only(
@@ -203,25 +203,25 @@ class TestCreateEditUsers:
     @allure.severity(allure.severity_level.NORMAL)
     def test_edit_user(self):
         existing_region = Region.JAPAN
-        existing_device_type = DeviceType.BODYCONTOURING
+        existing_device_group = DeviceGroup.BODYCONTOURING
         new_user = random_user()
-        new_device_type = DeviceType.CLEARLIGHT
+        new_device_group = DeviceGroup.CLEARLIGHT
 
         users_page = login_as(fota_admin_credentials)
-        existing_user = create_random_user_with_device(users_page, existing_region, existing_device_type)
+        existing_user = create_random_user_with_device(users_page, existing_region, existing_device_group)
 
         edit_dialog = users_page.reload().search_by(existing_user.email) \
             .open_edit_user_dialog(existing_user.email)
 
         edit_dialog.set_user_fields(new_user)
-        edit_dialog.device_table.click_edit(existing_device_type)
+        edit_dialog.device_table.click_edit(existing_device_group)
         edit_dialog.add_device_button.should(be.not_.visible)
         edit_dialog.save_button.should(be.visible).should(be.clickable)
         edit_dialog.remove_device_button.should(be.visible).should(be.clickable)
 
         assert_that(edit_dialog.location_tree_picker.get_all_selected_items()).contains_only(existing_region)
-        assert_that(edit_dialog.device_tree_picker.get_all_selected_items()).contains_only(existing_device_type)
-        existing_device_row = edit_dialog.device_table.get_row_by_device_types(existing_device_type)
+        assert_that(edit_dialog.device_tree_picker.get_all_selected_items()).contains_only(existing_device_group)
+        existing_device_row = edit_dialog.device_table.get_row_by_device_types(existing_device_group)
         assert_that(edit_dialog.device_table.is_row_selected(existing_device_row)) \
             .described_as("Edited row to be selected(grayed)").is_true()
         assert_that(edit_dialog.device_table.is_row_edit_button_enabled(existing_device_row)) \
@@ -229,15 +229,15 @@ class TestCreateEditUsers:
         assert_that(edit_dialog.device_table.is_row_remove_button_enabled(existing_device_row)) \
             .described_as("Edited row 'Remove' button to be enabled").is_false()
 
-        edit_dialog.device_tree_picker.remove_selected_item(existing_device_type)
+        edit_dialog.device_tree_picker.remove_selected_item(existing_device_group)
         assert_that(edit_dialog.device_tree_picker.get_all_selected_items()).is_empty()
 
-        edit_dialog.device_tree_picker.select_device_types(new_device_type)
+        edit_dialog.device_tree_picker.select_device_groups(new_device_group)
         edit_dialog.click_save()
         assert_that(edit_dialog.device_table.get_column_values(DeviceAssignmentTable.Headers.DEVICE_TYPES)) \
-            .contains_only(new_device_type)
+            .contains_only(new_device_group)
 
-        edit_dialog.device_table.click_remove(new_device_type)
+        edit_dialog.device_table.click_remove(new_device_group)
         assert_that(edit_dialog.device_table.rows).is_empty()
 
         edit_dialog.click_update()
@@ -256,7 +256,7 @@ class TestCreateEditUsers:
     @allure.severity(allure.severity_level.NORMAL)
     def test_create_user_dialog_pagination(self):
         test_region = Region.APAC
-        test_device_group = DeviceType.ACUPULSE
+        test_device_group = DeviceGroup.ACUPULSE
 
         users_page = login_as(fota_admin_credentials)
         dialog = users_page.click_add_user()
@@ -302,7 +302,7 @@ class TestCreateEditUsers:
         test_region = Region.AMERICAS
         test_country = "USA"
         test_state = "Colorado"
-        test_device_group = DeviceType.ACUPULSE
+        test_device_group = DeviceGroup.ACUPULSE
         test_device_model = "Acupulse - 30W"
         test_device1 = "GA-0000070CN"
 
@@ -314,7 +314,7 @@ class TestCreateEditUsers:
         edit_dialog = open_first_test_user_from_table_to_edit(users_page)
 
         edit_dialog.location_tree_picker.select_usa_states(test_state)
-        edit_dialog.device_tree_picker.select_devices(DeviceType.ACUPULSE, test_device_model, test_device1)
+        edit_dialog.device_tree_picker.select_devices(test_device_group, test_device_model, test_device1)
         edit_dialog.click_add_device()
 
         assert_that(edit_dialog.device_table.get_column_values(DeviceAssignmentTable.Headers.REGION)) \

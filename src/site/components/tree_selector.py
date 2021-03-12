@@ -245,7 +245,7 @@ class DeviceTypesTreeSelector(_BaseTreeSelector):
         self.all_tree.get_node_by_name(ALL_NODE).uncheck()
 
     @allure.step
-    def select_device_types(self, *device_types):
+    def select_device_groups(self, *device_types):
         self.open()
         self._get_all_node().open()
 
@@ -253,7 +253,7 @@ class DeviceTypesTreeSelector(_BaseTreeSelector):
             self._check_device_type(dev_type)
 
     @allure.step
-    def get_all_device_types(self) -> []:
+    def get_all_device_groups(self) -> []:
         self.open()
         self._get_all_node().open()
 

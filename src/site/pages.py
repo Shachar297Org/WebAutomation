@@ -215,10 +215,14 @@ class DevicesPage(_BasePage):
         dialog = self.click_add_device()
 
         dialog.set_device_serial_number(device.serial_number)
+
+        if device.group and device.model:
+            dialog.select_device_type(device)
+        else:
+            dialog.select_device_type_by_keyword(device.device)
+
         if customer:
             dialog.set_customer_fields(customer)
-
-        dialog.select_device_type_by_keyword(device.device_type)
 
         dialog.click_create()
         return self
