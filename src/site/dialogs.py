@@ -80,11 +80,13 @@ class _BaseCreateEditUserDialog(_BaseDialog):
         self.save_device_button = self.dialog.s(".//button[span[text()='Save']]")
         self.remove_device_button = self.dialog.s(".//button[span[text()='X']]")
 
+    @allure.step
     def wait_to_load(self):
         self.phone_number_input.wait_until(be.visible)
         self.cancel_button.wait_until(be.clickable)
         return self
 
+    @allure.step
     def set_user_fields(self, user: User):
         self.first_name_input.clear()
         self.set_first_name(user.first_name)
@@ -172,6 +174,7 @@ class CreateUserDialog(_BaseCreateEditUserDialog):
         super().__init__()
         self.create_button = self.dialog.s(".//button[span[text()='Create']]")
 
+    @allure.step
     def wait_to_load(self):
         self.phone_number_input.wait_until(be.visible)
         self.create_button.wait_until(be.clickable)
@@ -199,6 +202,7 @@ class EditUserDialog(_BaseCreateEditUserDialog):
         self.update_button = self.dialog.s(".//button[span[text()='Update']]")
         self.user_disabled_switcher = self.dialog.s("button#createUserForm_locked")
 
+    @allure.step
     def wait_to_load(self):
         self.manager_select.select.wait_until(be.visible)
         self.update_button.wait_until(be.clickable)
@@ -283,6 +287,7 @@ class CreateDeviceDialog(_BaseDialog):
 
         self.create_device_button = self.dialog.s(".//button[span[text()='Create Device']]")
 
+    @allure.step
     def wait_to_load(self):
         self.device_serial_number_input.wait_until(be.visible)
         self.comments_textarea.wait_until(be.clickable)
@@ -447,7 +452,7 @@ class CreateDeviceDialog(_BaseDialog):
         if customer.region_country:
             self.select_country_by_keyword(customer.region_country)
 
-        if customer.state:
+        if customer.region_country == "USA" and customer.state:
             self.select_state(customer.state)
 
         if customer.comments:

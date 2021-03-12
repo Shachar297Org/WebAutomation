@@ -211,23 +211,14 @@ class DevicesPage(_BasePage):
         return CreateDeviceDialog().wait_to_load()
 
     @allure.step
-    def add_device(self, device: Device):
+    def add_device(self, device: Device, customer: Customer = None):
         dialog = self.click_add_device()
 
         dialog.set_device_serial_number(device.serial_number)
+        if customer:
+            dialog.set_customer_fields(customer)
+
         dialog.select_device_type_by_keyword(device.device_type)
-
-        dialog.click_create()
-        return self
-
-    @allure.step
-    def add_device_with_customer(self, device: Device, customer: Customer):
-        dialog = self.click_add_device()
-
-        dialog.set_device_serial_number(device.serial_number)
-        dialog.select_device_type_by_keyword(device.device_type)
-
-        dialog.set_customer_fields(customer)
 
         dialog.click_create()
         return self

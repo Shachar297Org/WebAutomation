@@ -58,7 +58,7 @@ class TestCreateEditDevices:
         new_device = random_device()
         new_customer = random_usa_customer()
 
-        devices_page.add_device_with_customer(new_device, new_customer)
+        devices_page.add_device(new_device, new_customer)
 
         assert_that(devices_page.notification.get_message()).is_equal_to(DevicesPage.DEVICE_CREATED_MESSAGE)
 
@@ -71,9 +71,6 @@ class TestCreateEditDevices:
         assert_that(devices_page.table.get_column_values(headers.CLINIC_ID)).contains_only(new_customer.clinic_id)
         assert_that(devices_page.table.get_column_values(headers.CLINIC_NAME)).contains_only(new_customer.clinic_name)
         assert_that(devices_page.table.get_column_values(headers.COUNTRY)).contains_only(new_customer.region_country)
-
-        assert_that(devices_page.table.is_device_editable(new_device.serial_number))\
-            .described_as("Properties link").is_true()
 
         edit_dialog = devices_page.open_device_properties_dialog(new_device.serial_number)
 
