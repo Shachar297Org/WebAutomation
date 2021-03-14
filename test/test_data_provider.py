@@ -1,6 +1,6 @@
 import allure
 
-from src.const import UserGroup, Acupulse30Wdevices, EMEA_Country, AcupulseDeviceModels, DeviceGroup
+from src.const import UserGroup, Acupulse30Wdevices, EMEA_Country, AcupulseDeviceModels, DeviceGroup, AmericasCountry
 from src.domain.credentials import Credentials
 from src.domain.device import Device, Customer
 from src.domain.user import User
@@ -82,6 +82,6 @@ def random_usa_customer():
                     street_number=random_numeric_string(1),
                     city=random_city(),
                     postal_zip=random_zip_code(),
-                    region_country="USA",
+                    region_country=AmericasCountry.USA,
                     state=random_state(),
                     comments=random_string(10) + " " + random_string(10))

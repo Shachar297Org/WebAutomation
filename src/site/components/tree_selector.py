@@ -6,6 +6,7 @@ from selene.core.entity import Element
 from selene.support.conditions import have, be
 from selene.support.shared.jquery_style import s
 
+from src.const import AmericasCountry, Region
 from src.util.elements_util import extract_text, extract_titles
 
 SEPARATOR = "/"
@@ -116,6 +117,10 @@ class _BaseTreeSelector:
         return self
 
     @allure.step
+    def close(self):
+        self.tree_selector.press_escape()
+
+    @allure.step
     def is_opened(self) -> bool:
         return self.tree_selector.matching(have.css_class("ant-select-open"))
 
@@ -212,14 +217,17 @@ class LocationTreeSelector(_BaseTreeSelector):
     @allure.step
     def select_regions(self, *regions):
         self._select_first_level_items(*regions)
+        return self
 
     @allure.step
     def select_countries(self, region, *countries):
         self._select_second_level_items(region, *countries)
+        return self
 
     @allure.step
     def select_usa_states(self, *states):
-        self._select_third_level_items("Americas", "USA", *states)
+        self._select_third_level_items(Region.AMERICAS, AmericasCountry.USA, *states)
+        return self
 
 
 class DeviceTypesTreeSelector(_BaseTreeSelector):
@@ -227,11 +235,15 @@ class DeviceTypesTreeSelector(_BaseTreeSelector):
     @allure.step
     def select_device_groups(self, *device_groups):
         self._select_first_level_items(*device_groups)
+        return self
 
     @allure.step
     def select_device_models(self, device_group, *device_models):
         self._select_second_level_items(device_group, *device_models)
+        return self
 
     @allure.step
     def select_devices(self, device_group, device_model, *devices):
         self._select_third_level_items(device_group, device_model, *devices)
+        return self
+

@@ -3,7 +3,8 @@ import pytest
 from assertpy import assert_that
 from selene.support.conditions import be, have
 
-from src.const import Feature, Region, APAC_Country, DeviceGroup, UserGroup, AcupulseDeviceModels, Acupulse30Wdevices
+from src.const import Feature, Region, APAC_Country, DeviceGroup, UserGroup, AcupulseDeviceModels, Acupulse30Wdevices, \
+    AmericasCountry
 from src.domain.credentials import Credentials
 from src.domain.user import User
 from src.site.components.tree_selector import SEPARATOR, get_formatted_selected_plus_item
@@ -12,6 +13,7 @@ from src.site.login_page import LoginPage
 from src.site.components.tables import UsersTable, DeviceAssignmentTable
 from src.site.pages import UsersPage
 from src.util.driver_util import clear_session_storage, clear_local_storage
+from src.util.random_util import random_state
 from test.test_data_provider import random_user, fota_admin_credentials, TEST_USERS_PREFIX, TEST_SUPER_ADMIN, \
     TEST_FOTA_ADMIN, TEST_SYSTEM_ENGINEER, TEST_SERVICE_ADMIN, TEST_TECH_SUPPORT, super_admin_credentials, \
     user_for_disabling_credentials
@@ -300,8 +302,8 @@ class TestCreateEditUsers:
     @allure.severity(allure.severity_level.NORMAL)
     def test_edit_user_assign_device(self):
         test_region = Region.AMERICAS
-        test_country = "USA"
-        test_state = "Colorado"
+        test_country = AmericasCountry.USA
+        test_state = random_state()
         test_device_group = DeviceGroup.ACUPULSE
         test_device_model = "Acupulse - 30W"
         test_device1 = "GA-0000070CN"

@@ -6,6 +6,7 @@ from selene.core.entity import Element
 from selene.support.conditions import be, have
 from selene.support.shared.jquery_style import s
 
+from src.const import AmericasCountry
 from src.domain.device import Customer, Device
 from src.domain.user import User
 from src.site.components.base_table import PaginationElement
@@ -456,7 +457,7 @@ class CreateDeviceDialog(_BaseDialog):
         if customer.region_country:
             self.select_country_by_keyword(customer.region_country)
 
-        if customer.region_country == "USA" and customer.state:
+        if customer.region_country == AmericasCountry.USA and customer.state:
             self.select_state(customer.state)
 
         if customer.comments:

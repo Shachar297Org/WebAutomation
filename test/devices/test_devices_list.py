@@ -3,12 +3,13 @@ import pytest
 from assertpy import assert_that
 from selene.support.conditions import be
 
-from src.const import Feature
+from src.const import Feature, Acupulse30Wdevices, AmericasCountry, Region
+from src.site.components.tree_selector import SEPARATOR
 from src.site.login_page import LoginPage
 from src.site.components.tables import DevicesTable
 from src.site.pages import DevicesPage
 from src.util.random_util import random_list_item
-from test.test_data_provider import super_admin_credentials
+from test.test_data_provider import super_admin_credentials, test_device_group, test_device_model
 
 
 @pytest.fixture(scope="class")
@@ -134,3 +135,36 @@ class TestDevicesList:
 
         assert_that(devices_page.search_input.is_empty()).described_as("Search input to be empty after reset").is_true()
         assert_that(table.rows).described_as("Table rows count after reset").is_length(init_rows_count)
+
+    @allure.title("3.4.1 Verify that rows can be filtered by “Device Type” in the designated field ")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_filter_devices_by_type(self):
+        test_device = Acupulse30Wdevices.GA_0000070GR
+        devices_page = DevicesPage().open()
+        table = devices_page.table.wait_to_load()
+
+        devices_page.device_tree_picker.select_devices(test_device_group, test_device_model, test_device).close()
+
+        assert_that(table.get_column_values(DevicesTable.Headers.DEVICE_TYPE))\
+            .contains_only(test_device_model + SEPARATOR + test_device)
+
+        devices_page.click_reset()
+
+        assert_that(devices_page.device_tree_picker.get_all_selected_items())\
+            .described_as("Search input to be empty after reset").is_empty()
+
+    @allure.title("3.4.1 Verify that rows can be filtered by “Locations” in the designated field")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_filter_devices_by_locations(self):
+        test_country = AmericasCountry.USA
+        devices_page = DevicesPage().open()
+        table = devices_page.table.wait_to_load()
+
+        devices_page.location_tree_picker.select_countries(Region.AMERICAS, test_country).close()
+
+        assert_that(table.get_column_values(DevicesTable.Headers.COUNTRY)).contains_only(test_country)
+
+        devices_page.click_reset()
+
+        assert_that(devices_page.device_tree_picker.get_all_selected_items())\
+            .described_as("Search input to be empty after reset").is_empty()
