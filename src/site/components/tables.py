@@ -66,6 +66,12 @@ class DeviceAssignmentTable(_BaseTable):
     _REMOVE_TEXT = "Remove"
 
     @allure.step
+    def get_row_by_column_value(self, column_name: str, column_value: str) -> Element:
+        self.wait_to_load()
+        return self.table.s(".//tbody/tr[td[{0}][*/text()='{1}']]"
+                            .format(self._get_column_index(column_name), column_value))
+
+    @allure.step
     def get_rows_by_region(self, region: str) -> []:
         return self.get_rows_by_column_value(self.Headers.REGION, region)
 
@@ -116,9 +122,9 @@ class DeviceAssignmentTable(_BaseTable):
 
 
 class DevicesTable(_BaseTable):
-    _PROPERTIES_TEXT = "Properties"
     INACTIVE_STATUS = "Inactive"
     ACTIVE_STATUS = "Active"
+    _PROPERTIES_TEXT = "Properties"
 
     @allure.step
     def get_row_by_serial_number(self, serial_number: str) -> Element:

@@ -12,7 +12,7 @@ from src.site.components.base_table import PaginationElement
 from src.site.components.page_header import PageHeader
 from src.site.components.simple_components import SearchInput, SelectBox, TopRightNotification
 from src.site.components.tables import UsersTable, DevicesTable
-from src.site.components.tree_selector import DeviceTypesTreeSelector, DeviceLocationTreeSelector
+from src.site.components.tree_selector import DeviceTypesTreeSelector, LocationTreeSelector
 from src.site.dialogs import CreateUserDialog, EditUserDialog, CreateDeviceDialog, DevicePropertiesDialog
 from src.util.elements_util import JS_CLICK
 
@@ -165,7 +165,7 @@ class DevicesPage(_BasePage):
         self.search_input = SearchInput("input[placeholder='Search']")
         self.device_tree_picker = DeviceTypesTreeSelector(".//span[contains(@class, 'TreeSelector')]"
                                                           "[.//text()='Device Types']")
-        self.location_tree_picker = DeviceLocationTreeSelector(".//span[contains(@class, 'TreeSelector')]"
+        self.location_tree_picker = LocationTreeSelector(".//span[contains(@class, 'TreeSelector')]"
                                                                "[.//text()='Locations']")
         self.reset_button = s("//button[span[text()='Reset']]")
         self.reload_button = s("i.anticon-reload")

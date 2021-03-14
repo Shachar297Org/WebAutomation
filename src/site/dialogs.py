@@ -11,7 +11,7 @@ from src.domain.user import User
 from src.site.components.base_table import PaginationElement
 from src.site.components.cascader_picker import RegionCountryCascaderPicker, DeviceTypeCascaderPicker
 from src.site.components.simple_components import SelectBox
-from src.site.components.tree_selector import DeviceLocationTreeSelector, DeviceTypesTreeSelector
+from src.site.components.tree_selector import LocationTreeSelector, DeviceTypesTreeSelector
 from src.site.components.tables import DeviceAssignmentTable
 
 
@@ -68,7 +68,7 @@ class _BaseCreateEditUserDialog(_BaseDialog):
         self.user_group_select = SelectBox("#createUserForm_group")
         self.manager_select = SelectBox("#createUserForm_manager")
 
-        self.location_tree_picker = DeviceLocationTreeSelector(".//span[contains(@class, 'TreeSelector')]"
+        self.location_tree_picker = LocationTreeSelector(".//span[contains(@class, 'TreeSelector')]"
                                                                "[.//text()='Locations']")
         self.device_tree_picker = DeviceTypesTreeSelector(".//span[contains(@class, 'TreeSelector')]"
                                                           "[.//text()='Device Types']")

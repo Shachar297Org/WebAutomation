@@ -24,8 +24,6 @@ class _BaseCascaderPicker:
         self.selected_menu_items = self.cascader_menu.ss("li.ant-cascader-menu-item-active")
 
         self.first_menu = self.cascader_menu.s(".//ul[1]")
-        self.second_menu = self.cascader_menu.s(".//ul[2]")
-        self.third_menu = self.cascader_menu.s(".//ul[3]")
 
     @allure.step
     def open(self):
