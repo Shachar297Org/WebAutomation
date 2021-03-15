@@ -166,7 +166,7 @@ class DevicesPage(_BasePage):
         self.device_tree_picker = DeviceTypesTreeSelector(".//span[contains(@class, 'TreeSelector')]"
                                                           "[.//text()='Device Types']")
         self.location_tree_picker = LocationTreeSelector(".//span[contains(@class, 'TreeSelector')]"
-                                                               "[.//text()='Locations']")
+                                                         "[.//text()='Locations']")
         self.reset_button = s("//button[span[text()='Reset']]")
         self.reload_button = s("i.anticon-reload")
         self.table = DevicesTable(".ant-table-wrapper")

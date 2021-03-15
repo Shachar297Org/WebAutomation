@@ -1,8 +1,11 @@
 import allure
+from selene import query
 from selene.core.entity import Element
 from selene.support.conditions import have, be
+from selene.support.shared.jquery_style import s
 
 from src.site.components.base_table import _BaseTable
+from src.util.elements_util import extract_text
 
 
 class UsersTable(_BaseTable):
@@ -27,7 +30,8 @@ class UsersTable(_BaseTable):
 
     @allure.step
     def is_user_editable(self, email: str) -> bool:
-        return self._get_row_button_by_column_value(self.Headers.EMAIL, email).matching(have.exact_text(self._EDIT_TEXT))
+        return self._get_row_button_by_column_value(self.Headers.EMAIL, email)\
+            .matching(have.exact_text(self._EDIT_TEXT))
 
     @allure.step
     def is_lock_icon_displayed(self, email: str) -> bool:
@@ -113,7 +117,8 @@ class DeviceAssignmentTable(_BaseTable):
 
     @allure.step
     def _get_row_remove_button(self, device_types: str):
-        return self._get_row_button_with_name_by_column_value(self.Headers.DEVICE_TYPES, device_types, self._REMOVE_TEXT)
+        return self._get_row_button_with_name_by_column_value(self.Headers.DEVICE_TYPES, device_types,
+                                                              self._REMOVE_TEXT)
 
     class Headers:
         REGION = "Region"
@@ -157,7 +162,8 @@ class DevicesTable(_BaseTable):
 
     @allure.step
     def _get_row_properties_button(self, serial_number: str):
-        return self._get_row_button_with_name_by_column_value(self.Headers.SERIAL_NUMBER, serial_number, self._PROPERTIES_TEXT)
+        return self._get_row_button_with_name_by_column_value(self.Headers.SERIAL_NUMBER, serial_number,
+                                                              self._PROPERTIES_TEXT)
 
     class Headers:
         SERIAL_NUMBER = "Serial Number"
@@ -167,3 +173,78 @@ class DevicesTable(_BaseTable):
         CLINIC_NAME = "Clinic Name"
         COUNTRY = "Country"
         ACTION_BUTTON = ""
+
+
+class PropertiesTable:
+
+    def __init__(self, locator: str):
+        self.table = s(locator)
+        self.table_body = self.table.s("tbody.ant-table-tbody")
+        self.rows = self.table_body.ss("tr")
+
+    @allure.step
+    def wait_to_load(self):
+        self.table_body.wait.until(be.visible)
+        return self
+
+    @allure.step
+    def get_headers(self) -> []:
+        headers = self.table.ss(_BaseTable.HEADER_XPATH)
+        return extract_text(headers)
+
+    @allure.step
+    def get_properties(self) -> []:
+        cells = self.table_body.ss(".//tr/td[1]")
+        return extract_text(cells)
+
+    @allure.step
+    def get_property_value(self, property_name: str) -> str:
+        return self.table_body.s(".//tr/td[1][*[text()='{}']]/following-sibling::td".format(property_name))\
+            .get(query.text)
+
+    class Headers:
+        PROPERTY = "Property"
+        VALUE = "Value"
+
+    class Property:
+        DEVICE_TYPE = "Device Type"
+        DEVICE_SERIAL_NUMBER = "Device Serial Number"
+        STATUS = "Status"
+        CREATION_TIME = "Creation Time"
+        LUMENIS_APP_VERSION = "Lumenis Application Version"
+        LUMENISX_PLATFORM_VERSION = "LumenisXPlatform Version"
+        START_EVENT_LOCAL_TIMESTAMP = "Start Event Local Timestamp"
+        START_EVENT_INTERNET_TIMESTAMP = "Start Event Internet Timestamp"
+        LOCAL_TO_INTERNET_TIMESTAMP_OFFSET = "Local To Internet Timestamp Offset"
+        EVENTS_DICTIONARY_VERSION = "Events Dictionary Version"
+        COMMANDS_DICTIONARY_VERSION = "Commands Dictionary Version"
+        ACTIVATING_USER_EMAIL = "Activating User Email"
+        ACTIVATION_TYPE = "Activation Type"
+        ICCID = "ICCID"
+        IMEI = "IMEI"
+        CUSTOM_MESSAGE = "Custom Message"
+
+
+class AssignUserTable(_BaseTable):
+
+    class Headers:
+        ASSIGN = "Assign"
+        NAME = "Name"
+        USER_GROUP = "User Group"
+
+
+class V2CHistoryTable(_BaseTable):
+
+    class Headers:
+        FILE_NAME = "File Name"
+        UPLOAD_DATE = "Upload Date"
+        COMMENTS = "Comments"
+
+
+class AlarmHistoryTable(_BaseTable):
+
+    class Headers:
+        DATE = "Date"
+        ALARM_ID = "Alarm Id"
+        DESCRIPTION = "Description"
+        STATUS = "Status"

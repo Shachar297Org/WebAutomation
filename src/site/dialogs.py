@@ -1,4 +1,5 @@
 import abc
+from abc import ABC
 
 import allure
 from selene.core import query
@@ -13,7 +14,7 @@ from src.site.components.base_table import PaginationElement
 from src.site.components.cascader_picker import RegionCountryCascaderPicker, DeviceTypeCascaderPicker
 from src.site.components.simple_components import SelectBox
 from src.site.components.tree_selector import LocationTreeSelector, DeviceTypesTreeSelector
-from src.site.components.tables import DeviceAssignmentTable
+from src.site.components.tables import DeviceAssignmentTable, PropertiesTable
 
 
 class _BaseDialog:
@@ -70,7 +71,7 @@ class _BaseCreateEditUserDialog(_BaseDialog):
         self.manager_select = SelectBox("#createUserForm_manager")
 
         self.location_tree_picker = LocationTreeSelector(".//span[contains(@class, 'TreeSelector')]"
-                                                               "[.//text()='Locations']")
+                                                         "[.//text()='Locations']")
         self.device_tree_picker = DeviceTypesTreeSelector(".//span[contains(@class, 'TreeSelector')]"
                                                           "[.//text()='Device Types']")
 
@@ -243,8 +244,7 @@ class EditUserDialog(_BaseCreateEditUserDialog):
         self.user_disabled_switcher.click()
 
 
-class CreateDeviceDialog(_BaseDialog):
-    TITLE = "Create Device"
+class _BaseDeviceDialog(_BaseDialog, ABC):
 
     DEVICE_SERIAL_NUMBER_LABEL = "Device Serial Number"
     DEVICE_TYPE_LABEL = "Device Type"
@@ -264,7 +264,7 @@ class CreateDeviceDialog(_BaseDialog):
 
     def __init__(self):
         super().__init__()
-        self.dialog = s("//*[@class='ant-modal-content'][.//span[text()='Create Device']]")
+        self.dialog = s("//*[@class='ant-modal-content'][.//span[contains(text(), 'Device')]]")
 
         self.device_serial_number_input = self.dialog.s("#creatDeviceForm_deviceSerialNumber")
         self.device_picker = DeviceTypeCascaderPicker(".//span[contains(@class, 'DeviceTypeSelector')]")
@@ -285,18 +285,6 @@ class CreateDeviceDialog(_BaseDialog):
         self.region_country_picker = RegionCountryCascaderPicker("//span[contains(@class, 'ant-cascader-picker')]"
                                                                  "[input[@id='creatDeviceForm_country']]")
         self.state_select = SelectBox("#creatDeviceForm_state")
-
-        self.create_device_button = self.dialog.s(".//button[span[text()='Create Device']]")
-
-    @allure.step
-    def wait_to_load(self):
-        self.device_serial_number_input.wait_until(be.visible)
-        self.comments_textarea.wait_until(be.clickable)
-        return self
-
-    @allure.step
-    def click_create(self):
-        self.create_device_button.click()
 
     @allure.step
     def get_device_serial_number(self) -> str:
@@ -464,8 +452,43 @@ class CreateDeviceDialog(_BaseDialog):
             self.set_comment(customer.comments)
 
 
-class DevicePropertiesDialog(_BaseDialog):
+class CreateDeviceDialog(_BaseDeviceDialog):
+    TITLE = "Create Device"
+
+    def __init__(self):
+        super().__init__()
+        self.dialog = s("//*[@class='ant-modal-content'][.//span[text()='Create Device']]")
+        self.create_device_button = self.dialog.s(".//button[span[text()='Create Device']]")
+
+    @allure.step
+    def wait_to_load(self):
+        self.device_serial_number_input.wait_until(be.visible)
+        self.comments_textarea.wait_until(be.clickable)
+        return self
+
+    @allure.step
+    def click_create(self):
+        self.create_device_button.click()
+
+
+class DevicePropertiesDialog(_BaseDeviceDialog):
     TITLE = "Device Properties"
 
+    def __init__(self):
+        super().__init__()
+        self.dialog = s("//*[@class='ant-modal-content'][.//span[text()='Device Properties']]")
+        self.update_customer_button = self.dialog.s(".//button[span[text()='Update Customer']]")
+
+    @allure.step
     def wait_to_load(self):
-        pass
+        self.dialog.wait_until(be.visible)
+        self.update_customer_button.wait_until(be.clickable)
+        return self
+
+    @allure.step
+    def click_update(self):
+        self.update_customer_button.click()
+
+    class PropertiesTab:
+        def __init__(self):
+            self.table = PropertiesTable(".ant-modal-content .ant-table-wrapper")

@@ -9,7 +9,7 @@ from src.util.elements_util import extract_text
 
 
 class _BaseTable(object):
-    _HEADER_XPATH = ".//th//span[@class='ant-table-column-title']"
+    HEADER_XPATH = ".//th//span[@class='ant-table-column-title']"
 
     def __init__(self, locator: str):
         self.table = s(locator)
@@ -25,7 +25,7 @@ class _BaseTable(object):
 
     @allure.step
     def get_headers(self) -> []:
-        headers = self.table.ss(self._HEADER_XPATH)
+        headers = self.table.ss(self.HEADER_XPATH)
         return extract_text(headers)
 
     @allure.step
@@ -97,7 +97,7 @@ class _BaseTable(object):
         return row.s(".//button[span[text()='{}']]".format(button_name)).matching(be.visible)
 
     def _get_header(self, header_name) -> Element:
-        return self.table.s(self._HEADER_XPATH + "[text()='{}']".format(header_name))
+        return self.table.s(self.HEADER_XPATH + "[text()='{}']".format(header_name))
 
     def _get_column_sorter(self, header_name) -> Element:
         return self.table.s(".//th//*[@class='ant-table-column-sorters'][./span[text()='{}']]".format(header_name))
