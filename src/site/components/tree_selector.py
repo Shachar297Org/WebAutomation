@@ -18,7 +18,7 @@ def get_formatted_selected_plus_item(number) -> str:
 
 
 class _TreeNodeWrapper:
-    _CHECKED_CHECKBOX_CLASS = have.css_class("ant-select-tree-checkbox-checked")
+    _CHECKED_CHECKBOX_CLASS = "ant-select-tree-checkbox-checked"
 
     def __init__(self, tree_node_element: Element):
         self._node = tree_node_element
