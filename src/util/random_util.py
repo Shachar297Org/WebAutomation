@@ -111,4 +111,4 @@ def random_state() -> str:
 
 
 if __name__ == '__main__':
-    print(random_zip_code())
+    print(random_street_address())

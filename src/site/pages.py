@@ -201,7 +201,7 @@ class DevicesPage(_BasePage):
         return self
 
     @allure.step
-    def open_device_properties_dialog(self, serial_number) -> DevicePropertiesDialog:
+    def open_device_properties(self, serial_number) -> DevicePropertiesDialog:
         self.table.click_properties(serial_number)
         return DevicePropertiesDialog().wait_to_load()
 

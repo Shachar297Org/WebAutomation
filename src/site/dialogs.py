@@ -17,14 +17,15 @@ from src.site.components.simple_components import SelectBox, SearchInput
 from src.site.components.tree_selector import LocationTreeSelector, DeviceTypesTreeSelector
 from src.site.components.tables import DeviceAssignmentTable, PropertiesTable, AssignUserTable, V2CHistoryTable, \
     AlarmHistoryTable
+from src.util.elements_util import clear_text_input, JS_CLICK
 
 
 class _BaseDialog:
     def __init__(self):
-        self.dialog = s("//*[@class='ant-modal-content']")
+        self.dialog = s(".ant-modal-content")
         self.title = self.dialog.s(".ant-modal-title")
 
-        self.cancel_button = self.dialog.s(".//button[span[text()='Cancel']]")
+        self.cancel_button = self.dialog.s("//button[span[text()='Cancel']]")
         self.close_button = self.dialog.s("button.ant-modal-close")
 
     @abc.abstractmethod
@@ -72,9 +73,9 @@ class _BaseCreateEditUserDialog(_BaseDialog):
         self.user_group_select = SelectBox("#createUserForm_group")
         self.manager_select = SelectBox("#createUserForm_manager")
 
-        self.location_tree_picker = LocationTreeSelector(".//span[contains(@class, 'TreeSelector')]"
+        self.location_tree_picker = LocationTreeSelector("//span[contains(@class, 'TreeSelector')]"
                                                          "[.//text()='Locations']")
-        self.device_tree_picker = DeviceTypesTreeSelector(".//span[contains(@class, 'TreeSelector')]"
+        self.device_tree_picker = DeviceTypesTreeSelector("//span[contains(@class, 'TreeSelector')]"
                                                           "[.//text()='Device Types']")
 
         self.device_table = DeviceAssignmentTable(".ant-modal-content .ant-table-wrapper")
@@ -107,7 +108,7 @@ class _BaseCreateEditUserDialog(_BaseDialog):
 
     @allure.step
     def set_first_name(self, text: str):
-        self.first_name_input.set_value(text)
+        self.first_name_input.type(text)
         return self
 
     @allure.step
@@ -116,7 +117,7 @@ class _BaseCreateEditUserDialog(_BaseDialog):
 
     @allure.step
     def set_last_name(self, text: str):
-        self.last_name_input.set_value(text)
+        self.last_name_input.type(text)
         return self
 
     @allure.step
@@ -125,7 +126,7 @@ class _BaseCreateEditUserDialog(_BaseDialog):
 
     @allure.step
     def set_email(self, text: str):
-        self.email_input.set_value(text)
+        self.email_input.type(text)
         return self
 
     @allure.step
@@ -134,7 +135,7 @@ class _BaseCreateEditUserDialog(_BaseDialog):
 
     @allure.step
     def set_phone_number(self, text: str):
-        self.phone_number_input.clear().set_value(text)
+        self.phone_number_input.clear().type(text)
         return self
 
     @allure.step
@@ -268,7 +269,7 @@ class _BaseDeviceDialog(_BaseDialog, ABC):
         self.dialog = s("//*[@class='ant-modal-content'][.//span[contains(text(), 'Device')]]")
 
         self.device_serial_number_input = self.dialog.s("#creatDeviceForm_deviceSerialNumber")
-        self.device_type_picker = DeviceTypeCascaderPicker(".//span[contains(@class, 'DeviceTypeSelector')]")
+        self.device_type_picker = DeviceTypeCascaderPicker("//span[contains(@class, 'DeviceTypeSelector')]")
 
         self.clinic_name_input = self.dialog.s("#creatDeviceForm_clinicName")
         self.first_name_input = self.dialog.s("#creatDeviceForm_firstName")
@@ -293,7 +294,7 @@ class _BaseDeviceDialog(_BaseDialog, ABC):
 
     @allure.step
     def set_device_serial_number(self, text: str):
-        self.device_serial_number_input.set_value(text)
+        self.device_serial_number_input.type(text)
         return self
 
     @allure.step
@@ -317,7 +318,7 @@ class _BaseDeviceDialog(_BaseDialog, ABC):
 
     @allure.step
     def set_clinic_name(self, text: str):
-        self.clinic_name_input.set_value(text)
+        clear_text_input(self.clinic_name_input).type(text)
         return self
 
     @allure.step
@@ -326,7 +327,7 @@ class _BaseDeviceDialog(_BaseDialog, ABC):
 
     @allure.step
     def set_first_name(self, text: str):
-        self.first_name_input.set_value(text)
+        clear_text_input(self.first_name_input).type(text)
         return self
 
     @allure.step
@@ -335,7 +336,7 @@ class _BaseDeviceDialog(_BaseDialog, ABC):
 
     @allure.step
     def set_last_name(self, text: str):
-        self.last_name_input.set_value(text)
+        clear_text_input(self.last_name_input).type(text)
         return self
 
     @allure.step
@@ -344,7 +345,7 @@ class _BaseDeviceDialog(_BaseDialog, ABC):
 
     @allure.step
     def set_email(self, text: str):
-        self.email_input.set_value(text)
+        clear_text_input(self.email_input).type(text)
         return self
 
     @allure.step
@@ -353,7 +354,7 @@ class _BaseDeviceDialog(_BaseDialog, ABC):
 
     @allure.step
     def set_phone_number(self, text: str):
-        self.phone_number_input.clear().set_value(text)
+        clear_text_input(self.phone_number_input).type(text)
         return self
 
     @allure.step
@@ -362,7 +363,7 @@ class _BaseDeviceDialog(_BaseDialog, ABC):
 
     @allure.step
     def set_clinic_id(self, text: str):
-        self.clinic_id_input.set_value(text)
+        clear_text_input(self.clinic_id_input).type(text)
         return self
 
     @allure.step
@@ -371,7 +372,7 @@ class _BaseDeviceDialog(_BaseDialog, ABC):
 
     @allure.step
     def set_street(self, text: str):
-        self.street_input.set_value(text)
+        clear_text_input(self.street_input).type(text)
         return self
 
     @allure.step
@@ -380,7 +381,7 @@ class _BaseDeviceDialog(_BaseDialog, ABC):
 
     @allure.step
     def set_street_number(self, text: str):
-        self.street_number_input.set_value(text)
+        clear_text_input(self.street_number_input).type(text)
         return self
 
     @allure.step
@@ -389,7 +390,7 @@ class _BaseDeviceDialog(_BaseDialog, ABC):
 
     @allure.step
     def set_city(self, text: str):
-        self.city_input.set_value(text)
+        clear_text_input(self.city_input).type(text)
         return self
 
     @allure.step
@@ -398,7 +399,7 @@ class _BaseDeviceDialog(_BaseDialog, ABC):
 
     @allure.step
     def set_postal_code_zip(self, text: str):
-        self.postal_zip_input.set_value(text)
+        clear_text_input(self.postal_zip_input).type(text)
         return self
 
     @allure.step
@@ -425,7 +426,7 @@ class _BaseDeviceDialog(_BaseDialog, ABC):
 
     @allure.step
     def set_comment(self, text: str):
-        self.comments_textarea.set_value(text)
+        clear_text_input(self.comments_textarea).type(text)
         return self
 
     @allure.step
@@ -459,6 +460,12 @@ class _BaseDeviceDialog(_BaseDialog, ABC):
 
         if customer.comments:
             self.set_comment(customer.comments)
+
+    @allure.step
+    def assert_device_fields(self, expected: Device):
+        assert_that(self.get_device_serial_number()).is_equal_to(expected.serial_number)
+        assert_that(self.get_device_type()).contains("{0} / {1} / {2}".format(
+            expected.group, expected.model, expected.device))
 
     @allure.step
     def assert_customer_fields(self, expected: Customer):
@@ -593,6 +600,44 @@ class DevicePropertiesDialog(_BaseDialog):
         def name(self) -> str:
             return "Assign"
 
+        @allure.step
+        def search(self, text: str):
+            self.search_input.search(text)
+            self.table.wait_to_load()
+            return self
+
+        @allure.step
+        def filter_by_group(self, user_group: str):
+            self.user_group_select.select_item(user_group)
+            self.table.wait_to_load()
+            return self
+
+        @allure.step
+        def click_reset(self):
+            self.reset_button.click()
+            self.reset_button.wait.until(have.attribute("ant-click-animating-without-extra-node").value("false"))
+            return self
+
+        @allure.step
+        def reload(self):
+            self.reload_button.execute_script(JS_CLICK)
+            self.table.wait_to_load()
+
+        @allure.step
+        def sort_asc_by_name(self):
+            self.table.sort_asc(self.table.Headers.NAME)
+            return self
+
+        @allure.step
+        def sort_desc_by_name(self):
+            self.table.sort_desc(self.table.Headers.NAME)
+            return self
+
+        @allure.step
+        def click_update_user_assignment(self):
+            self.update_user_assignment_button.click()
+            return self
+
     class UploadV2CTab(_BaseTab):
         def __init__(self):
             super().__init__()
@@ -603,6 +648,26 @@ class DevicePropertiesDialog(_BaseDialog):
         @property
         def name(self) -> str:
             return "Upload V2C"
+
+        @allure.step
+        def click_update_device(self):
+            self.update_device_button.click()
+            return self
+
+        @allure.step
+        def click_upload(self):
+            self.upload_button.click()
+            return self
+
+        @allure.step
+        def get_comments(self):
+            self.comments_textarea.get(query.text)
+            return self
+
+        @allure.step
+        def set_comments(self, text: str):
+            self.comments_textarea.clear().type(text)
+            return self
 
     class V2CHistoryTab(_BaseTab):
         def __init__(self):
@@ -623,6 +688,29 @@ class DevicePropertiesDialog(_BaseDialog):
             self.reload_button = self.active_tab.s(".ant-modal-content i.anticon-reload")
             self.table = AlarmHistoryTable(self._ACTIVE_TAB_CSS + " .ant-table-wrapper")
 
+        @allure.step
+        def search(self, text: str):
+            self.search_input.search(text)
+            self.table.wait_to_load()
+            return self
+
+        @allure.step
+        def filter_by_status(self, status: str):
+            self.status_select.select_item(status)
+            self.table.wait_to_load()
+            return self
+
+        @allure.step
+        def click_reset(self):
+            self.reset_button.click()
+            self.reset_button.wait.until(have.attribute("ant-click-animating-without-extra-node").value("false"))
+            return self
+
+        @allure.step
+        def reload(self):
+            self.reload_button.execute_script(JS_CLICK)
+            self.table.wait_to_load()
+
         @property
         def name(self) -> str:
             return "Alarm History"
@@ -638,3 +726,11 @@ class DevicePropertiesDialog(_BaseDialog):
         @property
         def name(self) -> str:
             return "Activation"
+
+        @allure.step
+        def click_deactivate_device(self):
+            self.deactivate_device_button.click()
+
+        @allure.step
+        def click_reactivate_device(self):
+            self.reactivate_device_button.click()
