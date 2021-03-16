@@ -12,9 +12,10 @@ from src.domain.device import Customer, Device
 from src.domain.user import User
 from src.site.components.base_table import PaginationElement
 from src.site.components.cascader_picker import RegionCountryCascaderPicker, DeviceTypeCascaderPicker
-from src.site.components.simple_components import SelectBox
+from src.site.components.simple_components import SelectBox, SearchInput
 from src.site.components.tree_selector import LocationTreeSelector, DeviceTypesTreeSelector
-from src.site.components.tables import DeviceAssignmentTable, PropertiesTable
+from src.site.components.tables import DeviceAssignmentTable, PropertiesTable, AssignUserTable, V2CHistoryTable, \
+    AlarmHistoryTable
 
 
 class _BaseDialog:
@@ -245,7 +246,6 @@ class EditUserDialog(_BaseCreateEditUserDialog):
 
 
 class _BaseDeviceDialog(_BaseDialog, ABC):
-
     DEVICE_SERIAL_NUMBER_LABEL = "Device Serial Number"
     DEVICE_TYPE_LABEL = "Device Type"
     CLINIC_NAME_LABEL = "Clinic Name"
@@ -471,24 +471,121 @@ class CreateDeviceDialog(_BaseDeviceDialog):
         self.create_device_button.click()
 
 
-class DevicePropertiesDialog(_BaseDeviceDialog):
+class DevicePropertiesDialog(_BaseDialog):
     TITLE = "Device Properties"
 
     def __init__(self):
         super().__init__()
         self.dialog = s("//*[@class='ant-modal-content'][.//span[text()='Device Properties']]")
-        self.update_customer_button = self.dialog.s(".//button[span[text()='Update Customer']]")
+        self.general_tab = self.GeneralTab()
 
     @allure.step
     def wait_to_load(self):
         self.dialog.wait_until(be.visible)
-        self.update_customer_button.wait_until(be.clickable)
+        self.general_tab.wait_to_load()
         return self
 
-    @allure.step
-    def click_update(self):
-        self.update_customer_button.click()
+    class _BaseTab:
+        _ACTIVE_TAB_CSS = "div.ant-tabs-tabpane-active"
 
-    class PropertiesTab:
         def __init__(self):
-            self.table = PropertiesTable(".ant-modal-content .ant-table-wrapper")
+            self.active_tab = s(self._ACTIVE_TAB_CSS)
+            self.tabs_bar = s(".ant-tabs-left-bar")
+
+        @property
+        @abc.abstractmethod
+        def name(self) -> str:
+            """"Method should return the name of the tab"""
+
+        @allure.step
+        def open(self):
+            return self.tabs_bar.s(".//div[@role='tab'][text()='{}']".format(self.name))
+
+    class GeneralTab(_BaseTab, _BaseDeviceDialog):
+        def __init__(self):
+            super().__init__()
+            self.update_customer_button = self.active_tab.s(".//button[span[text()='Update Customer']]")
+
+        @property
+        def name(self) -> str:
+            return "General"
+
+        @allure.step
+        def wait_to_load(self):
+            self.update_customer_button.wait_until(be.clickable)
+            return self
+
+        @allure.step
+        def click_update(self):
+            self.update_customer_button.click()
+
+    class PropertiesTab(_BaseTab):
+        def __init__(self):
+            super().__init__()
+            self.table = PropertiesTable(self._ACTIVE_TAB_CSS + " .ant-table-wrapper")
+
+        @property
+        def name(self) -> str:
+            return "Properties"
+
+    class AssignTab(_BaseTab):
+        def __init__(self):
+            super().__init__()
+            self.search_input = SearchInput(self._ACTIVE_TAB_CSS + " input[placeholder='Search']")
+            self.user_group_select = SelectBox(self._ACTIVE_TAB_CSS + " #entityToolbarFilters_userGroupFilter")
+            self.reset_button = self.active_tab.s(".//button[span[text()='Reset']]")
+            self.reload_button = self.active_tab.s("i.anticon-reload")
+            self.table = AssignUserTable(self._ACTIVE_TAB_CSS + " .ant-table-wrapper")
+            self.pagination_element = PaginationElement(self._ACTIVE_TAB_CSS + " ul.ant-table-pagination")
+
+            self.update_user_assignment_button = self.active_tab.s(".//button[span[text()='Update User Assignment']]")
+
+        @property
+        def name(self) -> str:
+            return "Assign"
+
+    class UploadV2CTab(_BaseTab):
+        def __init__(self):
+            super().__init__()
+            self.update_device_button = self.active_tab.s(".//button[span[text()='Update Device']]")
+            self.upload_button = self.active_tab.s(".//button[span[text()=' Click to upload']]")
+            self.comments_textarea = self.active_tab.s("textarea#preferences_comments")
+
+        @property
+        def name(self) -> str:
+            return "Upload V2C"
+
+    class V2CHistoryTab(_BaseTab):
+        def __init__(self):
+            super().__init__()
+            self.table = V2CHistoryTable(self._ACTIVE_TAB_CSS + " .ant-table-wrapper")
+            self.upload_button = self.active_tab.s(".//button[span[text()='Upload']]")
+
+        @property
+        def name(self) -> str:
+            return "V2C History"
+
+    class AlarmHistoryTab(_BaseTab):
+        def __init__(self):
+            super().__init__()
+            self.search_input = SearchInput(self._ACTIVE_TAB_CSS + " input[placeholder='Search']")
+            self.status_select = SelectBox(self._ACTIVE_TAB_CSS + " #entityToolbarFilters_alarmStateOption")
+            self.reset_button = self.active_tab.s(".//button[span[text()='Reset']]")
+            self.reload_button = self.active_tab.s(".ant-modal-content i.anticon-reload")
+            self.table = AlarmHistoryTable(self._ACTIVE_TAB_CSS + " .ant-table-wrapper")
+
+        @property
+        def name(self) -> str:
+            return "Alarm History"
+
+    class ActivationTab(_BaseTab):
+        def __init__(self):
+            super().__init__()
+            self.status_select = SelectBox(self._ACTIVE_TAB_CSS + " #entityToolbarFilters_alarmStateOption")
+            self.deactivate_device_button = self.active_tab.s(".//button[span[text()='Deactivate Device']]")
+            self.reactivate_device_button = self.active_tab.s(".//button[span[text()='Reactivate Device']]")
+            self.device_status = self.active_tab.s("h4.ant-typography")
+
+        @property
+        def name(self) -> str:
+            return "Activation"
