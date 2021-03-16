@@ -2,6 +2,7 @@ import abc
 from abc import ABC
 
 import allure
+from assertpy import assert_that
 from selene.core import query
 from selene.core.entity import Element
 from selene.support.conditions import be, have
@@ -267,7 +268,7 @@ class _BaseDeviceDialog(_BaseDialog, ABC):
         self.dialog = s("//*[@class='ant-modal-content'][.//span[contains(text(), 'Device')]]")
 
         self.device_serial_number_input = self.dialog.s("#creatDeviceForm_deviceSerialNumber")
-        self.device_picker = DeviceTypeCascaderPicker(".//span[contains(@class, 'DeviceTypeSelector')]")
+        self.device_type_picker = DeviceTypeCascaderPicker(".//span[contains(@class, 'DeviceTypeSelector')]")
 
         self.clinic_name_input = self.dialog.s("#creatDeviceForm_clinicName")
         self.first_name_input = self.dialog.s("#creatDeviceForm_firstName")
@@ -296,13 +297,17 @@ class _BaseDeviceDialog(_BaseDialog, ABC):
         return self
 
     @allure.step
+    def get_device_type(self) -> str:
+        return self.device_type_picker.get_selected_item()
+
+    @allure.step
     def select_device_type_by_keyword(self, keyword):
-        self.device_picker.select_item_by_keyword(keyword)
+        self.device_type_picker.select_item_by_keyword(keyword)
         return self
 
     @allure.step
     def select_device_type(self, device: Device):
-        self.device_picker.open().select_device(device.group, device.model, device.device)
+        self.device_type_picker.open().select_device(device.group, device.model, device.device)
 
     # Customer fields
 
@@ -397,6 +402,10 @@ class _BaseDeviceDialog(_BaseDialog, ABC):
         return self
 
     @allure.step
+    def get_country(self):
+        return self.region_country_picker.get_selected_item()
+
+    @allure.step
     def select_country_by_keyword(self, keyword):
         self.region_country_picker.select_item_by_keyword(keyword)
         return self
@@ -451,6 +460,38 @@ class _BaseDeviceDialog(_BaseDialog, ABC):
         if customer.comments:
             self.set_comment(customer.comments)
 
+    @allure.step
+    def assert_customer_fields(self, expected: Customer):
+        if expected.clinic_name:
+            assert_that(self.get_clinic_name()).is_equal_to(expected.clinic_name)
+        if expected.first_name:
+            assert_that(self.get_first_name()).is_equal_to(expected.first_name)
+        if expected.last_name:
+            assert_that(self.get_last_name()).is_equal_to(expected.last_name)
+        if expected.email:
+            assert_that(self.get_email()).is_equal_to(expected.email)
+        if expected.phone_number:
+            assert_that(self.get_phone_number()).is_equal_to(expected.phone_number)
+        if expected.clinic_id:
+            assert_that(self.get_clinic_id()).is_equal_to(expected.clinic_id)
+        if expected.street:
+            assert_that(self.get_street()).is_equal_to(expected.street)
+        if expected.street_number:
+            assert_that(self.get_street_number()).is_equal_to(expected.street_number)
+
+        if expected.city:
+            assert_that(self.get_city()).is_equal_to(expected.city)
+        if expected.postal_zip:
+            assert_that(self.get_postal_code_zip()).is_equal_to(expected.postal_zip)
+        if expected.region_country:
+            assert_that(self.get_country()).contains(expected.region_country)
+
+        if expected.state:
+            assert_that(self.get_state()).is_equal_to(expected.state)
+
+        if expected.comments:
+            assert_that(self.get_comment()).is_equal_to(expected.comments)
+
 
 class CreateDeviceDialog(_BaseDeviceDialog):
     TITLE = "Create Device"
@@ -477,15 +518,22 @@ class DevicePropertiesDialog(_BaseDialog):
     def __init__(self):
         super().__init__()
         self.dialog = s("//*[@class='ant-modal-content'][.//span[text()='Device Properties']]")
-        self.general_tab = self.GeneralTab()
+
+        self.general = self.GeneralTab()
+        self.properties = self.PropertiesTab()
+        self.assign = self.AssignTab()
+        self.upload_v2c = self.UploadV2CTab()
+        self.v2c_history = self.V2CHistoryTab()
+        self.alarms_history = self.AlarmHistoryTab()
+        self.activation = self.ActivationTab()
 
     @allure.step
     def wait_to_load(self):
         self.dialog.wait_until(be.visible)
-        self.general_tab.wait_to_load()
+        self.general.wait_to_load()
         return self
 
-    class _BaseTab:
+    class _BaseTab(object):
         _ACTIVE_TAB_CSS = "div.ant-tabs-tabpane-active"
 
         def __init__(self):
@@ -504,6 +552,7 @@ class DevicePropertiesDialog(_BaseDialog):
     class GeneralTab(_BaseTab, _BaseDeviceDialog):
         def __init__(self):
             super().__init__()
+            _BaseDeviceDialog.__init__(self)
             self.update_customer_button = self.active_tab.s(".//button[span[text()='Update Customer']]")
 
         @property

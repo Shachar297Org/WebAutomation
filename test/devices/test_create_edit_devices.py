@@ -46,8 +46,10 @@ class TestCreateEditDevices:
 
         edit_dialog = devices_page.open_device_properties_dialog(new_device.serial_number)
 
-        # assert_that(edit_dialog.get_serial_number()).is_equal_to(new_device.serial_number)
-        # assert_that(edit_dialog.get_device_type()).contains(new_device.device_type)
+        assert_that(edit_dialog.general.get_device_serial_number()).is_equal_to(new_device.serial_number)
+        assert_that(edit_dialog.general.get_device_type()).contains("{0} / {1} / {2}".format(new_device.group,
+                                                                                             new_device.model,
+                                                                                             new_device.device))
 
     @allure.title("3.4.2 Create new device with all “Customer” fields")
     @allure.severity(allure.severity_level.CRITICAL)
@@ -74,5 +76,8 @@ class TestCreateEditDevices:
 
         edit_dialog = devices_page.open_device_properties_dialog(new_device.serial_number)
 
-        # assert_that(edit_dialog.get_serial_number()).is_equal_to(new_device.serial_number)
-        # assert_that(edit_dialog.get_device_type()).contains(new_device.device_type)
+        assert_that(edit_dialog.general.get_device_serial_number()).is_equal_to(new_device.serial_number)
+        assert_that(edit_dialog.general.get_device_type()).contains("{0} / {1} / {2}".format(new_device.group,
+                                                                                             new_device.model,
+                                                                                             new_device.device))
+        assert_that(edit_dialog.general.assert_customer_fields(new_customer))
