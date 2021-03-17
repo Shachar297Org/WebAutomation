@@ -85,9 +85,9 @@ class TestUsersList:
 
         users_page.search_by(random_item)
 
-        assert_that(table.rows).is_not_empty()
+        assert_that(table.get_rows()).is_not_empty()
 
-        for table_row in table.rows:
+        for table_row in table.get_rows():
             assert_that(table.is_any_row_cell_contains_text_ignoring_case(table_row, random_item)).is_true()
 
     @allure.title("Verify that you can search in the search field by substring")
@@ -95,28 +95,28 @@ class TestUsersList:
     def test_filter_users_by_substring(self):
         users_page = UsersPage().open()
         table = users_page.table.wait_to_load()
-        init_rows_count = len(table.rows)
+        init_rows_count = len(table.get_rows())
         random_name = random_list_item(table.get_column_values(UsersTable.Headers.NAME))
         substring = random_name[1:3]
 
         users_page.search_by(substring)
 
-        assert_that(table.rows).is_not_empty()
+        assert_that(table.get_rows()).is_not_empty()
 
-        for table_row in table.rows:
+        for table_row in table.get_rows():
             assert_that(table.is_any_row_cell_contains_text_ignoring_case(table_row, substring)).is_true()
 
         users_page.click_reset()
 
         assert_that(users_page.search_input.is_empty()).described_as("Search input to be empty after reset").is_true()
-        assert_that(table.rows).described_as("Table rows count after reset").is_length(init_rows_count)
+        assert_that(table.get_rows()).described_as("Table rows count after reset").is_length(init_rows_count)
 
     @allure.title("Verify that you can filter users by 'User Group'")
     @allure.severity(allure.severity_level.NORMAL)
     def test_filter_by_user_group(self):
         users_page = UsersPage().open()
         table = users_page.table.wait_to_load()
-        init_rows_count = len(table.rows)
+        init_rows_count = len(table.get_rows())
         random_group = random_list_item(table.get_column_values(UsersTable.Headers.USER_GROUP))
 
         users_page.filter_by_group(random_group)
@@ -125,4 +125,4 @@ class TestUsersList:
 
         users_page.click_reset()
 
-        assert_that(table.rows).described_as("Table rows count after reset").is_length(init_rows_count)
+        assert_that(table.get_rows()).described_as("Table rows count after reset").is_length(init_rows_count)

@@ -110,9 +110,9 @@ class TestDevicesList:
 
         devices_page.search_by(item)
 
-        assert_that(table.rows).is_not_empty()
+        assert_that(table.get_rows()).is_not_empty()
 
-        for table_row in table.rows:
+        for table_row in table.get_rows():
             assert_that(table.is_any_row_cell_contains_text_ignoring_case(table_row, item)).is_true()
 
     @allure.title("Verify that you can search in the search field by substring")
@@ -120,21 +120,21 @@ class TestDevicesList:
     def test_filter_devices_by_substring(self):
         devices_page = DevicesPage().open()
         table = devices_page.table.wait_to_load()
-        init_rows_count = len(table.rows)
+        init_rows_count = len(table.get_rows())
         random_device_type = random_list_item(table.get_column_values(DevicesTable.Headers.SERIAL_NUMBER))
         substring = random_device_type[0:4]
 
         devices_page.search_by(substring)
 
-        assert_that(table.rows).is_not_empty()
+        assert_that(table.get_rows()).is_not_empty()
 
-        for table_row in table.rows:
+        for table_row in table.get_rows():
             assert_that(table.is_any_row_cell_contains_text_ignoring_case(table_row, substring)).is_true()
 
         devices_page.click_reset()
 
         assert_that(devices_page.search_input.is_empty()).described_as("Search input to be empty after reset").is_true()
-        assert_that(table.rows).described_as("Table rows count after reset").is_length(init_rows_count)
+        assert_that(table.get_rows()).described_as("Table rows count after reset").is_length(init_rows_count)
 
     @allure.title("3.4.1 Verify that rows can be filtered by “Device Type” in the designated field ")
     @allure.severity(allure.severity_level.NORMAL)

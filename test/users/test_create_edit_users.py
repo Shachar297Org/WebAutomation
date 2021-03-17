@@ -105,7 +105,7 @@ class TestCreateEditUsers:
             .described_as("'Device Types' tree picker to be empty").is_empty()
 
         dialog.device_table.table.should(be.visible).should(be.enabled)
-        assert_that(dialog.device_table.rows).described_as("Device table to be empty").is_empty()
+        assert_that(dialog.device_table.get_rows()).described_as("Device table to be empty").is_empty()
         assert_that(dialog.device_table.get_headers()).contains_only(headers.REGION, headers.DEVICE_TYPES,
                                                                      headers.ACTION_BUTTON)
 
@@ -190,7 +190,7 @@ class TestCreateEditUsers:
         assert_that(dialog.device_table.get_column_values(DeviceAssignmentTable.Headers.DEVICE_TYPES)) \
             .contains_only(expected_device_types)
 
-        for row in dialog.device_table.rows:
+        for row in dialog.device_table.get_rows():
             assert_that(dialog.device_table.is_row_contains_edit_button(row)).described_as("Edit button").is_true()
             assert_that(dialog.device_table.is_row_contains_remove_button(row)).described_as("Remove button").is_true()
 
@@ -224,7 +224,7 @@ class TestCreateEditUsers:
         assert_that(edit_dialog.location_tree_picker.get_all_selected_items()).contains_only(existing_region)
         assert_that(edit_dialog.device_tree_picker.get_all_selected_items()).contains_only(existing_device_group)
         existing_device_row = edit_dialog.device_table.get_row_by_device_types(existing_device_group)
-        assert_that(edit_dialog.device_table.is_row_selected(existing_device_row)) \
+        assert_that(existing_device_row.is_selected()) \
             .described_as("Edited row to be selected(grayed)").is_true()
         assert_that(edit_dialog.device_table.is_row_edit_button_enabled(existing_device_row)) \
             .described_as("Edited row 'Edit' button to be enabled").is_false()
@@ -240,7 +240,7 @@ class TestCreateEditUsers:
             .contains_only(new_device_group)
 
         edit_dialog.device_table.click_remove(new_device_group)
-        assert_that(edit_dialog.device_table.rows).is_empty()
+        assert_that(edit_dialog.device_table.get_rows()).is_empty()
 
         edit_dialog.click_update()
 

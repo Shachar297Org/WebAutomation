@@ -8,13 +8,56 @@ from src.site.components.simple_components import Tooltip
 from src.util.elements_util import extract_text
 
 
+class TableRowWrapper:
+    def __init__(self, table_row_element: Element):
+        self.row = table_row_element
+        self._table = self.row.s("./ancestor::*[starts-with(@class, 'ant-table-wrapper')]")
+        self.cells = self.row.ss("td")
+        self.button = self.row.s("button")
+
+    @allure.step
+    def get_cell(self, column_name: str) -> Element:
+        return self._get_cell_by_index(self._get_column_index(column_name))
+
+    @allure.step
+    def get_cell_text(self, column_name: str) -> str:
+        return self.get_cell(column_name).get(query.text)
+
+    @allure.step
+    def hover_column_cell(self, column_name: str) -> Tooltip:
+        self.get_cell(column_name).hover()
+        return Tooltip()
+
+    @allure.step
+    def has_button_with_text(self, button_name: str) -> bool:
+        return self.row.s(".//button[span[text()='{}']]".format(button_name)).matching(be.visible)
+
+    @allure.step
+    def click_button(self, button_text: str):
+        self.get_button(button_text).click()
+
+    @allure.step
+    def get_button(self, button_text: str) -> Element:
+        return self.row.s(".//button[span[text()='{}']]".format(button_text))
+
+    @allure.step
+    def is_selected(self) -> bool:
+        return self.row.matching(have.css_class("selected"))
+
+    def _get_cell_by_index(self, column_index) -> Element:
+        return self.row.s("./td[{}]".format(column_index))
+
+    def _get_column_index(self, column_name: str) -> int:
+        return len(self._table.ss(".//th[.//span[@class='ant-table-column-title'][text()='{}']]/preceding-sibling::*"
+                                  .format(column_name))) + 1
+
+
 class _BaseTable(object):
-    HEADER_XPATH = ".//th//span[@class='ant-table-column-title']"
+    _ROW_BY_COLUMN_VALUE_XPATH = ".//tbody/tr[td[{0}][./descendant-or-self::text()='{1}']]"
 
     def __init__(self, locator: str):
         self.table = s(locator)
         self.table_body = self.table.s("tbody.ant-table-tbody")
-        self.rows = self.table_body.ss("tr")
         self.spinner = s('.ant-spin-blur')
 
     @allure.step
@@ -24,43 +67,32 @@ class _BaseTable(object):
         return self
 
     @allure.step
+    def get_rows(self):
+        return self._get_wrapped_rows(self.table_body.ss("tr"))
+
+    @allure.step
     def get_headers(self) -> []:
-        headers = self.table.ss(self.HEADER_XPATH)
+        headers = self.table.ss(".//th//span[@class='ant-table-column-title']")
         return extract_text(headers)
 
     @allure.step
-    def get_column_values(self, column_name: str, ) -> []:
+    def get_column_values(self, column_name: str) -> []:
         self.wait_to_load()
-        cells = self.table.ss(".//tbody/tr/td[{0}]".format(self._get_column_index(column_name)))
+        cells = self.table.ss(".//tbody/tr/td[{}]".format(self._get_column_index(column_name)))
         return extract_text(cells)
 
     @allure.step
-    def get_row_by_column_value(self, column_name: str, column_value: str) -> Element:
+    def get_row_by_column_value(self, column_name: str, column_value: str) -> TableRowWrapper:
         self.wait_to_load()
-        return self.table.s(".//tbody/tr[td[{0}][text()='{1}']]"
-                            .format(self._get_column_index(column_name), column_value))
+        return TableRowWrapper(self.table.s(self._ROW_BY_COLUMN_VALUE_XPATH.format(
+            self._get_column_index(column_name), column_value)))
 
     @allure.step
     def get_rows_by_column_value(self, column_name: str, column_value: str) -> []:
         self.wait_to_load()
-        return self.table.ss(".//tbody/tr[td[{0}][text()='{1}']]"
-                             .format(self._get_column_index(column_name), column_value))
-
-    @allure.step("Get table row by source column value and return the target column cell")
-    def get_column_cell(self, src_column_name: str, src_column_value: str, target_column: str) -> Element:
-        self.wait_to_load()
-        target_column_index = self._get_column_index(target_column)
-        return self.get_row_by_column_value(src_column_name, src_column_value) \
-            .s("./td[{0}]".format(target_column_index))
-
-    @allure.step("Get table row by source column value and return the target column value")
-    def get_column_value(self, src_column_name: str, src_column_value: str, target_column: str) -> str:
-        return self.get_column_cell(src_column_name, src_column_value, target_column).get(query.text)
-
-    @allure.step
-    def hover_column_cell(self, src_column_name: str, src_column_value: str, target_column: str) -> Tooltip:
-        self.get_column_cell(src_column_name, src_column_value, target_column).hover()
-        return Tooltip()
+        row_elements = self.table.ss(self._ROW_BY_COLUMN_VALUE_XPATH.format(
+            self._get_column_index(column_name), column_value))
+        return self._get_wrapped_rows(row_elements)
 
     @allure.step("Sort table rows by column value in Ascending (A to Z) order")
     def sort_asc(self, column_name):
@@ -83,24 +115,10 @@ class _BaseTable(object):
         return self._get_column_sort_icon_down(column_name).matching(have.css_class("on"))
 
     @allure.step
-    def is_any_row_cell_contains_text_ignoring_case(self, table_row: Element, text: str) -> bool:
-        for cell_text in extract_text(self._get_raw_cells(table_row)):
+    def is_any_row_cell_contains_text_ignoring_case(self, table_row: TableRowWrapper, text: str) -> bool:
+        for cell_text in extract_text(table_row.cells):
             if text.lower() in cell_text.lower():
                 return True
-
-    @allure.step
-    def is_row_selected(self, row) -> bool:
-        return row.matching(have.css_class("selected"))
-
-    @allure.step
-    def _is_row_contains_button_by_text(self, row: Element, button_name: str) -> bool:
-        return row.s(".//button[span[text()='{}']]".format(button_name)).matching(be.visible)
-
-    def _get_header(self, header_name) -> Element:
-        return self.table.s(self.HEADER_XPATH + "[text()='{}']".format(header_name))
-
-    def _get_column_sorter(self, header_name) -> Element:
-        return self.table.s(".//th//*[@class='ant-table-column-sorters'][./span[text()='{}']]".format(header_name))
 
     def _get_column_index(self, column_name: str) -> int:
         return len(self.table.ss(".//th[.//span[@class='ant-table-column-title'][text()='{}']]/preceding-sibling::*"
@@ -112,33 +130,24 @@ class _BaseTable(object):
     def _get_column_sort_icon_down(self, header_name) -> Element:
         return self._get_column_sorter(header_name).s("i.ant-table-column-sorter-down")
 
-    @allure.step
-    def _get_row_button_by_column_value(self, column_name: str, column_value: str) -> Element:
-        return self.get_row_by_column_value(column_name, column_value).s("button")
+    def _get_column_sorter(self, header_name) -> Element:
+        return self.table.s(".//th//*[@class='ant-table-column-sorters'][./span[text()='{}']]".format(header_name))
 
-    @allure.step
-    def _get_row_button_with_name_by_column_value(self, column_name: str, column_value: str,
-                                                  button_name: str) -> Element:
-        return self.get_row_by_column_value(column_name, column_value) \
-            .s(".//button[span[text()='{}']]".format(button_name))
+    def _get_row_button_by_column_value(self, column_name: str, column_value: str) -> Element:
+        return self.get_row_by_column_value(column_name, column_value).button
 
     def _sort(self, icon):
         for i in range(2):
             if icon.matching(have.css_class("off")):
-                self._click_sort_icon(icon)
+                icon.s("svg").click()
                 self.wait_to_load()
 
     @staticmethod
-    def get_row_cell_text_by_index(row: Element, index: int) -> str:
-        return row.s("./td[{0}]".format(index)).get(query.text)
-
-    @staticmethod
-    def _click_sort_icon(icon: Element):
-        icon.s("svg").click()
-
-    @staticmethod
-    def _get_raw_cells(table_row: Element) -> []:
-        return table_row.ss("td")
+    def _get_wrapped_rows(row_elements: []):
+        wrapped_rows = []
+        for row_el in row_elements:
+            wrapped_rows.append(TableRowWrapper(row_el))
+        return wrapped_rows
 
 
 class PaginationElement(object):
@@ -171,4 +180,3 @@ class PaginationElement(object):
     @allure.step
     def is_right_arrow_disabled(self) -> bool:
         return self.right_arrow.matching(have.css_class(self._DISABLED_ARROW_CLASS))
-
