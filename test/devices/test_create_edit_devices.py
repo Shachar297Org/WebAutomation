@@ -38,7 +38,8 @@ class TestCreateEditDevices:
 
         dialog.title.should(have.exact_text(CreateDeviceDialog.TITLE))
 
-        assert_text_input_default_state(dialog.device_serial_number_input, CreateDeviceDialog.DEVICE_SERIAL_NUMBER_LABEL)
+        assert_text_input_default_state(dialog.device_serial_number_input,
+                                        CreateDeviceDialog.DEVICE_SERIAL_NUMBER_LABEL)
         assert_text_input_default_state(dialog.clinic_name_input, CreateDeviceDialog.CLINIC_NAME_LABEL)
         assert_text_input_default_state(dialog.first_name_input, CreateDeviceDialog.FIRST_NAME_LABEL)
         assert_text_input_default_state(dialog.last_name_input, CreateDeviceDialog.LAST_NAME_LABEL)
@@ -105,8 +106,8 @@ class TestCreateEditDevices:
         new_customer = random_usa_customer()
 
         devices_page = DevicesPage().open()
-        devices_page.add_device(device, customer)\
-            .reload()\
+        devices_page.add_device(device, customer) \
+            .reload() \
             .search_by(device.serial_number)
         properties_dialog = devices_page.open_device_properties(device.serial_number)
 
@@ -138,7 +139,7 @@ class TestCreateEditDevices:
         existing_device_serial_number = devices_page.table.get_column_values(DevicesTable.Headers.SERIAL_NUMBER)[0]
         existing_device_type = devices_page.table.get_column_values(DevicesTable.Headers.DEVICE_TYPE)[0].split("/")[-1]
         dialog = devices_page.click_add_device()
-        dialog.set_device_serial_number(existing_device_serial_number)\
+        dialog.set_device_serial_number(existing_device_serial_number) \
             .select_device_type_by_keyword(existing_device_type).click_create()
 
         assert_that(devices_page.notification.get_message()).is_equal_to(DevicesPage.CREATION_FAILURE_MESSAGE)
@@ -149,11 +150,10 @@ class TestCreateEditDevices:
         devices_page = DevicesPage().open()
         dialog = devices_page.click_add_device()
         dialog.set_clinic_name(random_company())
-
         dialog.click_create()
 
         assert_that(dialog.is_visible).is_true()
-        assert_that(get_element_error_message(dialog.device_serial_number_input))\
+        assert_that(get_element_error_message(dialog.device_serial_number_input)) \
             .is_equal_to(CreateDeviceDialog.FIELD_IS_REQUIRED_MESSAGE)
         assert_that(get_element_error_message(dialog.device_type_picker.picker)) \
             .is_equal_to(CreateDeviceDialog.FIELD_IS_REQUIRED_MESSAGE)
@@ -163,13 +163,13 @@ class TestCreateEditDevices:
     def test_create_device_with_too_long_parameters(self):
         devices_page = DevicesPage().open()
         dialog = devices_page.click_add_device()
-        dialog.set_device_serial_number(random_alpha_numeric_string(37))\
-            .set_clinic_name(random_alpha_numeric_string(33))\
-            .set_first_name(random_alpha_numeric_string(33))\
-            .set_last_name(random_alpha_numeric_string(33))\
-            .set_phone_number(random_alpha_numeric_string(33))\
-            .set_clinic_id(random_alpha_numeric_string(33))\
-            .set_street(random_alpha_numeric_string(101))\
+        dialog.set_device_serial_number(random_alpha_numeric_string(37)) \
+            .set_clinic_name(random_alpha_numeric_string(33)) \
+            .set_first_name(random_alpha_numeric_string(33)) \
+            .set_last_name(random_alpha_numeric_string(33)) \
+            .set_phone_number(random_alpha_numeric_string(33)) \
+            .set_clinic_id(random_alpha_numeric_string(33)) \
+            .set_street(random_alpha_numeric_string(101)) \
             .set_street_number(random_alpha_numeric_string(11)) \
             .set_city(random_alpha_numeric_string(101)) \
             .set_postal_code_zip(random_alpha_numeric_string(13)) \
@@ -179,7 +179,7 @@ class TestCreateEditDevices:
         assert_that(dialog.is_visible).is_true()
         assert_that(get_element_error_message(dialog.device_serial_number_input)) \
             .is_equal_to(CreateDeviceDialog.MAX_36_CHARS_ALLOWED_ERROR)
-        assert_that(get_element_error_message(dialog.clinic_name_input))\
+        assert_that(get_element_error_message(dialog.clinic_name_input)) \
             .is_equal_to(CreateDeviceDialog.MAX_32_CHARS_ALLOWED_ERROR)
         assert_that(get_element_error_message(dialog.first_name_input)) \
             .is_equal_to(CreateDeviceDialog.MAX_32_CHARS_ALLOWED_ERROR)
@@ -205,8 +205,8 @@ class TestCreateEditDevices:
     def test_create_device_with_invalid_parameters(self):
         devices_page = DevicesPage().open()
         dialog = devices_page.click_add_device()
-        dialog.set_device_serial_number(random_alpha_numeric_string(10) + " " + random_alpha_numeric_string(10))\
-            .select_device_type_by_keyword(RG_0000070)\
+        dialog.set_device_serial_number(random_alpha_numeric_string(10) + " " + random_alpha_numeric_string(10)) \
+            .select_device_type_by_keyword(RG_0000070) \
             .set_email(random_alpha_numeric_string(10))
 
         assert_that(get_element_error_message(dialog.email_input)).is_equal_to(CreateDeviceDialog.EMAIL_INVALID_ERROR)
