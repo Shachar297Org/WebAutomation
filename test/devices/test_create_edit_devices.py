@@ -1,11 +1,12 @@
 import allure
 import pytest
 from assertpy import assert_that
+from selene.support.conditions import have, be
 
 from src.const import Feature
 from src.domain.device import Customer, Device
-from src.site.components.cascader_picker import SEPARATOR
-from src.site.dialogs import DevicePropertiesDialog
+from src.site.components.cascader_picker import SEPARATOR, CascaderPicker
+from src.site.dialogs import CreateDeviceDialog, get_element_label, assert_text_input_default_state
 from src.site.login_page import LoginPage
 from src.site.components.tables import DevicesTable
 from src.site.pages import DevicesPage
@@ -24,6 +25,34 @@ def login(request):
 @pytest.mark.usefixtures("login")
 @allure.feature(Feature.DEVICES)
 class TestCreateEditDevices:
+
+    @allure.title("Verify 'Create Device' dialog web elements")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_create_device_dialog_elements(self):
+        devices_page = DevicesPage().open()
+        dialog = devices_page.click_add_device()
+
+        dialog.title.should(have.exact_text(CreateDeviceDialog.TITLE))
+
+        assert_text_input_default_state(dialog.device_serial_number_input, CreateDeviceDialog.DEVICE_SERIAL_NUMBER_LABEL)
+        assert_text_input_default_state(dialog.clinic_name_input, CreateDeviceDialog.CLINIC_NAME_LABEL)
+        assert_text_input_default_state(dialog.first_name_input, CreateDeviceDialog.FIRST_NAME_LABEL)
+        assert_text_input_default_state(dialog.last_name_input, CreateDeviceDialog.LAST_NAME_LABEL)
+        assert_text_input_default_state(dialog.email_input, CreateDeviceDialog.EMAIL_LABEL)
+        assert_text_input_default_state(dialog.phone_number_input, CreateDeviceDialog.PHONE_NUMBER_LABEL)
+        assert_text_input_default_state(dialog.clinic_id_input, CreateDeviceDialog.CLINIC_ID_LABEL)
+        assert_text_input_default_state(dialog.street_input, CreateDeviceDialog.STREET_LABEL)
+        assert_text_input_default_state(dialog.street_number_input, CreateDeviceDialog.STREET_NUMBER_LABEL)
+        assert_text_input_default_state(dialog.city_input, CreateDeviceDialog.CITY_LABEL)
+        assert_text_input_default_state(dialog.postal_zip_input, CreateDeviceDialog.POSTAL_ZIP_LABEL)
+        assert_text_input_default_state(dialog.comments_textarea, CreateDeviceDialog.COMMENTS_LABEL)
+
+        self.assert_cascader_picker_default_state(dialog.device_type_picker, CreateDeviceDialog.DEVICE_TYPE_LABEL)
+        self.assert_cascader_picker_default_state(dialog.region_country_picker, CreateDeviceDialog.REGION_COUNTRY_LABEL)
+
+        dialog.close_button.should(be.visible).should(be.clickable)
+        dialog.create_device_button.should(be.visible).should(be.clickable)
+        dialog.cancel_button.should(be.visible).should(be.clickable)
 
     @allure.title("3.4.2 Create new device")
     @allure.severity(allure.severity_level.CRITICAL)
@@ -123,3 +152,11 @@ class TestCreateEditDevices:
         assert_that(table.get_column_values(table.Headers.CLINIC_ID)).contains_only(expected.clinic_id)
         assert_that(table.get_column_values(table.Headers.CLINIC_NAME)).contains_only(expected.clinic_name)
         assert_that(table.get_column_values(table.Headers.COUNTRY)).contains_only(expected.region_country)
+
+    @allure.step
+    def assert_cascader_picker_default_state(self, picker: CascaderPicker, expected_label: str):
+        picker.picker.should(be.visible)
+        picker.input.should(be.visible).should(be.clickable).should(be.blank)
+        assert_that(picker.is_disabled()).described_as(expected_label + " picker to be disabled").is_false()
+        assert_that(picker.get_selected_item()).described_as(expected_label + " picker to be empty").is_empty()
+        assert_that(get_element_label(picker.picker)).is_equal_to(expected_label)

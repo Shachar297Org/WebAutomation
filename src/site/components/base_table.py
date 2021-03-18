@@ -52,7 +52,7 @@ class TableRowWrapper:
                                   .format(column_name))) + 1
 
 
-class _BaseTable(object):
+class Table(object):
     _ROW_BY_COLUMN_VALUE_XPATH = ".//tbody/tr[td[{0}][./descendant-or-self::text()='{1}']]"
 
     def __init__(self, locator: str):

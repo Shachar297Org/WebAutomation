@@ -9,7 +9,8 @@ from src.domain.credentials import Credentials
 from src.domain.user import User
 from src.site.components.base_table import TableRowWrapper
 from src.site.components.tree_selector import SEPARATOR, get_formatted_selected_plus_item
-from src.site.dialogs import CreateUserDialog
+from src.site.dialogs import CreateUserDialog, get_element_label, assert_text_input_default_state, \
+    assert_select_box_default_state, assert_tree_selector_default_state
 from src.site.login_page import LoginPage
 from src.site.components.tables import UsersTable, DeviceAssignmentTable
 from src.site.pages import UsersPage
@@ -65,45 +66,17 @@ class TestCreateEditUsers:
 
         dialog.title.should(have.exact_text(CreateUserDialog.TITLE))
 
-        dialog.first_name_input.should(be.visible).should(be.enabled).should(be.blank)
-        assert_that(dialog.get_element_label(dialog.first_name_input)).is_equal_to(CreateUserDialog.FIRST_NAME_LABEL)
-        dialog.last_name_input.should(be.visible).should(be.enabled).should(be.blank)
-        assert_that(dialog.get_element_label(dialog.last_name_input)).is_equal_to(CreateUserDialog.LAST_NAME_LABEL)
-        dialog.email_input.should(be.visible).should(be.enabled).should(be.blank)
-        assert_that(dialog.get_element_label(dialog.email_input)).is_equal_to(CreateUserDialog.EMAIL_LABEL)
-        dialog.phone_number_input.should(be.visible).should(be.enabled).should(be.blank)
-        assert_that(dialog.get_element_label(dialog.phone_number_input)).is_equal_to(
-            CreateUserDialog.PHONE_NUMBER_LABEL)
+        assert_text_input_default_state(dialog.first_name_input, CreateUserDialog.FIRST_NAME_LABEL)
+        assert_text_input_default_state(dialog.last_name_input, CreateUserDialog.LAST_NAME_LABEL)
+        assert_text_input_default_state(dialog.email_input, CreateUserDialog.EMAIL_LABEL)
+        assert_text_input_default_state(dialog.phone_number_input, CreateUserDialog.PHONE_NUMBER_LABEL)
+        assert_select_box_default_state(dialog.user_group_select, CreateUserDialog.USER_GROUP_LABEL)
+        assert_select_box_default_state(dialog.manager_select, CreateUserDialog.MANAGER_LABEL, is_enabled=False)
 
-        dialog.user_group_select.select.should(be.visible)
-        assert_that(dialog.user_group_select.is_enabled()) \
-            .described_as("'User Group' select to be enabled").is_true()
-        assert_that(dialog.user_group_select.is_empty()) \
-            .described_as("'User Group' select to be empty").is_true()
-        assert_that(dialog.get_element_label(dialog.user_group_select.select)) \
-            .is_equal_to(CreateUserDialog.USER_GROUP_LABEL)
-
-        dialog.manager_select.select.should(be.visible)
-        assert_that(dialog.manager_select.is_disabled()) \
-            .described_as("'Manager' select to be disabled").is_true()
-        assert_that(dialog.manager_select.is_empty()) \
-            .described_as("'Manager' select to be empty").is_true()
-        assert_that(dialog.get_element_label(dialog.manager_select.select)) \
-            .is_equal_to(CreateUserDialog.MANAGER_LABEL)
-
-        dialog.location_tree_picker.tree_selector.should(be.visible)
-        assert_that(dialog.location_tree_picker.is_enabled()) \
-            .described_as("'Location' tree picker to be enabled").is_true()
-        assert_that(dialog.location_tree_picker.selected_items()) \
-            .described_as("'Location' tree picker to be empty").is_empty()
-        assert_that(dialog.get_element_label(dialog.location_tree_picker.tree_selector)) \
+        assert_that(get_element_label(dialog.location_tree_picker.tree_selector)) \
             .is_equal_to(CreateUserDialog.DEVICE_ASSIGNMENT_LABEL)
-
-        dialog.device_tree_picker.tree_selector.should(be.visible)
-        assert_that(dialog.device_tree_picker.is_enabled()) \
-            .described_as("'Device Types' tree picker to be enabled").is_true()
-        assert_that(dialog.device_tree_picker.selected_items()) \
-            .described_as("'Device Types' tree picker to be empty").is_empty()
+        assert_tree_selector_default_state(dialog.location_tree_picker, CreateUserDialog.LOCATIONS_PLACEHOLDER)
+        assert_tree_selector_default_state(dialog.device_tree_picker, CreateUserDialog.DEVICE_TYPES_PLACEHOLDER)
 
         dialog.device_table.table.should(be.visible).should(be.enabled)
         assert_that(dialog.device_table.get_rows()).described_as("Device table to be empty").is_empty()

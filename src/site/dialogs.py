@@ -14,10 +14,44 @@ from src.domain.user import User
 from src.site.components.base_table import PaginationElement
 from src.site.components.cascader_picker import RegionCountryCascaderPicker, DeviceTypeCascaderPicker
 from src.site.components.simple_components import SelectBox, SearchInput
-from src.site.components.tree_selector import LocationTreeSelector, DeviceTypesTreeSelector
+from src.site.components.tree_selector import LocationTreeSelector, DeviceTypesTreeSelector, TreeSelector
 from src.site.components.tables import DeviceAssignmentTable, PropertiesTable, AssignUserTable, V2CHistoryTable, \
     AlarmHistoryTable
 from src.util.elements_util import clear_text_input, JS_CLICK
+
+
+@allure.step
+def get_element_label(element: Element) -> str:
+    return element.s("./ancestor::*[contains(@class,'ant-row ant-form-item')]//label").get(query.text)
+
+
+@allure.step
+def assert_text_input_default_state(text_input: Element, expected_label: str):
+    text_input.should(be.visible).should(be.enabled).should(be.blank)
+    assert_that(get_element_label(text_input)).described_as("Input label").is_equal_to(expected_label)
+
+
+@allure.step
+def assert_select_box_default_state(select_box: SelectBox, expected_label: str, is_enabled=True):
+    select_box.select.should(be.visible)
+    assert_that(select_box.is_empty()).described_as(expected_label + " select to be empty").is_true()
+    assert_that(get_element_label(select_box.select)).is_equal_to(expected_label)
+    if is_enabled:
+        assert_that(select_box.is_enabled()).described_as(expected_label + " select to be enabled").is_true()
+    else:
+        assert_that(select_box.is_enabled()).described_as(expected_label + " select to be enabled").is_false()
+
+
+@allure.step
+def assert_tree_selector_default_state(tree_selector: TreeSelector, placeholder: str, is_enabled=True):
+    tree_selector.tree_selector.should(be.visible)
+    assert_that(tree_selector.selected_items()).described_as(placeholder + "tree selector to be empty").is_empty()
+    assert_that(tree_selector.get_placeholder()).is_equal_to(placeholder)
+
+    if is_enabled:
+        assert_that(tree_selector.is_enabled()).described_as(placeholder + " tree selector to be enabled").is_true()
+    else:
+        assert_that(tree_selector.is_enabled()).described_as(placeholder + " tree selector to be enabled").is_false()
 
 
 class _BaseDialog:
@@ -34,10 +68,6 @@ class _BaseDialog:
         (wait to some element that exists only for the particular dialog)"""
 
     @allure.step
-    def get_element_label(self, element: Element) -> str:
-        return element.s("./ancestor::*[contains(@class,'ant-row ant-form-item')]//label").get(query.text)
-
-    @allure.step
     def get_element_error_message(self, element: Element) -> str:
         return element.s("./parent::span/following-sibling::div[@class='ant-form-explain']").get(query.text)
 
@@ -51,13 +81,16 @@ class _BaseDialog:
 
 
 class _BaseCreateEditUserDialog(_BaseDialog):
-    DEVICE_ASSIGNMENT_LABEL = "Device assignment"
     FIRST_NAME_LABEL = "First Name"
     LAST_NAME_LABEL = "Last Name"
     EMAIL_LABEL = "Email"
     PHONE_NUMBER_LABEL = "Phone Number"
     USER_GROUP_LABEL = "User Group"
     MANAGER_LABEL = "Manager"
+
+    DEVICE_ASSIGNMENT_LABEL = "Device assignment"
+    LOCATIONS_PLACEHOLDER = "Locations"
+    DEVICE_TYPES_PLACEHOLDER = "Device Types"
 
     INVALID_EMAIL_MESSAGE = "The input is not valid E-mail!"
     FIELD_IS_REQUIRED_MESSAGE = "This field is required"

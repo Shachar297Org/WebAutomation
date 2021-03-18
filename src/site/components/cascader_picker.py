@@ -12,7 +12,7 @@ from src.util.elements_util import extract_titles
 SEPARATOR = "/"
 
 
-class _BaseCascaderPicker:
+class CascaderPicker:
 
     def __init__(self, picker_locator):
         self.picker = s(picker_locator)
@@ -46,27 +46,6 @@ class _BaseCascaderPicker:
         self.filtered_items.filtered_by(have.text(keyword)).first.click()
 
     @allure.step
-    def _expand_first_level_item(self, text) -> Element:
-        self.open()
-        return self._expand_menu_item(self.first_menu, text)
-
-    @allure.step
-    def _expand_second_level_item(self, first_level_item: str, second_level_item: str) -> Element:
-        second_level_menu = self._expand_first_level_item(first_level_item)
-        return self._expand_menu_item(second_level_menu, second_level_item)
-
-    @allure.step
-    def _select_second_level_item(self, first_level_item: str, second_level_item: str) -> Element:
-        second_level_menu = self._expand_first_level_item(first_level_item)
-        return self._select_menu_item(second_level_menu, second_level_item)
-
-    @allure.step
-    def _select_third_level_item(self, first_level_item: str, second_level_item: str,
-                                 third_level_item: str) -> Element:
-        third_level_menu = self._expand_second_level_item(first_level_item, second_level_item)
-        return self._select_menu_item(third_level_menu, third_level_item)
-
-    @allure.step
     def filter(self, text):
         self.input.set_value(text).press_enter()
         return self
@@ -90,6 +69,27 @@ class _BaseCascaderPicker:
         return self
 
     @allure.step
+    def _expand_first_level_item(self, text) -> Element:
+        self.open()
+        return self._expand_menu_item(self.first_menu, text)
+
+    @allure.step
+    def _expand_second_level_item(self, first_level_item: str, second_level_item: str) -> Element:
+        second_level_menu = self._expand_first_level_item(first_level_item)
+        return self._expand_menu_item(second_level_menu, second_level_item)
+
+    @allure.step
+    def _select_second_level_item(self, first_level_item: str, second_level_item: str) -> Element:
+        second_level_menu = self._expand_first_level_item(first_level_item)
+        return self._select_menu_item(second_level_menu, second_level_item)
+
+    @allure.step
+    def _select_third_level_item(self, first_level_item: str, second_level_item: str,
+                                 third_level_item: str) -> Element:
+        third_level_menu = self._expand_second_level_item(first_level_item, second_level_item)
+        return self._select_menu_item(third_level_menu, third_level_item)
+
+    @allure.step
     def _expand_menu_item(self, menu: Element, text: str) -> Element:
         self._select_menu_item(menu, text)
         return menu.s("./following-sibling::ul")
@@ -99,7 +99,7 @@ class _BaseCascaderPicker:
         menu.s("./li[@title='{}']".format(text)).perform(command.js.scroll_into_view).click()
 
 
-class DeviceTypeCascaderPicker(_BaseCascaderPicker):
+class DeviceTypeCascaderPicker(CascaderPicker):
 
     @allure.step
     def select_device(self, group: str, model: str, device: str):
@@ -107,7 +107,7 @@ class DeviceTypeCascaderPicker(_BaseCascaderPicker):
         return self
 
 
-class RegionCountryCascaderPicker(_BaseCascaderPicker):
+class RegionCountryCascaderPicker(CascaderPicker):
 
     @allure.step
     def filter(self, text):

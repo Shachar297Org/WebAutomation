@@ -97,7 +97,7 @@ class _ChildTreeWrapper:
         return extract_text(self.tree.ss("./li/span[@title]"))
 
 
-class _BaseTreeSelector:
+class TreeSelector:
     def __init__(self, tree_selector_locator: str):
         self.tree_selector = s(tree_selector_locator)
 
@@ -212,7 +212,7 @@ class _BaseTreeSelector:
         return self.tree_selector.matching(be.present)
 
 
-class LocationTreeSelector(_BaseTreeSelector):
+class LocationTreeSelector(TreeSelector):
 
     @allure.step
     def select_regions(self, *regions):
@@ -230,7 +230,7 @@ class LocationTreeSelector(_BaseTreeSelector):
         return self
 
 
-class DeviceTypesTreeSelector(_BaseTreeSelector):
+class DeviceTypesTreeSelector(TreeSelector):
 
     @allure.step
     def select_device_groups(self, *device_groups):

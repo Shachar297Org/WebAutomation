@@ -1,14 +1,14 @@
 import allure
 from selene import query
 from selene.core.entity import Element
-from selene.support.conditions import have, be
+from selene.support.conditions import be
 from selene.support.shared.jquery_style import s
 
-from src.site.components.base_table import _BaseTable, TableRowWrapper
+from src.site.components.base_table import Table, TableRowWrapper
 from src.util.elements_util import extract_text
 
 
-class UsersTable(_BaseTable):
+class UsersTable(Table):
     _EDIT_TEXT = "Edit"
     _VIEW_TEXT = "View"
 
@@ -41,7 +41,7 @@ class UsersTable(_BaseTable):
         ACTION_BUTTON = ""
 
 
-class DeviceAssignmentTable(_BaseTable):
+class DeviceAssignmentTable(Table):
     _EDIT_TEXT = "Edit"
     _REMOVE_TEXT = "Remove"
 
@@ -101,7 +101,7 @@ class DeviceAssignmentTable(_BaseTable):
         ACTION_BUTTON = ""
 
 
-class DevicesTable(_BaseTable):
+class DevicesTable(Table):
     INACTIVE_STATUS = "Inactive"
     ACTIVE_STATUS = "Active"
     _PROPERTIES_TEXT = "Properties"
@@ -194,7 +194,7 @@ class PropertiesTable:
         CUSTOM_MESSAGE = "Custom Message"
 
 
-class AssignUserTable(_BaseTable):
+class AssignUserTable(Table):
 
     class Headers:
         ASSIGN = "Assign"
@@ -202,7 +202,7 @@ class AssignUserTable(_BaseTable):
         USER_GROUP = "User Group"
 
 
-class V2CHistoryTable(_BaseTable):
+class V2CHistoryTable(Table):
 
     class Headers:
         FILE_NAME = "File Name"
@@ -210,7 +210,7 @@ class V2CHistoryTable(_BaseTable):
         COMMENTS = "Comments"
 
 
-class AlarmHistoryTable(_BaseTable):
+class AlarmHistoryTable(Table):
 
     class Headers:
         DATE = "Date"
