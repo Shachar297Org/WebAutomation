@@ -26,6 +26,11 @@ def get_element_label(element: Element) -> str:
 
 
 @allure.step
+def get_element_error_message(element: Element) -> str:
+    return element.s("./parent::span/following-sibling::div[@class='ant-form-explain']").get(query.text)
+
+
+@allure.step
 def assert_text_input_default_state(text_input: Element, expected_label: str):
     text_input.should(be.visible).should(be.enabled).should(be.blank)
     assert_that(get_element_label(text_input)).described_as("Input label").is_equal_to(expected_label)
@@ -55,6 +60,8 @@ def assert_tree_selector_default_state(tree_selector: TreeSelector, placeholder:
 
 
 class _BaseDialog:
+    FIELD_IS_REQUIRED_MESSAGE = "This field is required"
+
     def __init__(self):
         self.dialog = s(".ant-modal-content")
         self.title = self.dialog.s(".ant-modal-title")
@@ -62,14 +69,13 @@ class _BaseDialog:
         self.cancel_button = self.dialog.s("//button[span[text()='Cancel']]")
         self.close_button = self.dialog.s("button.ant-modal-close")
 
+    def is_visible(self) -> bool:
+        return self.dialog.matching(be.visible)
+
     @abc.abstractmethod
     def wait_to_load(self):
         """"Method should check if the dialog is loaded by some unique conditions
         (wait to some element that exists only for the particular dialog)"""
-
-    @allure.step
-    def get_element_error_message(self, element: Element) -> str:
-        return element.s("./parent::span/following-sibling::div[@class='ant-form-explain']").get(query.text)
 
     @allure.step
     def close(self):
@@ -93,7 +99,6 @@ class _BaseCreateEditUserDialog(_BaseDialog):
     DEVICE_TYPES_PLACEHOLDER = "Device Types"
 
     INVALID_EMAIL_MESSAGE = "The input is not valid E-mail!"
-    FIELD_IS_REQUIRED_MESSAGE = "This field is required"
 
     def __init__(self):
         super().__init__()
@@ -295,6 +300,15 @@ class _BaseDeviceDialog(_BaseDialog, ABC):
     COMMENTS_LABEL = "Comments"
     REGION_COUNTRY_LABEL = "Region / Country"
     STATE_LABEL = "State"
+
+    _MAX_CHARS_ALLOWED_ERROR = "Max {} characters allowed"
+    MAX_12_CHARS_ALLOWED_ERROR = _MAX_CHARS_ALLOWED_ERROR.format(12)
+    MAX_32_CHARS_ALLOWED_ERROR = _MAX_CHARS_ALLOWED_ERROR.format(32)
+    MAX_36_CHARS_ALLOWED_ERROR = _MAX_CHARS_ALLOWED_ERROR.format(36)
+    MAX_10_CHARS_ALLOWED_ERROR = _MAX_CHARS_ALLOWED_ERROR.format(10)
+    MAX_100_CHARS_ALLOWED_ERROR = _MAX_CHARS_ALLOWED_ERROR.format(100)
+    MAX_256_CHARS_ALLOWED_ERROR = _MAX_CHARS_ALLOWED_ERROR.format(256)
+    EMAIL_INVALID_ERROR = "The input is not valid E-mail!"
 
     def __init__(self):
         super().__init__()
