@@ -93,7 +93,6 @@ class _BaseCreateEditUserDialog(_BaseDialog):
 
     @allure.step
     def set_user_fields(self, user: User):
-        self.first_name_input.clear()
         self.set_first_name(user.first_name)
         self.set_last_name(user.last_name)
         self.set_email(user.email)
@@ -108,7 +107,7 @@ class _BaseCreateEditUserDialog(_BaseDialog):
 
     @allure.step
     def set_first_name(self, text: str):
-        self.first_name_input.type(text)
+        clear_text_input(self.first_name_input).type(text)
         return self
 
     @allure.step
@@ -117,7 +116,7 @@ class _BaseCreateEditUserDialog(_BaseDialog):
 
     @allure.step
     def set_last_name(self, text: str):
-        self.last_name_input.type(text)
+        clear_text_input(self.last_name_input).type(text)
         return self
 
     @allure.step
@@ -126,7 +125,7 @@ class _BaseCreateEditUserDialog(_BaseDialog):
 
     @allure.step
     def set_email(self, text: str):
-        self.email_input.type(text)
+        clear_text_input(self.email_input).type(text)
         return self
 
     @allure.step
@@ -135,7 +134,7 @@ class _BaseCreateEditUserDialog(_BaseDialog):
 
     @allure.step
     def set_phone_number(self, text: str):
-        self.phone_number_input.clear().type(text)
+        clear_text_input(self.phone_number_input.clear()).type(text)
         return self
 
     @allure.step
