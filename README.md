@@ -13,13 +13,13 @@
 
 ## Run the tests
 ```
-# pytest <tests path>
+ pytest <tests path>
 ```
 
 ### Examples 
 ```
-$ pytest test - running all tests
-$ pytest test.users - running all tests in the users package
+ pytest test - running all tests
+ pytest test.users - running all tests in the users package
 ```
 ####TODO Add more examples 
 
@@ -28,6 +28,6 @@ To see the actual report after your tests have finished, you need to use [Allure
 to generate report from the results.
 
 ```
-$ allure serve .allure_results
+ allure serve .allure_results
 ```
 This command will show you generated report in your default browser.
