@@ -10,7 +10,7 @@ from src.site.components.cascader_picker import SEPARATOR, CascaderPicker
 from src.site.dialogs import CreateDeviceDialog, get_element_label, assert_text_input_default_state, \
     get_element_error_message
 from src.site.login_page import LoginPage
-from src.site.components.tables import DevicesTable
+from src.site.components.tables import DevicesTable, PropertiesTable
 from src.site.pages import DevicesPage
 from src.util.elements_util import is_input_disabled
 from src.util.random_util import random_company, random_alpha_numeric_string, random_gmail_alias_from
@@ -76,6 +76,23 @@ class TestCreateEditDevices:
         edit_dialog = devices_page.open_device_properties(new_device.serial_number)
 
         edit_dialog.general.assert_device_fields(new_device)
+
+        edit_dialog.properties.open()
+
+        assert_that(edit_dialog.properties.get_property(PropertiesTable.Property.DEVICE_TYPE))\
+            .is_equal_to(new_device.device)
+        assert_that(edit_dialog.properties.get_property(PropertiesTable.Property.DEVICE_SERIAL_NUMBER)) \
+            .is_equal_to(new_device.serial_number)
+        assert_that(edit_dialog.properties.get_property(PropertiesTable.Property.STATUS)) \
+            .is_equal_to(DevicesTable.INACTIVE_STATUS)
+        assert_that(edit_dialog.properties.get_property(PropertiesTable.Property.CREATION_TIME)) \
+            .is_not_empty()
+        assert_that(edit_dialog.properties.get_property(PropertiesTable.Property.LUMENIS_APP_VERSION)) \
+            .is_empty()
+        assert_that(edit_dialog.properties.get_property(PropertiesTable.Property.ACTIVATION_TYPE)) \
+            .is_empty()
+        assert_that(edit_dialog.properties.get_property(PropertiesTable.Property.IMEI)) \
+            .is_empty()
 
     @allure.title("3.4.2 Create new device with all “Customer” fields")
     @allure.severity(allure.severity_level.NORMAL)

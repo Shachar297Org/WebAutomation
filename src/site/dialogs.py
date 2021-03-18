@@ -600,7 +600,7 @@ class DevicePropertiesDialog(_BaseDialog):
 
         @allure.step
         def open(self):
-            return self.tabs_bar.s(".//div[@role='tab'][text()='{}']".format(self.name))
+            return self.tabs_bar.s(".//div[@role='tab'][text()='{}']".format(self.name)).click()
 
     class GeneralTab(_BaseTab, _BaseDeviceDialog):
         def __init__(self):
@@ -625,6 +625,9 @@ class DevicePropertiesDialog(_BaseDialog):
         def __init__(self):
             super().__init__()
             self.table = PropertiesTable(self._ACTIVE_TAB_CSS + " .ant-table-wrapper")
+
+        def get_property(self, property_name: str):
+            return self.table.get_property_value(property_name)
 
         @property
         def name(self) -> str:
