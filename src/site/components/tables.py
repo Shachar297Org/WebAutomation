@@ -13,29 +13,16 @@ class UsersTable(_BaseTable):
     _VIEW_TEXT = "View"
 
     @allure.step
-    def get_name_by_email(self, email: str) -> str:
-        return self._get_row_by_email(email).get_cell_text(self.Headers.NAME)
-
-    @allure.step
-    def get_phone_by_email(self, email: str) -> str:
-        return self._get_row_by_email(email).get_cell_text(self.Headers.PHONE)
-
-    @allure.step
-    def get_user_group_by_email(self, email: str) -> str:
-        return self._get_row_by_email(email).get_cell_text(self.Headers.USER_GROUP)
-
-    @allure.step
-    def get_manager_by_email(self, email: str) -> str:
-        return self._get_row_by_email(email).get_cell_text(self.Headers.MANAGER)
+    def get_row_by_email(self, email: str) -> TableRowWrapper:
+        return self.get_row_by_column_value(self.Headers.EMAIL, email)
 
     @allure.step
     def is_user_editable(self, email: str) -> bool:
-        return self._get_row_button_by_column_value(self.Headers.EMAIL, email)\
-            .matching(have.exact_text(self._EDIT_TEXT))
+        return self.get_row_by_email(email).has_button_with_text(self._EDIT_TEXT)
 
     @allure.step
     def is_lock_icon_displayed(self, email: str) -> bool:
-        return self._get_row_by_email(email).row.s(".anticon-lock").matching(be.visible)
+        return self.get_row_by_email(email).row.s(".anticon-lock").matching(be.visible)
 
     @allure.step
     def click_edit(self, email: str):
@@ -44,10 +31,6 @@ class UsersTable(_BaseTable):
     @allure.step
     def click_view(self, email: str):
         self.get_row_by_column_value(self.Headers.EMAIL, email).click_button(self._VIEW_TEXT)
-
-    @allure.step
-    def _get_row_by_email(self, email: str) -> TableRowWrapper:
-        return self.get_row_by_column_value(self.Headers.EMAIL, email)
 
     class Headers:
         NAME = "Name"
@@ -65,6 +48,10 @@ class DeviceAssignmentTable(_BaseTable):
     @allure.step
     def get_rows_by_region(self, region: str) -> []:
         return self.get_rows_by_column_value(self.Headers.REGION, region)
+
+    @allure.step
+    def get_row_by_region(self, region: str) -> TableRowWrapper:
+        return self.get_row_by_column_value(self.Headers.REGION, region)
 
     @allure.step
     def get_rows_by_device_types(self, device_types: str) -> []:
@@ -137,8 +124,7 @@ class DevicesTable(_BaseTable):
 
     @allure.step
     def is_device_editable(self, serial_number: str) -> bool:
-        return self._get_row_button_by_column_value(self.Headers.SERIAL_NUMBER, serial_number)\
-            .matching(have.exact_text(self._PROPERTIES_TEXT))
+        return self.get_row_by_serial_number(serial_number).has_button_with_text(self._PROPERTIES_TEXT)
 
     @allure.step
     def is_row_contains_properties_button(self, row) -> bool:

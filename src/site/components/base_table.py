@@ -133,9 +133,6 @@ class _BaseTable(object):
     def _get_column_sorter(self, header_name) -> Element:
         return self.table.s(".//th//*[@class='ant-table-column-sorters'][./span[text()='{}']]".format(header_name))
 
-    def _get_row_button_by_column_value(self, column_name: str, column_value: str) -> Element:
-        return self.get_row_by_column_value(column_name, column_value).button
-
     def _sort(self, icon):
         for i in range(2):
             if icon.matching(have.css_class("off")):

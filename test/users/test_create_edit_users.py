@@ -7,6 +7,7 @@ from src.const import Feature, Region, APAC_Country, DeviceGroup, UserGroup, Acu
     AmericasCountry
 from src.domain.credentials import Credentials
 from src.domain.user import User
+from src.site.components.base_table import TableRowWrapper
 from src.site.components.tree_selector import SEPARATOR, get_formatted_selected_plus_item
 from src.site.dialogs import CreateUserDialog
 from src.site.login_page import LoginPage
@@ -128,12 +129,9 @@ class TestCreateEditUsers:
 
         users_page.reload().search_by(new_user.email)
 
-        assert_that(users_page.table.get_column_values(headers.EMAIL)).contains_only(new_user.email)
-        assert_that(users_page.table.get_name_by_email(new_user.email)).is_equal_to(new_user.name)
-        assert_that(users_page.table.get_phone_by_email(new_user.email)).is_equal_to(new_user.phone_number)
-        assert_that(users_page.table.get_user_group_by_email(new_user.email)).is_equal_to(new_user.user_group)
-        assert_that(users_page.table.get_manager_by_email(new_user.email)).is_equal_to(new_user.manager)
-
+        assert_that(users_page.table.get_column_values(headers.EMAIL)).contains(new_user.email)
+        user_row = users_page.table.get_row_by_email(new_user.email)
+        self.assert_user_row(user_row, new_user)
         assert_that(users_page.table.is_user_editable(new_user.email)).described_as("Edit link").is_true()
 
         edit_dialog = users_page.open_edit_user_dialog(new_user.email)
@@ -194,9 +192,9 @@ class TestCreateEditUsers:
             assert_that(dialog.device_table.is_row_contains_edit_button(row)).described_as("Edit button").is_true()
             assert_that(dialog.device_table.is_row_contains_remove_button(row)).described_as("Remove button").is_true()
 
-        # tooltip = dialog.device_table.hover_column_cell(DeviceAssignmentTable.Headers.REGION, expected_region,
-        #                                                 DeviceAssignmentTable.Headers.DEVICE_TYPES).wait_to_be_loaded()
-        # TODO debug why tooltip isn't hovered
+        # tooltip = dialog.device_table.get_row_by_region(expected_region).hover_column_cell(
+        #     DeviceAssignmentTable.Headers.DEVICE_TYPES).wait_to_be_loaded()
+        # # TODO debug why tooltip isn't hovered
         # assert_that(tooltip.get_items_text()).described_as("Tooltip device type values").contains_only(
         #     expected_device_tooltip_prefix + test_device1, expected_device_tooltip_prefix + test_device2,
         #     expected_device_tooltip_prefix + test_device3, expected_device_tooltip_prefix + test_device4)
@@ -249,10 +247,8 @@ class TestCreateEditUsers:
         users_page.reload().search_by(new_user.email)
 
         assert_that(users_page.table.get_column_values(UsersTable.Headers.EMAIL)).contains_only(new_user.email)
-        assert_that(users_page.table.get_name_by_email(new_user.email)).is_equal_to(new_user.name)
-        assert_that(users_page.table.get_phone_by_email(new_user.email)).is_equal_to(new_user.phone_number)
-        assert_that(users_page.table.get_user_group_by_email(new_user.email)).is_equal_to(new_user.user_group)
-        assert_that(users_page.table.get_manager_by_email(new_user.email)).is_equal_to(new_user.manager)
+        user_row = users_page.table.get_row_by_email(new_user.email)
+        self.assert_user_row(user_row, new_user)
 
     @allure.title("Add 8 devices. Verify pagination")
     @allure.severity(allure.severity_level.NORMAL)
@@ -338,6 +334,15 @@ class TestCreateEditUsers:
 
         assert_that(users_page.notification.get_message()).is_equal_to(UsersPage.RESET_PASSWORD_MESSAGE)
         # TODO implement email client and add verification that 'Reset Password' email is received.
+
+    @allure.step
+    def assert_user_row(self, row: TableRowWrapper, expected: User):
+        headers = UsersTable.Headers
+        assert_that(row.get_cell_text(headers.EMAIL)).is_equal_to(expected.email)
+        assert_that(row.get_cell_text(headers.NAME)).is_equal_to(expected.name)
+        assert_that(row.get_cell_text(headers.PHONE)).is_equal_to(expected.phone_number)
+        assert_that(row.get_cell_text(headers.USER_GROUP)).is_equal_to(expected.user_group)
+        assert_that(row.get_cell_text(headers.MANAGER)).is_equal_to(expected.manager)
 
 
 @allure.feature(Feature.USERS)
