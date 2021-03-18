@@ -5,11 +5,12 @@ from assertpy import assert_that
 from src.const import Feature
 from src.domain.device import Customer, Device
 from src.site.components.cascader_picker import SEPARATOR
+from src.site.dialogs import DevicePropertiesDialog
 from src.site.login_page import LoginPage
 from src.site.components.tables import DevicesTable
 from src.site.pages import DevicesPage
 from src.util.elements_util import is_input_disabled
-from test.test_data_provider import super_admin_credentials, random_device, random_usa_customer
+from test.test_data_provider import super_admin_credentials, random_device, random_usa_customer, TEST_DEVICE_PREFIX
 
 
 @pytest.fixture(scope="class")
@@ -96,6 +97,19 @@ class TestCreateEditDevices:
         edit_dialog.general.assert_device_fields(device)
         edit_dialog.general.assert_customer_fields(new_customer)
 
+    @allure.title("Validation: Create the same device twice")
+    @allure.severity(allure.severity_level.MINOR)
+    def test_create_the_same_device_twice(self):
+        devices_page = DevicesPage().open()
+        devices_page.search_by(TEST_DEVICE_PREFIX)
+        existing_device_serial_number = devices_page.table.get_column_values(DevicesTable.Headers.SERIAL_NUMBER)[0]
+        existing_device_type = devices_page.table.get_column_values(DevicesTable.Headers.DEVICE_TYPE)[0].split("/")[-1]
+        dialog = devices_page.click_add_device()
+        dialog.set_device_serial_number(existing_device_serial_number)\
+            .select_device_type_by_keyword(existing_device_type).click_create()
+
+        assert_that(devices_page.notification.get_message()).is_equal_to(DevicesPage.CREATION_FAILURE_MESSAGE)
+
     @allure.step
     def assert_device_in_table(self, table: DevicesTable, expected: Device):
         assert_that(table.get_column_values(table.Headers.SERIAL_NUMBER)).contains_only(expected.serial_number)
@@ -109,4 +123,3 @@ class TestCreateEditDevices:
         assert_that(table.get_column_values(table.Headers.CLINIC_ID)).contains_only(expected.clinic_id)
         assert_that(table.get_column_values(table.Headers.CLINIC_NAME)).contains_only(expected.clinic_name)
         assert_that(table.get_column_values(table.Headers.COUNTRY)).contains_only(expected.region_country)
-

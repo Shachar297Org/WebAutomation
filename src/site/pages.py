@@ -158,6 +158,7 @@ class DevicesPage(_BasePage):
 
     DEVICE_CREATED_MESSAGE = "Create Device successful"
     DEVICE_UPDATED_MESSAGE = "Update Device successful"
+    CREATION_FAILURE_MESSAGE = "Creation Failure"
 
     def __init__(self):
         super().__init__()
