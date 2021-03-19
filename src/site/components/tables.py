@@ -1,7 +1,7 @@
 import allure
 from selene import query
 from selene.core.entity import Element
-from selene.support.conditions import be
+from selene.support.conditions import be, have
 from selene.support.shared.jquery_style import s
 
 from src.site.components.base_table import Table, TableRowWrapper
@@ -195,6 +195,38 @@ class PropertiesTable:
 
 
 class AssignUserTable(Table):
+    _CHECKBOX_CHECKED_CLASS = "ant-checkbox-checked"
+
+    @allure.step
+    def get_user_group_by_username(self, username: str) -> str:
+        return self._get_row_by_username(username).get_cell_text(AssignUserTable.Headers.USER_GROUP)
+
+    @allure.step
+    def hover_row_by_username(self, username: str) -> Element:
+        return self._get_row_by_username(username).row.hover()
+
+    @allure.step
+    def select_user(self, username: str):
+        if not self.is_user_selected(username):
+            self._click_assign_checkbox(username).wait_until(have.css_class(self._CHECKBOX_CHECKED_CLASS))
+
+    @allure.step
+    def unselect_user(self, username: str):
+        if self.is_user_selected(username):
+            self._click_assign_checkbox(username).wait_until(have.no.css_class(self._CHECKBOX_CHECKED_CLASS))
+
+    @allure.step
+    def is_user_selected(self, username: str) -> bool:
+        return self._get_assign_checkbox_by_username(username).matching(have.css_class(self._CHECKBOX_CHECKED_CLASS))
+
+    def _click_assign_checkbox(self, username: str) -> Element:
+        return self._get_assign_checkbox_by_username(username).click()
+
+    def _get_assign_checkbox_by_username(self, username: str) -> Element:
+        return self._get_row_by_username(username).get_cell("span.ant-checkbox")
+
+    def _get_row_by_username(self, username: str) -> TableRowWrapper:
+        return self.get_row_by_column_value(AssignUserTable.Headers.NAME, username)
 
     class Headers:
         ASSIGN = "Assign"
