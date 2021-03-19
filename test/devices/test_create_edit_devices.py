@@ -8,12 +8,12 @@ from src.const.Acupulse30Wdevices import RG_0000070
 from src.domain.device import Customer, Device
 from src.site.components.cascader_picker import SEPARATOR, CascaderPicker
 from src.site.dialogs import CreateDeviceDialog, get_element_label, assert_text_input_default_state, \
-    get_element_error_message
+    get_element_error_message, DevicePropertiesDialog
 from src.site.login_page import LoginPage
-from src.site.components.tables import DevicesTable, PropertiesTable
+from src.site.components.tables import DevicesTable, PropertiesTable, AssignUserTable
 from src.site.pages import DevicesPage
 from src.util.elements_util import is_input_disabled
-from src.util.random_util import random_company, random_alpha_numeric_string, random_gmail_alias_from
+from src.util.random_util import random_company, random_alpha_numeric_string, random_gmail_alias_from, random_list_item
 from test.test_data_provider import super_admin_credentials, random_device, random_usa_customer, TEST_DEVICE_PREFIX, \
     TEST_GMAIL_ACCOUNT
 
@@ -79,7 +79,7 @@ class TestCreateEditDevices:
 
         edit_dialog.properties.open()
 
-        assert_that(edit_dialog.properties.get_property(PropertiesTable.Property.DEVICE_TYPE))\
+        assert_that(edit_dialog.properties.get_property(PropertiesTable.Property.DEVICE_TYPE)) \
             .is_equal_to(new_device.device)
         assert_that(edit_dialog.properties.get_property(PropertiesTable.Property.DEVICE_SERIAL_NUMBER)) \
             .is_equal_to(new_device.serial_number)
@@ -114,6 +114,33 @@ class TestCreateEditDevices:
 
         edit_dialog.general.assert_device_fields(new_device)
         edit_dialog.general.assert_customer_fields(new_customer)
+
+    @allure.title("3.4.2 Create new device with customer none-ASCII parameters")
+    @allure.issue("error on creating a device using customer none-ASCII parameters")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_create_device_using_none_ascii_customer_parameters(self):
+        new_device = random_device()
+        customer_first_name = "Віктор"
+        customer_street = "Шевченка"
+
+        devices_page = DevicesPage().open()
+        dialog = devices_page.click_add_device()
+
+        dialog.set_device_serial_number(new_device.serial_number)\
+            .select_device_type(new_device)\
+            .set_first_name(customer_first_name)\
+            .set_street(customer_street)\
+            .click_create()
+
+        assert_that(devices_page.notification.get_message()).is_equal_to(DevicesPage.DEVICE_CREATED_MESSAGE)
+
+        devices_page.reload().search_by(new_device.serial_number)
+
+        edit_dialog = devices_page.open_device_properties(new_device.serial_number)
+
+        edit_dialog.general.assert_device_fields(new_device)
+        assert_that(edit_dialog.general.get_first_name()).is_equal_to(customer_first_name)
+        assert_that(edit_dialog.general.get_street()).is_equal_to(customer_street)
 
     @allure.title("3.4.3 Edit device")
     @allure.severity(allure.severity_level.CRITICAL)
@@ -254,3 +281,74 @@ class TestCreateEditDevices:
         assert_that(picker.is_disabled()).described_as(expected_label + " picker to be disabled").is_false()
         assert_that(picker.get_selected_item()).described_as(expected_label + " picker to be empty").is_empty()
         assert_that(get_element_label(picker.picker)).is_equal_to(expected_label)
+
+
+@pytest.mark.usefixtures("login")
+@allure.feature(Feature.DEVICES)
+class TestDeviceProperties:
+    assign_table_columns_provider = [
+        AssignUserTable.Headers.NAME,
+        AssignUserTable.Headers.USER_GROUP
+        ]
+
+    @allure.title("Sort users by name on Assign Tab of the Device Properties dialog")
+    @allure.issue("wrong sorting order if the item contains more than 1 word. The second word isn't considered")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_sort_users_on_properties_assign_tab(self):
+        assign_tab = self.open_assign_user_dialog()
+        table = assign_tab.table.wait_to_load()
+        column = AssignUserTable.Headers.NAME
+
+        assert_that(table.is_column_sorted(column)).described_as("is column sorted by default").is_false()
+
+        assign_tab.sort_asc_by_name()
+        sorted_asc_values = table.get_column_values(column)
+
+        assert_that(table.is_up_icon_blue(column)).described_as("is blue sort icon up displayed").is_true()
+        assert_that(sorted_asc_values).is_sorted(key=str.lower)
+
+        assign_tab.sort_desc_by_name()
+
+        sorted_desc_values = table.get_column_values(column)
+
+        assert_that(table.is_down_icon_blue(column)).described_as("is blue sort icon down displayed").is_true()
+        assert_that(sorted_desc_values).is_sorted(key=str.lower, reverse=True)
+
+    @allure.title("Verify that you can search users by any column value")
+    @allure.severity(allure.severity_level.NORMAL)
+    @pytest.mark.parametrize("column", assign_table_columns_provider)
+    def test_filter_users_by_column_value_on_properties_assign_tab(self, column):
+        assign_tab = self.open_assign_user_dialog()
+        table = assign_tab.table.wait_to_load()
+        random_item = random_list_item(table.get_column_values(column)).split()[0]
+
+        assign_tab.search_by(random_item)
+
+        assert_that(table.get_rows()).is_not_empty()
+        for table_row in table.get_rows():
+            assert_that(table.is_any_row_cell_contains_text_ignoring_case(table_row, random_item)).is_true()
+
+    @allure.title("Verify that you can filter users by 'User Group'")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_filter_users_by_user_group_on_properties_assign_tab(self):
+        assign_tab = self.open_assign_user_dialog()
+        table = assign_tab.table.wait_to_load()
+        init_rows_count = len(table.get_rows())
+        random_group = random_list_item(table.get_column_values(AssignUserTable.Headers.USER_GROUP))
+
+        assign_tab.filter_by_group(random_group)
+
+        assert_that(table.get_column_values(AssignUserTable.Headers.USER_GROUP)).contains_only(random_group)
+
+        assign_tab.click_reset()
+
+        assert_that(table.get_rows()).described_as("Table rows count after reset").is_length(init_rows_count)
+
+    @allure.step
+    def open_assign_user_dialog(self) -> DevicePropertiesDialog.AssignTab:
+        devices_page = DevicesPage().open().search_by(TEST_DEVICE_PREFIX)
+
+        first_user = devices_page.table.get_column_values(AssignUserTable.Headers.NAME)[0]
+        dialog = devices_page.open_device_properties(first_user)
+        dialog.assign.open()
+        return dialog.assign

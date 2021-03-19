@@ -355,6 +355,7 @@ class _BaseDeviceDialog(_BaseDialog, ABC):
     @allure.step
     def select_device_type(self, device: Device):
         self.device_type_picker.open().select_device(device.group, device.model, device.device)
+        return self
 
     # Customer fields
 
@@ -650,7 +651,7 @@ class DevicePropertiesDialog(_BaseDialog):
             return "Assign"
 
         @allure.step
-        def search(self, text: str):
+        def search_by(self, text: str):
             self.search_input.search(text)
             self.table.wait_to_load()
             return self
