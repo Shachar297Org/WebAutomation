@@ -571,7 +571,7 @@ class DevicePropertiesDialog(_BaseDialog):
 
     def __init__(self):
         super().__init__()
-        self.dialog = s("//*[@class='ant-modal-content'][.//span[text()='Device Properties']]")
+        self.dialog = s("//*[@class='ant-modal-content'][.//*[text()='Device Properties']]")
 
         self.general = self.GeneralTab()
         self.properties = self.PropertiesTab()
@@ -583,7 +583,7 @@ class DevicePropertiesDialog(_BaseDialog):
 
     @allure.step
     def wait_to_load(self):
-        self.dialog.wait_until(be.visible)
+        self.dialog.wait_until(be.present)
         self.general.wait_to_load()
         return self
 
