@@ -238,7 +238,7 @@ class DevicesPage(_BasePage):
     def reload(self):
         self.reload_button.execute_script(JS_CLICK)
         self.table.wait_to_load()
-        return UsersPage()
+        return DevicesPage()
 
     @allure.step
     def _click_add_device(self):

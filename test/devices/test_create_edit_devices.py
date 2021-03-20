@@ -11,11 +11,11 @@ from src.site.dialogs import CreateDeviceDialog, get_element_label, assert_text_
     get_element_error_message, DevicePropertiesDialog
 from src.site.login_page import LoginPage
 from src.site.components.tables import DevicesTable, PropertiesTable, AssignUserTable
-from src.site.pages import DevicesPage
+from src.site.pages import DevicesPage, UsersPage
 from src.util.elements_util import is_input_disabled
 from src.util.random_util import random_company, random_alpha_numeric_string, random_gmail_alias_from, random_list_item
 from test.test_data_provider import super_admin_credentials, random_device, random_usa_customer, TEST_DEVICE_PREFIX, \
-    TEST_GMAIL_ACCOUNT
+    TEST_GMAIL_ACCOUNT, random_user
 
 
 @pytest.fixture(scope="class")
@@ -75,23 +75,23 @@ class TestCreateEditDevices:
 
         edit_dialog = devices_page.open_device_properties(new_device.serial_number)
 
-        edit_dialog.general.assert_device_fields(new_device)
+        edit_dialog.general_tab.assert_device_fields(new_device)
 
-        edit_dialog.properties.open()
+        edit_dialog.properties_tab.open()
 
-        assert_that(edit_dialog.properties.get_property(PropertiesTable.Property.DEVICE_TYPE)) \
+        assert_that(edit_dialog.properties_tab.get_property(PropertiesTable.Property.DEVICE_TYPE)) \
             .is_equal_to(new_device.device)
-        assert_that(edit_dialog.properties.get_property(PropertiesTable.Property.DEVICE_SERIAL_NUMBER)) \
+        assert_that(edit_dialog.properties_tab.get_property(PropertiesTable.Property.DEVICE_SERIAL_NUMBER)) \
             .is_equal_to(new_device.serial_number)
-        assert_that(edit_dialog.properties.get_property(PropertiesTable.Property.STATUS)) \
+        assert_that(edit_dialog.properties_tab.get_property(PropertiesTable.Property.STATUS)) \
             .is_equal_to(DevicesTable.INACTIVE_STATUS)
-        assert_that(edit_dialog.properties.get_property(PropertiesTable.Property.CREATION_TIME)) \
+        assert_that(edit_dialog.properties_tab.get_property(PropertiesTable.Property.CREATION_TIME)) \
             .is_not_empty()
-        assert_that(edit_dialog.properties.get_property(PropertiesTable.Property.LUMENIS_APP_VERSION)) \
+        assert_that(edit_dialog.properties_tab.get_property(PropertiesTable.Property.LUMENIS_APP_VERSION)) \
             .is_empty()
-        assert_that(edit_dialog.properties.get_property(PropertiesTable.Property.ACTIVATION_TYPE)) \
+        assert_that(edit_dialog.properties_tab.get_property(PropertiesTable.Property.ACTIVATION_TYPE)) \
             .is_empty()
-        assert_that(edit_dialog.properties.get_property(PropertiesTable.Property.IMEI)) \
+        assert_that(edit_dialog.properties_tab.get_property(PropertiesTable.Property.IMEI)) \
             .is_empty()
 
     @allure.title("3.4.2 Create new device with all “Customer” fields")
@@ -112,8 +112,8 @@ class TestCreateEditDevices:
 
         edit_dialog = devices_page.open_device_properties(new_device.serial_number)
 
-        edit_dialog.general.assert_device_fields(new_device)
-        edit_dialog.general.assert_customer_fields(new_customer)
+        edit_dialog.general_tab.assert_device_fields(new_device)
+        edit_dialog.general_tab.assert_customer_fields(new_customer)
 
     @allure.title("3.4.2 Create new device with customer none-ASCII parameters")
     @allure.issue("error on creating a device using customer none-ASCII parameters")
@@ -138,9 +138,9 @@ class TestCreateEditDevices:
 
         edit_dialog = devices_page.open_device_properties(new_device.serial_number)
 
-        edit_dialog.general.assert_device_fields(new_device)
-        assert_that(edit_dialog.general.get_first_name()).is_equal_to(customer_first_name)
-        assert_that(edit_dialog.general.get_street()).is_equal_to(customer_street)
+        edit_dialog.general_tab.assert_device_fields(new_device)
+        assert_that(edit_dialog.general_tab.get_first_name()).is_equal_to(customer_first_name)
+        assert_that(edit_dialog.general_tab.get_street()).is_equal_to(customer_street)
 
     @allure.title("3.4.3 Edit device")
     @allure.severity(allure.severity_level.CRITICAL)
@@ -155,13 +155,13 @@ class TestCreateEditDevices:
             .search_by(device.serial_number)
         properties_dialog = devices_page.open_device_properties(device.serial_number)
 
-        assert_that(is_input_disabled(properties_dialog.general.device_serial_number_input)) \
+        assert_that(is_input_disabled(properties_dialog.general_tab.device_serial_number_input)) \
             .described_as("Device serial number input to be disabled").is_true()
-        assert_that(properties_dialog.general.device_type_picker.is_disabled()) \
+        assert_that(properties_dialog.general_tab.device_type_picker.is_disabled()) \
             .described_as("Device type picker to be disabled").is_true()
 
-        properties_dialog.general.set_customer_fields(new_customer)
-        properties_dialog.general.click_update()
+        properties_dialog.general_tab.set_customer_fields(new_customer)
+        properties_dialog.general_tab.click_update()
 
         assert_that(devices_page.notification.get_message()).is_equal_to(DevicesPage.DEVICE_UPDATED_MESSAGE)
 
@@ -172,8 +172,8 @@ class TestCreateEditDevices:
 
         edit_dialog = devices_page.open_device_properties(device.serial_number)
 
-        edit_dialog.general.assert_device_fields(device)
-        edit_dialog.general.assert_customer_fields(new_customer)
+        edit_dialog.general_tab.assert_device_fields(device)
+        edit_dialog.general_tab.assert_customer_fields(new_customer)
 
     @allure.title("Validation: Create the same device twice")
     @allure.severity(allure.severity_level.MINOR)
@@ -291,6 +291,45 @@ class TestDeviceProperties:
         AssignUserTable.Headers.USER_GROUP
         ]
 
+    @allure.title("3.4.5 Assign User")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_assign_user(self):
+        test_device = random_device()
+        test_user = random_user()
+
+        UsersPage().open().add_user(test_user)
+
+        devices_page = DevicesPage().open().add_device(test_device)
+
+        properties_dialog = devices_page.reload().search_by(test_device.serial_number)\
+            .open_device_properties(test_device.serial_number)
+        assign_tab = properties_dialog.assign_tab.open()
+
+        table = assign_tab.table.wait_to_load()
+        users = table.get_column_values(AssignUserTable.Headers.NAME)
+        for user in users:
+            assert_that(table.is_user_selected(user)).is_false()
+
+        assign_tab.search_by(test_user.name)
+        table.select_user(test_user.name)
+        assign_tab.click_update_user_assignment()
+
+        assert_that(devices_page.notification.get_message()).is_equal_to(DevicesPage.DEVICE_UPDATED_MESSAGE)
+
+        properties_dialog = devices_page.open_device_properties(test_device.serial_number)
+        properties_dialog.assign_tab.open()
+        assert_that(properties_dialog.assign_tab.table.is_user_selected(test_user.name)).is_true()
+
+        users_page = UsersPage().open()
+        users_page.search_by(test_user.email)
+        edit_user_dialog = users_page.open_edit_user_dialog(test_user.email)
+
+        device_rows = edit_user_dialog.device_table.get_rows()
+        assert_that(device_rows).is_not_empty()
+        for row in device_rows:
+            assert_that(edit_user_dialog.device_table.is_any_row_cell_contains_text_ignoring_case(
+                row, test_device.model))
+
     @allure.title("Sort users by name on Assign Tab of the Device Properties dialog")
     @allure.issue("wrong sorting order if the item contains more than 1 word. The second word isn't considered")
     @allure.severity(allure.severity_level.NORMAL)
@@ -348,7 +387,7 @@ class TestDeviceProperties:
     def open_assign_user_dialog(self) -> DevicePropertiesDialog.AssignTab:
         devices_page = DevicesPage().open().search_by(TEST_DEVICE_PREFIX)
 
-        first_user = devices_page.table.get_column_values(AssignUserTable.Headers.NAME)[0]
-        dialog = devices_page.open_device_properties(first_user)
-        dialog.assign.open()
-        return dialog.assign
+        first_device = devices_page.table.get_column_values(AssignUserTable.Headers.NAME)[0]
+        dialog = devices_page.open_device_properties(first_device)
+        dialog.assign_tab.open()
+        return dialog.assign_tab

@@ -223,7 +223,7 @@ class AssignUserTable(Table):
         return self._get_assign_checkbox_by_username(username).click()
 
     def _get_assign_checkbox_by_username(self, username: str) -> Element:
-        return self._get_row_by_username(username).get_cell("span.ant-checkbox")
+        return self._get_row_by_username(username).row.s("span.ant-checkbox")
 
     def _get_row_by_username(self, username: str) -> TableRowWrapper:
         return self.get_row_by_column_value(AssignUserTable.Headers.NAME, username)

@@ -573,18 +573,18 @@ class DevicePropertiesDialog(_BaseDialog):
         super().__init__()
         self.dialog = s("//*[@class='ant-modal-content'][.//*[text()='Device Properties']]")
 
-        self.general = self.GeneralTab()
-        self.properties = self.PropertiesTab()
-        self.assign = self.AssignTab()
-        self.upload_v2c = self.UploadV2CTab()
-        self.v2c_history = self.V2CHistoryTab()
-        self.alarms_history = self.AlarmHistoryTab()
-        self.activation = self.ActivationTab()
+        self.general_tab = self.GeneralTab()
+        self.properties_tab = self.PropertiesTab()
+        self.assign_tab = self.AssignTab()
+        self.upload_v2c_tab = self.UploadV2CTab()
+        self.v2c_history_tab = self.V2CHistoryTab()
+        self.alarms_history_tab = self.AlarmHistoryTab()
+        self.activation_tab = self.ActivationTab()
 
     @allure.step
     def wait_to_load(self):
         self.dialog.wait_until(be.present)
-        self.general.wait_to_load()
+        self.general_tab.wait_to_load()
         return self
 
     class _BaseTab(object):
@@ -601,7 +601,8 @@ class DevicePropertiesDialog(_BaseDialog):
 
         @allure.step
         def open(self):
-            return self.tabs_bar.s(".//div[@role='tab'][text()='{}']".format(self.name)).click()
+            self.tabs_bar.s(".//div[@role='tab'][text()='{}']".format(self.name)).click()
+            return self
 
     class GeneralTab(_BaseTab, _BaseDeviceDialog):
         def __init__(self):
