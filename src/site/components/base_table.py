@@ -167,7 +167,7 @@ class PaginationElement(object):
 
     @allure.step
     def open_page(self, number: int):
-        self.element.s(".//li[@title='{}']".format(number))
+        self.element.s(".//li[@title='{}']".format(number)).click()
         return self
 
     @allure.step

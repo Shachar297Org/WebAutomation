@@ -568,6 +568,7 @@ class CreateDeviceDialog(_BaseDeviceDialog):
 
 class DevicePropertiesDialog(_BaseDialog):
     TITLE = "Device Properties"
+    DEVICE_STATUS = "Device Status: {}"
 
     def __init__(self):
         super().__init__()

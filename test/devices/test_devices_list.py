@@ -168,3 +168,33 @@ class TestDevicesList:
 
         assert_that(devices_page.device_tree_picker.get_all_selected_items())\
             .described_as("Search input to be empty after reset").is_empty()
+
+    # For this test the Devices table need to contain at least 11 devices to enable the pagination element
+    @allure.title("Device pagination test")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_devices_pagination(self):
+        devices_page = DevicesPage().open()
+        pagination_element = devices_page.pagination_element
+        first_page_items = devices_page.table.wait_to_load().get_column_values(DevicesTable.Headers.SERIAL_NUMBER)
+
+        pagination_element.element.should(be.visible).should(be.enabled)
+        assert_that(pagination_element.get_active_item_number()).is_equal_to(1)
+        assert_that(pagination_element.is_left_arrow_disabled())\
+            .described_as("'Left arrow' to be disabled by default").is_true()
+        assert_that(pagination_element.is_right_arrow_disabled()) \
+            .described_as("'Right arrow' to be disabled by default").is_false()
+
+        pagination_element.open_page(2)
+        second_page_items = devices_page.table.wait_to_load().get_column_values(DevicesTable.Headers.SERIAL_NUMBER)
+
+        assert_that(pagination_element.get_active_item_number()).is_equal_to(2)
+        assert_that(pagination_element.is_left_arrow_disabled()) \
+            .described_as("'Left arrow' to be disabled").is_false()
+        assert_that(second_page_items).is_not_equal_to(first_page_items)
+
+        pagination_element.open_page(1)
+        assert_that(pagination_element.get_active_item_number()).is_equal_to(1)
+        assert_that(pagination_element.is_left_arrow_disabled()) \
+            .described_as("'Left arrow' to be disabled").is_true()
+        assert_that(devices_page.table.wait_to_load().get_column_values(DevicesTable.Headers.SERIAL_NUMBER))\
+            .is_equal_to(first_page_items)

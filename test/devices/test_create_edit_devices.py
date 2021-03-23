@@ -2,6 +2,7 @@ import allure
 import pytest
 from assertpy import assert_that
 from selene.support.conditions import have, be
+from selene.support.conditions.be import not_
 
 from src.const import Feature
 from src.const.Acupulse30Wdevices import RG_0000070
@@ -60,6 +61,16 @@ class TestCreateEditDevices:
         dialog.cancel_button.should(be.visible).should(be.clickable)
 
     @allure.title("3.4.2 Create new device")
+    @allure.description_html("""
+    <ol>
+        <li>In the Devices Tab click on the blue Plus button (on the top left) - A Create Device window will appear</li>
+        <li>Enter value in “Device Serial Number” and select a “Device Type”</li>
+        <li>Enter values in the “Customer” fields</li>
+        <li>In the Region/Country field choose Americas/USA – A new field will appear with a list of US states</li>
+        <li>Click on the Create Device button - Create Device successful message will appear</li>
+        <li>Verify that the new Device created has been added to the Device list</li>
+    </ol>
+    """)
     @allure.severity(allure.severity_level.CRITICAL)
     def test_create_device(self):
         new_device = random_device()
@@ -93,6 +104,13 @@ class TestCreateEditDevices:
             .is_empty()
         assert_that(edit_dialog.properties_tab.get_property(PropertiesTable.Property.IMEI)) \
             .is_empty()
+
+        edit_dialog.activation_tab.open()
+
+        edit_dialog.activation_tab.device_status.should(be.visible)\
+            .should(have.text(DevicePropertiesDialog.DEVICE_STATUS.format(DevicesTable.INACTIVE_STATUS)))
+        edit_dialog.activation_tab.deactivate_device_button.should(be.visible).should(be.disabled)
+        edit_dialog.activation_tab.reactivate_device_button.should(be.visible).should(be.disabled)
 
     @allure.title("3.4.2 Create new device with all “Customer” fields")
     @allure.severity(allure.severity_level.NORMAL)
@@ -382,6 +400,37 @@ class TestDeviceProperties:
         assign_tab.click_reset()
 
         assert_that(table.get_rows()).described_as("Table rows count after reset").is_length(init_rows_count)
+
+    @allure.title("Assign users pagination test")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_users_pagination(self):
+        assign_tab = self.open_assign_user_dialog()
+
+        pagination_element = assign_tab.pagination_element
+        first_page_items = assign_tab.table.wait_to_load().get_column_values(AssignUserTable.Headers.NAME)
+
+        pagination_element.element.should(be.visible).should(be.enabled)
+        assert_that(first_page_items).is_length(10)
+        assert_that(pagination_element.get_active_item_number()).is_equal_to(1)
+        assert_that(pagination_element.is_left_arrow_disabled())\
+            .described_as("'Left arrow' to be disabled by default").is_true()
+        assert_that(pagination_element.is_right_arrow_disabled()) \
+            .described_as("'Right arrow' to be disabled by default").is_false()
+
+        pagination_element.open_page(2)
+        second_page_items = assign_tab.table.wait_to_load().get_column_values(AssignUserTable.Headers.NAME)
+
+        assert_that(pagination_element.get_active_item_number()).is_equal_to(2)
+        assert_that(pagination_element.is_left_arrow_disabled()) \
+            .described_as("'Left arrow' to be disabled").is_false()
+        assert_that(second_page_items).is_not_equal_to(first_page_items)
+
+        pagination_element.open_page(1)
+        assert_that(pagination_element.get_active_item_number()).is_equal_to(1)
+        assert_that(pagination_element.is_left_arrow_disabled()) \
+            .described_as("'Left arrow' to be disabled").is_true()
+        assert_that(assign_tab.table.wait_to_load().get_column_values(AssignUserTable.Headers.NAME))\
+            .is_equal_to(first_page_items)
 
     @allure.step
     def open_assign_user_dialog(self) -> DevicePropertiesDialog.AssignTab:
