@@ -21,6 +21,35 @@ remote = bool(os.getenv("SELENE_REMOTE", False))
 chrome_headless = bool(os.getenv("SELENE_CHROME_HEADLESS", False))
 
 
+@pytest.fixture(autouse=True, scope="session")
+def setup_driver():
+    if remote:
+        driver = _get_remote_web_driver()
+    else:
+        if config.browser_name == 'chrome':
+            driver = _get_chrome_driver()
+        elif config.browser_name == 'firefox':
+            driver = _get_firefox_driver()
+        else:
+            raise Exception(config.browser_name + " local browser run isn't supported by automation framework")
+    config.driver = EventFiringWebDriver(driver, DriverEventListener())
+    config.driver.set_window_size(1280, 720)
+    yield
+    browser.quit()
+
+
+@pytest.fixture(autouse=True, scope="class")
+def cleanup_browser_session():
+    yield
+    clear_session_storage()
+    clear_local_storage()
+
+
+def pytest_exception_interact(node, call, report):
+    allure.attach(body=browser.driver.get_screenshot_as_png(), name="Screenshot",
+                  attachment_type=AttachmentType.PNG, extension='.png')
+
+
 def _get_remote_web_driver():
     return webdriver.Remote(
         command_executor='http://selenium-server-sample-url:4444/wd/hub',
@@ -42,32 +71,3 @@ def _get_chrome_driver():
 
 def _get_firefox_driver():
     return webdriver.Chrome(executable_path=GeckoDriverManager().install())
-
-
-@pytest.fixture(scope="session")
-def setup_driver():
-    if remote:
-        driver = _get_remote_web_driver()
-    else:
-        if config.browser_name == 'chrome':
-            driver = _get_chrome_driver()
-        elif config.browser_name == 'firefox':
-            driver = _get_firefox_driver()
-        else:
-            raise Exception(config.browser_name + " local browser run isn't supported by automation framework")
-    config.driver = EventFiringWebDriver(driver, DriverEventListener())
-    config.driver.set_window_size(1920, 1080)
-    yield
-    browser.quit()
-
-
-@pytest.fixture(autouse=True, scope="class")
-def cleanup_browser_session():
-    yield
-    clear_session_storage()
-    clear_local_storage()
-
-
-def pytest_exception_interact(node, call, report):
-    allure.attach(body=browser.driver.get_screenshot_as_png(), name="Screenshot",
-                  attachment_type=AttachmentType.PNG, extension='.png')
