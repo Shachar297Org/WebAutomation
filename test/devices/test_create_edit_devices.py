@@ -2,7 +2,6 @@ import allure
 import pytest
 from assertpy import assert_that
 from selene.support.conditions import have, be
-from selene.support.conditions.be import not_
 
 from src.const import Feature
 from src.const.Acupulse30Wdevices import RG_0000070
@@ -32,6 +31,15 @@ def login(request):
 class TestCreateEditDevices:
 
     @allure.title("Verify 'Create Device' dialog web elements")
+    @allure.description_html("""
+    <ol>
+        <li>In the Devices Tab open 'Create Device' dialog</li>
+        <li>Verify that the title has a correct text</li>
+        <li>Verify that all text fields are visible, blank and have correct labels</li>
+        <li>Verify that all cascader pickers are visible, clickable, blank, enabled, have correct labels  </li>
+        <li>Verify that "Create Device", "Cancel", "Close" buttons are visible and clickable</li>
+    </ol>
+    """)
     @allure.severity(allure.severity_level.NORMAL)
     def test_create_device_dialog_elements(self):
         devices_page = DevicesPage().open()
@@ -65,10 +73,11 @@ class TestCreateEditDevices:
     <ol>
         <li>In the Devices Tab click on the blue Plus button (on the top left) - A Create Device window will appear</li>
         <li>Enter value in “Device Serial Number” and select a “Device Type”</li>
-        <li>Enter values in the “Customer” fields</li>
-        <li>In the Region/Country field choose Americas/USA – A new field will appear with a list of US states</li>
         <li>Click on the Create Device button - Create Device successful message will appear</li>
         <li>Verify that the new Device created has been added to the Device list</li>
+        <li>Open device properties and verify that the "Device Type", “Device Serial Number” correctly displayed</li>
+        <li>Verify that the status is inactive and the activation info is empty</li>
+        <li>Open "Activation" tab and verify the "Deactivate", "Reactivate" buttons are visible but disabled</li>
     </ol>
     """)
     @allure.severity(allure.severity_level.CRITICAL)
@@ -113,6 +122,17 @@ class TestCreateEditDevices:
         edit_dialog.activation_tab.reactivate_device_button.should(be.visible).should(be.disabled)
 
     @allure.title("3.4.2 Create new device with all “Customer” fields")
+    @allure.description_html("""
+    <ol>
+        <li>In the Devices Tab open 'Create Device' dialog</li>
+        <li>Enter value in “Device Serial Number” and select a “Device Type”</li>
+        <li>Enter values in the “Customer” fields</li>
+        <li>In the Region/Country field choose Americas/USA – A new field will appear with a list of US states</li>
+        <li>Click on the Create Device button - Create Device successful message will appear</li>
+        <li>Verify that the new Device created has been added to the Device list</li>
+        <li>Open device properties and verify that the device and customer fields are correctly displayed on the "General" tab</li>
+    </ol>
+    """)
     @allure.severity(allure.severity_level.NORMAL)
     def test_create_device_with_customer(self):
         new_device = random_device()
@@ -134,6 +154,16 @@ class TestCreateEditDevices:
         edit_dialog.general_tab.assert_customer_fields(new_customer)
 
     @allure.title("3.4.2 Create new device with customer none-ASCII parameters")
+    @allure.description_html("""
+    <ol>
+        <li>In the Devices Tab open 'Create Device' dialog</li>
+        <li>Enter value in “Device Serial Number” and select a “Device Type”</li>
+        <li>Enter none-ASCII values in the “Customer” fields</li>
+        <li>Click on the Create Device button - Create Device successful message will appear</li>
+        <li>Verify that the new Device created has been added to the Device list</li>
+        <li>Open device properties and verify that the device and customer fields are correctly displayed</li>
+    </ol>
+    """)
     @allure.issue("error on creating a device using customer none-ASCII parameters")
     @allure.severity(allure.severity_level.NORMAL)
     def test_create_device_using_none_ascii_customer_parameters(self):
@@ -161,6 +191,19 @@ class TestCreateEditDevices:
         assert_that(edit_dialog.general_tab.get_street()).is_equal_to(customer_street)
 
     @allure.title("3.4.3 Edit device")
+    @allure.description_html("""
+    <ol>
+        <li>Preconditions:</li>
+        <li>Create a new device</li>
+        <li></li>
+        <li>In the Devices Tab open 'Create Device' dialog</li>
+        <li>Go to Devices Tab click Properties on one of the Devices - An Device Properties window will appear<li>
+        <li>Verify you can edit all data except the fields “Device Serial Number” and “Device Type”<li>
+        <li>Click on the “Update customer” button - Update Device successful message will appear <li>
+        <li>Verify that the edited Device has been updated in the Device list</li>
+        <li>Open device properties and verify that the updated device and customer fields are correctly displayed</li>
+    </ol>
+    """)
     @allure.severity(allure.severity_level.CRITICAL)
     def test_edit_device(self):
         device = random_device()
@@ -194,6 +237,13 @@ class TestCreateEditDevices:
         edit_dialog.general_tab.assert_customer_fields(new_customer)
 
     @allure.title("Validation: Create the same device twice")
+    @allure.description_html("""
+    <ol>
+        <li>Try to create a device using the serial number and the device type from the existing device</li>
+        <li>Click on the Create Device button</li>
+        <li>Verify error message</li>
+    </ol>
+    """)
     @allure.severity(allure.severity_level.MINOR)
     def test_create_the_same_device_twice(self):
         devices_page = DevicesPage().open()
@@ -207,6 +257,12 @@ class TestCreateEditDevices:
         assert_that(devices_page.notification.get_message()).is_equal_to(DevicesPage.CREATION_FAILURE_MESSAGE)
 
     @allure.title("Validation: Create the device with empty required fields")
+    @allure.description_html("""
+    <ol>
+        <li>Try to create a device: leave required fields (serial number device type) empty</li>
+        <li>Verify required fields validation messages</li>
+    </ol>
+    """)
     @allure.severity(allure.severity_level.MINOR)
     def test_create_device_with_empty_required_fields(self):
         devices_page = DevicesPage().open()
@@ -221,6 +277,12 @@ class TestCreateEditDevices:
             .is_equal_to(CreateDeviceDialog.FIELD_IS_REQUIRED_MESSAGE)
 
     @allure.title("Validation: Create the device with too long parameters")
+    @allure.description_html("""
+    <ol>
+        <li>Try to create a device: fill in parameters with longer that maximum allowed values</li>
+        <li>Verify fields validation messages</li>
+    </ol>
+    """)
     @allure.severity(allure.severity_level.MINOR)
     def test_create_device_with_too_long_parameters(self):
         devices_page = DevicesPage().open()
@@ -263,6 +325,15 @@ class TestCreateEditDevices:
             .is_equal_to(CreateDeviceDialog.MAX_256_CHARS_ALLOWED_ERROR)
 
     @allure.title("Validation: Create the device with invalid serial number and customer email")
+    @allure.description_html("""
+    <ol>
+        <li>Try to create a device: fill in invalid parameters (serial number and email)</li>
+        <li>Verify fields validation messages</li>
+        <li>Try to use valid but not allowed email</li>
+        <li>Click on the Create Device button</li>
+        <li>Verify error message</li>
+    </ol>
+    """)
     @allure.severity(allure.severity_level.MINOR)
     def test_create_device_with_invalid_parameters(self):
         devices_page = DevicesPage().open()
