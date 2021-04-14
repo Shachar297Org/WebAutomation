@@ -381,6 +381,24 @@ class TestDeviceProperties:
         ]
 
     @allure.title("3.4.5 Assign User")
+    @allure.description_html("""
+    <ol>
+        <li>Preconditions:</li>
+        <li>Create a new user</li>
+        <li>Create a new device</li>
+        <li></li>
+        <li>Go to Devices Tab click Properties on the created Device - An Device Properties window will appear</li>
+        <li>In Device Properties go to “Assign” tab</li>
+        <li>Verify that no users assigned to the device yet</li>
+        <li>Mark a created user – The Check box will turn blue</li>
+        <li>Click on the “Update User Assignment” button - Update Device successful message will appear</li>
+        <li>Go back to Properties window – the User you added is marked</li>
+        <li>Go to Users Tab change the ?? of the User- the User wont be selected in the Assign  tab of the Device – the user isn’t selected</li>
+        <li>Open user page, search and open created user and check that the device is in the assigned devices list</li>
+    </ol>
+    """)
+    @allure.issue("The device isn't appeared for the user in the Users device assignment if assign the user"
+                  " to the device on  the devices tab")
     @allure.severity(allure.severity_level.NORMAL)
     def test_assign_user(self):
         test_device = random_device()
@@ -420,6 +438,13 @@ class TestDeviceProperties:
                 row, test_device.model))
 
     @allure.title("Sort users by name on Assign Tab of the Device Properties dialog")
+    @allure.description_html("""
+    <ol>
+        <li>Open "Device Properties" "Assign" Tab</li>
+        <li>Sort users in the ascending order - Verify users are sorted</li>
+        <li>Sort users in the descending order - Verify users are sorted</li>
+    </ol>
+    """)
     @allure.issue("wrong sorting order if the item contains more than 1 word. The second word isn't considered")
     @allure.severity(allure.severity_level.NORMAL)
     def test_sort_users_on_properties_assign_tab(self):
@@ -443,6 +468,12 @@ class TestDeviceProperties:
         assert_that(sorted_desc_values).is_sorted(key=str.lower, reverse=True)
 
     @allure.title("Verify that you can search users by any column value")
+    @allure.description_html("""
+    <ol>
+        <li>Open "Device Properties" "Assign" Tab</li>
+        <li>Filter users by a column value - Verify users are filtered</li>
+    </ol>
+    """)
     @allure.severity(allure.severity_level.NORMAL)
     @pytest.mark.parametrize("column", assign_table_columns_provider)
     def test_filter_users_by_column_value_on_properties_assign_tab(self, column):
@@ -457,6 +488,13 @@ class TestDeviceProperties:
             assert_that(table.is_any_row_cell_contains_text_ignoring_case(table_row, random_item)).is_true()
 
     @allure.title("Verify that you can filter users by 'User Group'")
+    @allure.description_html("""
+    <ol>
+        <li>Open "Device Properties" "Assign" Tab</li>
+        <li>Filter users by group - Verify users are filtered</li>
+        <li>Click 'Reset' - Verify users aren't filtered</li>
+    </ol>
+    """)
     @allure.severity(allure.severity_level.NORMAL)
     def test_filter_users_by_user_group_on_properties_assign_tab(self):
         assign_tab = self.open_assign_user_dialog()
@@ -473,6 +511,17 @@ class TestDeviceProperties:
         assert_that(table.get_rows()).described_as("Table rows count after reset").is_length(init_rows_count)
 
     @allure.title("Assign users pagination test")
+    @allure.description_html("""
+    <ol>
+        <li>Open "Device Properties" "Assign" Tab</li>
+        <li>Verify the pagination component is displayed</li>
+        <li>Verify that 10 items displayed on the page and active page number is 1</li>
+        <li>Verify that the left arrow is disabled, and right arrow is enabled</li>
+        <li>Open the second page</li>
+        <li>Verify that the active page number is 2</li>
+        <li>Verify that the left arrow became enabled</li>
+    </ol>
+    """)
     @allure.severity(allure.severity_level.NORMAL)
     def test_users_pagination(self):
         assign_tab = self.open_assign_user_dialog()

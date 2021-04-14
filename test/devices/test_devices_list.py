@@ -41,6 +41,16 @@ class TestDevicesList:
     ]
 
     @allure.title("Verify Devices page web elements")
+    @allure.description_html("""
+    <ol>
+        <li>Open device page</li>
+        <li>Verify that "Add Device" button is visible and clickable</li>
+        <li>Verify that the search input is visible, blank and has correct placeholder</li>
+        <li>Verify that device and location tree pickers are visible, enabled, empty and have correct placeholder</li>
+        <li>Verify that "Reset", "Reload" buttons are visible and clickable</li>
+        <li>Verify that devices table is visible, enabled and has correct columns</li>
+    </ol>
+    """)
     @allure.severity(allure.severity_level.CRITICAL)
     def test_device_page_elements(self):
         devices_page = self.home_page.left_panel.open_devices()
@@ -77,6 +87,13 @@ class TestDevicesList:
                                                                     headers.ACTION_BUTTON)
 
     @allure.title("3.4.1 Verify that you can sort device rows by any column")
+    @allure.description_html("""
+    <ol>
+        <li>Open device page</li>
+        <li>Sort devices in the ascending order - Verify devices are sorted</li>
+        <li>Sort devices in the descending order - Verify devices are sorted</li>
+    </ol>
+    """)
     @allure.severity(allure.severity_level.NORMAL)
     @allure.issue("wrong device type sorting order")
     @pytest.mark.parametrize("column", table_columns_provider)
@@ -99,6 +116,12 @@ class TestDevicesList:
         assert_that(sorted_desc_values).is_sorted(key=str.lower, reverse=True)
 
     @allure.title("3.4.1 Verify that you can search in the search field by all fields")
+    @allure.description_html("""
+    <ol>
+        <li>Open device page</li>
+        <li>Filter devices by a column value - Verify devices are filtered</li>
+    </ol>
+    """)
     @allure.severity(allure.severity_level.NORMAL)
     @allure.issue("filtering doesn't work by status and device type")
     @pytest.mark.parametrize("column", table_columns_provider)
@@ -116,6 +139,14 @@ class TestDevicesList:
             assert_that(table.is_any_row_cell_contains_text_ignoring_case(table_row, item)).is_true()
 
     @allure.title("Verify that you can search in the search field by substring")
+    @allure.description_html("""
+    <ol>
+        <li>Open device page</li>
+        <li>Filter devices by a column value substring - Verify devices are filtered</li>
+        <li>Click 'Reset'</li>
+        <li>Verify devices aren't filtered</li>
+    </ol>
+    """)
     @allure.severity(allure.severity_level.NORMAL)
     def test_filter_devices_by_substring(self):
         devices_page = DevicesPage().open()
@@ -137,6 +168,14 @@ class TestDevicesList:
         assert_that(table.get_rows()).described_as("Table rows count after reset").is_length(init_rows_count)
 
     @allure.title("3.4.1 Verify that rows can be filtered by “Device Type” in the designated field ")
+    @allure.description_html("""
+    <ol>
+        <li>Open device page</li>
+        <li>Filter devices by type - Verify devices are filtered</li>
+        <li>Click 'Reset'</li>
+        <li>Verify devices aren't filtered</li>
+    </ol>
+    """)
     @allure.severity(allure.severity_level.NORMAL)
     def test_filter_devices_by_type(self):
         test_device = Acupulse30Wdevices.GA_0000070GR
@@ -154,6 +193,14 @@ class TestDevicesList:
             .described_as("Search input to be empty after reset").is_empty()
 
     @allure.title("3.4.1 Verify that rows can be filtered by “Locations” in the designated field")
+    @allure.description_html("""
+    <ol>
+        <li>Open device page</li>
+        <li>Filter devices by location - Verify devices are filtered</li>
+        <li>Click 'Reset'</li>
+        <li>Verify devices aren't filtered</li>
+    </ol>
+    """)
     @allure.severity(allure.severity_level.NORMAL)
     def test_filter_devices_by_locations(self):
         test_country = AmericasCountry.USA
@@ -171,6 +218,20 @@ class TestDevicesList:
 
     # For this test the Devices table need to contain at least 11 devices to enable the pagination element
     @allure.title("Device pagination test")
+    @allure.description_html("""
+    <ol>
+        <li>Open Device page</li>
+        <li>Verify the pagination component is displayed</li>
+        <li>Verify that 10 items displayed on the page and active page number is 1</li>
+        <li>Verify that the left arrow is disabled, and right arrow is enabled</li>
+        <li>Open the second page</li>
+        <li>Verify that the active page number is 2 - next 10 items are displayed</li>
+        <li>Verify that the left arrow became enabled</li>
+        <li>Open the first page again</li>
+        <li>Verify that the active page number is 1 - the same 10 items are displayed that were displayed before on the first page</li>
+        <li>Verify that the left arrow became disabled</li>
+    </ol>
+    """)
     @allure.severity(allure.severity_level.NORMAL)
     def test_devices_pagination(self):
         devices_page = DevicesPage().open()
