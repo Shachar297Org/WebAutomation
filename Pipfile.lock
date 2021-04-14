@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "45113890df3a6e2040e20f53e780da32219c2b8e061c46c46a6e54a448c28231"
+            "sha256": "f086e233d63b86ea918b2bf1ffd765e9984a3d8b424d874f4c8c14d76a1e3cb8"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -79,11 +79,11 @@
         },
         "configparser": {
             "hashes": [
-                "sha256:005c3b102c96f4be9b8f40dafbd4997db003d07d1caa19f37808be8031475f2a",
-                "sha256:08e8a59ef1817ac4ed810bb8e17d049566dd6e024e7566f6285c756db2bb4ff8"
+                "sha256:85d5de102cfe6d14a5172676f09d19c465ce63d6019cf0a4ef13385fc535e828",
+                "sha256:af59f2cdd7efbdd5d111c1976ecd0b82db9066653362f0962d7bf1d3ab89a1fa"
             ],
             "markers": "python_version >= '3.6'",
-            "version": "==5.0.1"
+            "version": "==5.0.2"
         },
         "crayons": {
             "hashes": [
@@ -94,11 +94,11 @@
         },
         "faker": {
             "hashes": [
-                "sha256:31a58ec5a8f4672f24da3b5ddea02c82a712de1de3179b432948e5c34d787aca",
-                "sha256:aadfe0efe11ecbbbc5b3b0b0fab050c2acbd2d8e5201769546d43d236bfff663"
+                "sha256:26c7c3df8d46f1db595a34962f8967021dd90bbd38cc6e27461a3fb16cd413ae",
+                "sha256:44eb060fad3015690ff3fec6564d7171be393021e820ad1851d96cb968fbfcd4"
             ],
             "index": "pypi",
-            "version": "==6.4.1"
+            "version": "==8.1.0"
         },
         "future": {
             "hashes": [
@@ -187,10 +187,11 @@
         },
         "selene": {
             "hashes": [
-                "sha256:2e775484462b214e0604e1ebcffb0d2de0f753b26bb37ec8676dbe696e039a90"
+                "sha256:01d10b1d8f39af827e86c7d4f793e3fc93125d1e19c9275eec53ca3f3419549f",
+                "sha256:746f54f30d866a58e47bd7b4a44813f7f789da3ad7d7f24d06d08894506b72ca"
             ],
             "index": "pypi",
-            "version": "==2.0.0a34"
+            "version": "==2.0.0a36"
         },
         "selenium": {
             "hashes": [
@@ -224,19 +225,18 @@
         },
         "urllib3": {
             "hashes": [
-                "sha256:1b465e494e3e0d8939b50680403e3aedaa2bc434b7d5af64dfd3c958d7f5ae80",
-                "sha256:de3eedaad74a2683334e282005cd8d7f22f4d55fa690a2a1020a416cb0a47e73"
+                "sha256:2f4da4594db7e1e110a944bb1b551fdf4e6c136ad42e4234131391e21eb5b0df",
+                "sha256:e7b021f7241115872f92f43c6508082facffbd1c048e3c6e2bb9c2a157e28937"
             ],
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'",
-            "version": "==1.26.3"
+            "version": "==1.26.4"
         },
         "webdriver-manager": {
             "hashes": [
-                "sha256:22ae0ace4da117472302c21ead8ec05eb5c1312eeeba97547395d79f83afb241",
-                "sha256:6b54b18f75379f97f9e49f504a8e79010d47af1da8e7b5d7d7a103ca535b1e46"
+                "sha256:e4359ff4fb7ebeae3a561081897a747eddf6fe726652d95b609303b966ac4cf7"
             ],
             "markers": "python_version >= '3.6'",
-            "version": "==3.3.0"
+            "version": "==2.3.0"
         }
     },
     "develop": {}

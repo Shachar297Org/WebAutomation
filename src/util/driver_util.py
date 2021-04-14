@@ -10,8 +10,8 @@ def get_session_storage():
 
 
 def clear_local_storage():
-    browser.driver.execute_script("localStorage.clear()")
+    browser.clear_local_storage()
 
 
 def clear_session_storage():
-    browser.driver.execute_script("sessionStorage.clear()")
+    browser.clear_session_storage()
