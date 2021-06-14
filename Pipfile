@@ -4,12 +4,13 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-selene = "==2.0.0a36"
-pytest = "==6.2.2"
+selene = "==2.0.0a38"
+pytest = "==6.2.4"
 pytest-env = "==0.6.2"
-allure-pytest = "==2.8.33"
+allure-pytest = "==2.9.43"
 assertpy = "==1.1"
 faker = "*"
+colorama = "*"
 
 [dev-packages]
 
