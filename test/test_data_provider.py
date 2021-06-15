@@ -13,6 +13,7 @@ TEST_SUPER_ADMIN = "Victor savchyn"
 TEST_FOTA_ADMIN = "Victor AQA FOTA Admin"
 TEST_SYSTEM_ENGINEER = "Victor AQA System Engineer"
 TEST_SERVICE_ADMIN = "Victor AQA Service Admin"
+TEST_SERVICE_MANAGER = "Victor AQA Service Manager"
 TEST_TECH_SUPPORT = "Victor AQA Tech Support"
 
 TEST_USER_FOR_DISABLING = "Victor AQA User For Disabling"
@@ -25,6 +26,7 @@ super_admin_credentials = Credentials("victor.savchyn@gmail.com", "LumenisX225")
 fota_admin_credentials = Credentials("lumenisauto+FotaAdmin@gmail.com", "LumenisX225@")
 system_engineer_credentials = Credentials("lumenisauto+SystemEngineer@gmail.com", "LumenisX225@")
 service_admin_credentials = Credentials("lumenisauto+ServiceAdmin@gmail.com", "LumenisX225@")
+service_manager_credentials = Credentials("lumenisauto+ServiceManager@gmail.com", "LumenisX225@")
 tech_support_credentials = Credentials("lumenisauto+TechSupport@gmail.com", "LumenisX225@")
 
 user_for_disabling_credentials = Credentials("lumenisauto+Disabled@gmail.com", "LumenisX225@")
