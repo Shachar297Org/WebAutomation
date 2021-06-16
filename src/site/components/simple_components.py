@@ -63,8 +63,11 @@ class SelectBox:
 
     @allure.step
     def get_items(self) -> []:
-        self.open()
-        return list(filter(None, extract_text(ss(".ant-select-dropdown ul li"))))
+        self.open().wait_to_be_not_empty()
+        time.sleep(1)
+
+        items = extract_text(ss(".ant-select-dropdown ul li"))
+        return list(filter(None, items))
 
     @allure.step
     def get_selected_item(self) -> str:

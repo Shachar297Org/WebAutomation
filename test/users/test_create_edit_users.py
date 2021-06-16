@@ -261,7 +261,7 @@ class TestCreateEditUsers:
         edit_dialog = open_first_test_user_from_table_to_edit(users_page)
         edit_dialog.select_user_group(UserGroup.SERVICE_ADMIN)
 
-        all_managers = edit_dialog.manager_select.open().wait_to_be_not_empty().get_items()
+        all_managers = edit_dialog.manager_select.get_items()
 
         assert_that(all_managers).described_as("Managers list available for " + UserGroup.SERVICE_ADMIN + " group") \
             .contains(TEST_FOTA_ADMIN, TEST_SUPER_ADMIN) \
