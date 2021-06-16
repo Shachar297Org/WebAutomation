@@ -43,7 +43,7 @@ def create_random_user_with_device(users_page: UsersPage, region: str, device_gr
 @allure.feature(Feature.PERMISSIONS)
 class TestUsersPermissions:
 
-    @allure.title("FOTA admin: View all users")
+    @allure.title("3.1.2.1 FOTA admin: View all users")
     @allure.severity(allure.severity_level.NORMAL)
     @allure.issue("FOTA admin can't see users with higher permissions")
     def test_view_users(self):
@@ -58,7 +58,7 @@ class TestUsersPermissions:
         for table_row in table.get_rows():
             assert_that(table.is_any_row_cell_contains_text_ignoring_case(table_row, super_admin_user)).is_true()
 
-    @allure.title("FOTA admin: Create a new user")
+    @allure.title("3.1.2.1 FOTA admin: Create a new user")
     @allure.issue("Some token is displayed for few secs instead of the manager in the Manager menu")
     @allure.severity(allure.severity_level.NORMAL)
     def test_create_user(self):
@@ -84,7 +84,7 @@ class TestUsersPermissions:
         assert_that(edit_dialog.get_user_group()).is_equal_to(new_user.user_group)
         assert_that(edit_dialog.get_manager()).is_equal_to(new_user.manager)
 
-    @allure.title("FOTA admin: Edit a user")
+    @allure.title("3.1.2.1 FOTA admin: Edit a user")
     @allure.severity(allure.severity_level.NORMAL)
     def test_edit_user(self):
         existing_region = Region.JAPAN
