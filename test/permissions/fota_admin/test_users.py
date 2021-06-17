@@ -4,51 +4,29 @@ from assertpy import assert_that
 
 from src.const import Feature, Region, DeviceGroup
 from src.const.UserGroup import SERVICE_MANAGER, SERVICE_TECHNICIAN, TECH_SUPPORT, SERVICE_ADMIN
-from src.domain.credentials import Credentials
 from src.domain.user import User
 from src.site.components.base_table import TableRowWrapper
 from src.site.components.tables import UsersTable, DeviceAssignmentTable
 from src.site.login_page import LoginPage
 from src.site.pages import UsersPage
-from src.util.driver_util import clear_session_storage, clear_local_storage
-from test.test_data_provider import random_user, fota_admin_credentials, TEST_USERS_PREFIX, super_admin_credentials
+from test.test_data_provider import random_user, fota_admin_credentials, super_admin_credentials
 
 
-def login_as(credentials: Credentials):
-    LoginPage().open().login_as(credentials)
-    return UsersPage().open()
+@pytest.fixture(scope="class")
+def login():
+    LoginPage().open().login_as(fota_admin_credentials)
 
 
-@pytest.fixture(autouse=True)
-def cleanup_browser_session():
-    yield
-    clear_session_storage()
-    clear_local_storage()
-
-
-@allure.step
-def create_random_user_with_device(users_page: UsersPage, region: str, device_group: str) -> User:
-    user = random_user()
-
-    create_dialog = users_page.click_add_user().set_user_fields(user)
-    create_dialog.location_tree_picker.select_regions(region)
-    create_dialog.device_tree_picker.select_device_groups(device_group)
-    create_dialog.click_add_device()
-
-    create_dialog.click_create()
-    users_page.notification.wait_to_load()
-    return user
-
-
+@pytest.mark.usefixtures("login")
 @allure.feature(Feature.PERMISSIONS)
 class TestUsersPermissions:
 
     @allure.title("3.1.2.1 FOTA admin: View all users")
     @allure.severity(allure.severity_level.NORMAL)
     @allure.issue("FOTA admin can't see users with higher permissions")
-    def test_view_users(self):
+    def test_users_list(self):
         super_admin_user = super_admin_credentials.username
-        users_page = login_as(fota_admin_credentials)
+        users_page = UsersPage().open()
         table = users_page.table.wait_to_load()
 
         users_page.search_by(super_admin_user)
@@ -61,8 +39,8 @@ class TestUsersPermissions:
     @allure.title("3.1.2.1 FOTA admin: Create a new user")
     @allure.issue("Some token is displayed for few secs instead of the manager in the Manager menu")
     @allure.severity(allure.severity_level.NORMAL)
-    def test_create_user(self):
-        users_page = login_as(fota_admin_credentials)
+    def test_create_view_user(self):
+        users_page = UsersPage().open()
         headers = UsersTable.Headers
         new_user = random_user()
 
@@ -92,8 +70,8 @@ class TestUsersPermissions:
         new_user = random_user()
         new_device_group = DeviceGroup.CLEARLIGHT
 
-        users_page = login_as(fota_admin_credentials)
-        existing_user = create_random_user_with_device(users_page, existing_region, existing_device_group)
+        users_page = UsersPage().open()
+        existing_user = self.create_random_user_with_device(users_page, existing_region, existing_device_group)
 
         edit_dialog = users_page.reload().search_by(existing_user.email) \
             .open_edit_user_dialog(existing_user.email)
@@ -119,6 +97,19 @@ class TestUsersPermissions:
         assert_that(users_page.table.get_column_values(UsersTable.Headers.EMAIL)).contains_only(new_user.email)
         user_row = users_page.table.get_row_by_email(new_user.email)
         self.assert_user_row(user_row, new_user)
+
+    @allure.step
+    def create_random_user_with_device(self, users_page: UsersPage, region: str, device_group: str) -> User:
+        user = random_user()
+
+        create_dialog = users_page.click_add_user().set_user_fields(user)
+        create_dialog.location_tree_picker.select_regions(region)
+        create_dialog.device_tree_picker.select_device_groups(device_group)
+        create_dialog.click_add_device()
+
+        create_dialog.click_create()
+        users_page.notification.wait_to_load()
+        return user
 
     @allure.step
     def assert_user_row(self, row: TableRowWrapper, expected: User):

@@ -1,28 +1,36 @@
 import allure
 import pytest
 from assertpy import assert_that
+from selene.support.conditions import be
 
 from src.const import Feature
 from src.domain.device import Customer, Device
 from src.site.components.cascader_picker import SEPARATOR
-from src.site.components.tables import DevicesTable, AssignUserTable
+from src.site.components.tables import DevicesTable
 from src.site.login_page import LoginPage
 from src.site.pages import DevicesPage, UsersPage
 from test.test_data_provider import random_device, random_usa_customer, random_user, fota_admin_credentials
 
 
 @pytest.fixture(scope="class")
-def login(request):
-    home_page = LoginPage().open().login_as(fota_admin_credentials)
-    if request.cls is not None:
-        request.cls.home_page = home_page
-    yield home_page
+def login():
+    LoginPage().open().login_as(fota_admin_credentials)
 
 
 @pytest.mark.usefixtures("login")
 @allure.feature(Feature.PERMISSIONS)
 class TestDevicesPermissions:
 
+    @allure.title("3.1.2.2 View devices in a table")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_devices_list(self):
+        devices_page = DevicesPage().open()
+
+        devices_page.table.wait_to_load()
+        devices_page.table.table.should(be.visible).should(be.enabled)
+        assert_that(devices_page.table.get_rows()).is_not_empty()
+
+    @allure.issue("FOTA admin can't view the device he added")
     @allure.title("3.1.2.2 Create and view a new device")
     @allure.severity(allure.severity_level.NORMAL)
     def test_create_view_device(self):
@@ -44,6 +52,7 @@ class TestDevicesPermissions:
         edit_dialog.general_tab.assert_device_fields(new_device)
         edit_dialog.general_tab.assert_customer_fields(new_customer)
 
+    @allure.issue("FOTA admin can't view the device he added")
     @allure.title("3.1.2.2 Edit device customer details")
     @allure.severity(allure.severity_level.NORMAL)
     def test_edit_device_customer_details(self):
@@ -53,8 +62,8 @@ class TestDevicesPermissions:
 
         devices_page = DevicesPage().open()
         devices_page.add_device(device, customer) \
-            .reload() \
-            .search_by(device.serial_number)
+            .reload()
+        devices_page.search_by(device.serial_number)
         properties_dialog = devices_page.open_device_properties(device.serial_number)
         properties_dialog.general_tab.set_customer_fields(new_customer)
         properties_dialog.general_tab.click_update()
@@ -73,7 +82,7 @@ class TestDevicesPermissions:
 
     @allure.title("3.1.2.2 Assign User")
     @allure.issue("The device isn't appeared for the user in the Users device assignment if assign the user"
-                  " to the device on  the devices tab")
+                  " to the device on the devices tab")
     @allure.severity(allure.severity_level.NORMAL)
     def test_assign_user(self):
         test_device = random_device()
@@ -87,13 +96,8 @@ class TestDevicesPermissions:
             .open_device_properties(test_device.serial_number)
         assign_tab = properties_dialog.assign_tab.open()
 
-        table = assign_tab.table.wait_to_load()
-        users = table.get_column_values(AssignUserTable.Headers.NAME)
-        for user in users:
-            assert_that(table.is_user_selected(user)).is_false()
-
         assign_tab.search_by(test_user.name)
-        table.select_user(test_user.name)
+        assign_tab.table.wait_to_load().select_user(test_user.name)
         assign_tab.click_update_user_assignment()
 
         assert_that(devices_page.notification.get_message()).is_equal_to(DevicesPage.DEVICE_UPDATED_MESSAGE)
