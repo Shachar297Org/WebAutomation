@@ -152,6 +152,10 @@ class TreeSelector:
         return self.tree_selector.matching(have.css_class("ant-select-enabled"))
 
     @allure.step
+    def is_disabled(self) -> bool:
+        return self.tree_selector.matching(have.css_class("ant-select-disabled"))
+
+    @allure.step
     def get_placeholder(self) -> str:
         return self.placeholder.get(query.text)
 

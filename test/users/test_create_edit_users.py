@@ -8,7 +8,7 @@ from src.const import Feature, Region, APAC_Country, DeviceGroup, UserGroup, Acu
 from src.domain.credentials import Credentials
 from src.domain.user import User
 from src.site.components.base_table import TableRowWrapper
-from src.site.components.tree_selector import SEPARATOR, get_formatted_selected_plus_item
+from src.site.components.tree_selector import SEPARATOR, get_formatted_selected_plus_item, ALL_NODE
 from src.site.dialogs import CreateUserDialog, get_element_label, assert_text_input_default_state, \
     assert_select_box_default_state, assert_tree_selector_default_state
 from src.site.login_page import LoginPage
@@ -115,6 +115,22 @@ class TestCreateEditUsers:
         assert_that(edit_dialog.get_phone_number()).is_equal_to(new_user.phone_number)
         assert_that(edit_dialog.get_user_group()).is_equal_to(new_user.user_group)
         assert_that(edit_dialog.get_manager()).is_equal_to(new_user.manager)
+
+    @allure.title("14 Select User Group type 'FOTA Admin' and verify that automatically the assigned resources"
+                  " on the web should are 'ALL, ALL'")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_create_fota_admin_user(self):
+        users_page = login_as(super_admin_credentials)
+
+        dialog = users_page.click_add_user()
+        dialog.select_user_group(UserGroup.FOTA_ADMIN)
+
+        assert_that(dialog.location_tree_picker.is_disabled()).described_as("Location picker to be disabled").is_true()
+        assert_that(dialog.device_tree_picker.is_disabled()).described_as("Devices picker to be disabled").is_true()
+        assert_that(dialog.device_table.get_column_values(DeviceAssignmentTable.Headers.REGION)) \
+            .contains_only(ALL_NODE)
+        assert_that(dialog.device_table.get_column_values(DeviceAssignmentTable.Headers.DEVICE_TYPES)) \
+            .contains_only(ALL_NODE)
 
     @allure.title("Create a new user: add devices")
     @allure.severity(allure.severity_level.NORMAL)
