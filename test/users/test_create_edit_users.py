@@ -5,9 +5,6 @@ from selene.support.conditions import be, have
 
 from src.const import Feature, Region, APAC_Country, DeviceGroup, UserGroup, AcupulseDeviceModels, Acupulse30Wdevices, \
     AmericasCountry
-from src.domain.credentials import Credentials
-from src.domain.user import User
-from src.site.components.base_table import TableRowWrapper
 from src.site.components.tree_selector import SEPARATOR, get_formatted_selected_plus_item, ALL_NODE
 from src.site.dialogs import CreateUserDialog, get_element_label, assert_text_input_default_state, \
     assert_select_box_default_state, assert_tree_selector_default_state
@@ -16,14 +13,10 @@ from src.site.components.tables import UsersTable, DeviceAssignmentTable
 from src.site.pages import UsersPage
 from src.util.driver_util import clear_session_storage, clear_local_storage
 from src.util.random_util import random_state
-from test.test_data_provider import random_user, fota_admin_credentials, TEST_USERS_PREFIX, TEST_SUPER_ADMIN, \
+from test.test_data_provider import random_user, fota_admin_credentials, TEST_SUPER_ADMIN, \
     TEST_FOTA_ADMIN, TEST_SYSTEM_ENGINEER, TEST_SERVICE_ADMIN, TEST_TECH_SUPPORT, super_admin_credentials, \
     user_for_disabling_credentials
-
-
-def login_as(credentials: Credentials):
-    LoginPage().open().login_as(credentials)
-    return UsersPage().open()
+from test.users.base_users_test import BaseUsersTest, login_as
 
 
 @pytest.fixture(autouse=True)
@@ -33,29 +26,8 @@ def cleanup_browser_session():
     clear_local_storage()
 
 
-@allure.step
-def create_random_user_with_device(users_page: UsersPage, region: str, device_group: str) -> User:
-    user = random_user()
-
-    create_dialog = users_page.click_add_user().set_user_fields(user)
-    create_dialog.location_tree_picker.select_regions(region)
-    create_dialog.device_tree_picker.select_device_groups(device_group)
-    create_dialog.click_add_device()
-
-    create_dialog.click_create()
-    users_page.notification.wait_to_load()
-    return user
-
-
-def open_first_test_user_from_table_to_edit(users_page: UsersPage):
-    users_page.search_by(TEST_USERS_PREFIX)
-
-    first_test_user = users_page.table.get_column_values(UsersTable.Headers.EMAIL)[0]
-    return users_page.open_edit_user_dialog(first_test_user)
-
-
 @allure.feature(Feature.USERS)
-class TestCreateEditUsers:
+class TestCreateEditUsers(BaseUsersTest):
 
     @allure.title("Verify 'Create User' dialog web elements")
     @allure.severity(allure.severity_level.CRITICAL)
@@ -109,12 +81,7 @@ class TestCreateEditUsers:
 
         edit_dialog = users_page.open_edit_user_dialog(new_user.email)
 
-        assert_that(edit_dialog.get_first_name()).is_equal_to(new_user.first_name)
-        assert_that(edit_dialog.get_last_name()).is_equal_to(new_user.last_name)
-        assert_that(edit_dialog.get_email()).is_equal_to(new_user.email)
-        assert_that(edit_dialog.get_phone_number()).is_equal_to(new_user.phone_number)
-        assert_that(edit_dialog.get_user_group()).is_equal_to(new_user.user_group)
-        assert_that(edit_dialog.get_manager()).is_equal_to(new_user.manager)
+        self.assert_user_fields(edit_dialog, new_user)
 
     @allure.title("14 Select User Group type 'FOTA Admin' and verify that automatically the assigned resources"
                   " on the web should are 'ALL, ALL'")
@@ -197,7 +164,8 @@ class TestCreateEditUsers:
         new_device_group = DeviceGroup.CLEARLIGHT
 
         users_page = login_as(fota_admin_credentials)
-        existing_user = create_random_user_with_device(users_page, existing_region, existing_device_group)
+        existing_user = self.create_random_user_with_device(users_page, TEST_FOTA_ADMIN,
+                                                            existing_region, existing_device_group)
 
         edit_dialog = users_page.reload().search_by(existing_user.email) \
             .open_edit_user_dialog(existing_user.email)
@@ -274,7 +242,7 @@ class TestCreateEditUsers:
     @allure.severity(allure.severity_level.NORMAL)
     def test_associating_with_user_groups(self):
         users_page = login_as(super_admin_credentials)
-        edit_dialog = open_first_test_user_from_table_to_edit(users_page)
+        edit_dialog = self.open_first_test_user_from_table_to_edit(users_page)
         edit_dialog.select_user_group(UserGroup.SERVICE_ADMIN)
 
         all_managers = edit_dialog.manager_select.get_items()
@@ -298,7 +266,7 @@ class TestCreateEditUsers:
                                                                  device=test_device1)
 
         users_page = login_as(fota_admin_credentials)
-        edit_dialog = open_first_test_user_from_table_to_edit(users_page)
+        edit_dialog = self.open_first_test_user_from_table_to_edit(users_page)
 
         edit_dialog.location_tree_picker.select_usa_states(test_state)
         edit_dialog.device_tree_picker.select_devices(test_device_group, test_device_model, test_device1)
@@ -314,24 +282,16 @@ class TestCreateEditUsers:
         assert_that(users_page.notification.get_message()).is_equal_to(UsersPage.USER_UPDATED_MESSAGE)
 
     @allure.title("Reset password test")
+    @allure.issue("Reset password link is absent")
     @allure.severity(allure.severity_level.NORMAL)
     def test_reset_users_password(self):
         users_page = login_as(super_admin_credentials)
-        edit_dialog = open_first_test_user_from_table_to_edit(users_page)
+        edit_dialog = self.open_first_test_user_from_table_to_edit(users_page)
 
         edit_dialog.click_reset_password()
 
         assert_that(users_page.notification.get_message()).is_equal_to(UsersPage.RESET_PASSWORD_MESSAGE)
         # TODO implement email client and add verification that 'Reset Password' email is received.
-
-    @allure.step
-    def assert_user_row(self, row: TableRowWrapper, expected: User):
-        headers = UsersTable.Headers
-        assert_that(row.get_cell_text(headers.EMAIL)).is_equal_to(expected.email)
-        assert_that(row.get_cell_text(headers.NAME)).is_equal_to(expected.name)
-        assert_that(row.get_cell_text(headers.PHONE)).is_equal_to(expected.phone_number)
-        assert_that(row.get_cell_text(headers.USER_GROUP)).is_equal_to(expected.user_group)
-        assert_that(row.get_cell_text(headers.MANAGER)).is_equal_to(expected.manager)
 
 
 @allure.feature(Feature.USERS)
@@ -379,6 +339,6 @@ class TestDisableEnableUser:
 
         users_page.logout()
 
-        home_page = LoginPage().wait_to_load().login_as(user_for_disabling_credentials)
+        home_page = LoginPage().login_as(user_for_disabling_credentials)
 
         home_page.background_image.should(be.visible)

@@ -45,7 +45,9 @@ class SelectBox:
     @allure.step
     def open(self):
         if not self.is_opened():
+            self.wait_to_be_enabled()
             self.select.click()
+            self.wait_to_be_opened()
         return self
 
     @allure.step
@@ -86,13 +88,18 @@ class SelectBox:
 
     @allure.step
     def wait_to_be_enabled(self):
-        self.select.wait.until(have.css_class("ant-select-enabled"))
+        self.select.should(have.css_class("ant-select-enabled"))
+        return self
+
+    @allure.step
+    def wait_to_be_opened(self):
+        self.select.should(have.css_class("ant-select-open"))
         return self
 
     @allure.step
     def wait_to_be_not_empty(self):
         self.wait_to_be_enabled()
-        self.items.wait.until(have.size_greater_than_or_equal(1))
+        self.items.should(have.size_greater_than_or_equal(1))
         return self
 
     @allure.step
@@ -112,8 +119,8 @@ class Tooltip:
 
     @allure.step
     def wait_to_be_loaded(self):
-        time.sleep(3)  # TODO replaces with waiter
-        self.tooltip.wait.until(be.visible)
+        time.sleep(3)  # TODO replace with waiter
+        self.tooltip.should(be.visible)
         return self
 
     @allure.step

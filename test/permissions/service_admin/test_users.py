@@ -3,26 +3,27 @@ import pytest
 from assertpy import assert_that
 
 from src.const import Feature, Region, DeviceGroup
-from src.const.UserGroup import SERVICE_MANAGER, SERVICE_TECHNICIAN, TECH_SUPPORT, SERVICE_ADMIN
+from src.const.UserGroup import SERVICE_MANAGER, SERVICE_TECHNICIAN, TECH_SUPPORT
 from src.site.components.tables import UsersTable, DeviceAssignmentTable
 from src.site.login_page import LoginPage
 from src.site.pages import UsersPage
-from test.test_data_provider import random_user, fota_admin_credentials, super_admin_credentials, TEST_FOTA_ADMIN
+from test.test_data_provider import random_user, super_admin_credentials, \
+    service_admin_credentials, TEST_SERVICE_ADMIN
 from test.users.base_users_test import BaseUsersTest
 
 
 @pytest.fixture(scope="class")
 def login():
-    LoginPage().open().login_as(fota_admin_credentials)
+    LoginPage().open().login_as(service_admin_credentials)
 
 
 @pytest.mark.usefixtures("login")
 @allure.feature(Feature.PERMISSIONS)
 class TestUsersPermissions(BaseUsersTest):
 
-    @allure.title("3.1.2.1 FOTA admin: View all users")
+    @allure.title("3.1.3.1 Service admin: View all users")
     @allure.severity(allure.severity_level.NORMAL)
-    @allure.issue("FOTA admin can't see users with higher permissions")
+    @allure.issue("Service admin can't see users with higher permissions")
     def test_users_list(self):
         super_admin_user = super_admin_credentials.username
         users_page = UsersPage().open()
@@ -35,12 +36,13 @@ class TestUsersPermissions(BaseUsersTest):
         for table_row in table.get_rows():
             assert_that(table.is_any_row_cell_contains_text_ignoring_case(table_row, super_admin_user)).is_true()
 
-    @allure.title("3.1.2.1 FOTA admin: Create a new user")
+    @allure.title("3.1.3.1 Service admin: Create a new user")
     @allure.issue("Some token is displayed for few secs instead of the manager in the Manager menu")
     @allure.severity(allure.severity_level.NORMAL)
     def test_create_view_user(self):
         users_page = UsersPage().open()
         new_user = random_user()
+        new_user.manager = TEST_SERVICE_ADMIN
 
         users_page.add_user(new_user)
 
@@ -55,7 +57,7 @@ class TestUsersPermissions(BaseUsersTest):
 
         self.assert_user_fields(edit_dialog, new_user)
 
-    @allure.title("3.1.2.1 FOTA admin: Edit a user")
+    @allure.title("3.1.3.1 Service admin: Edit a user")
     @allure.severity(allure.severity_level.NORMAL)
     def test_edit_user(self):
         existing_region = Region.JAPAN
@@ -64,14 +66,14 @@ class TestUsersPermissions(BaseUsersTest):
         new_device_group = DeviceGroup.CLEARLIGHT
 
         users_page = UsersPage().open()
-        existing_user = self.create_random_user_with_device(users_page, TEST_FOTA_ADMIN,
+        existing_user = self.create_random_user_with_device(users_page, TEST_SERVICE_ADMIN,
                                                             existing_region, existing_device_group)
 
         edit_dialog = users_page.reload().search_by(existing_user.email) \
             .open_edit_user_dialog(existing_user.email)
 
         assert_that(edit_dialog.user_group_select.get_items())\
-            .contains_only(SERVICE_ADMIN, SERVICE_MANAGER, SERVICE_TECHNICIAN, TECH_SUPPORT)
+            .contains_only(SERVICE_MANAGER, SERVICE_TECHNICIAN, TECH_SUPPORT)
 
         edit_dialog.set_user_fields(new_user)
         edit_dialog.device_table.click_edit(existing_device_group)

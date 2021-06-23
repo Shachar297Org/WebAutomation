@@ -24,10 +24,8 @@ TEST_GMAIL_ACCOUNT = "lumenisauto@gmail.com"
 
 super_admin_credentials = Credentials("victor.savchyn@gmail.com", "LumenisX225")
 fota_admin_credentials = Credentials("lumenisauto+FotaAdmin@gmail.com", "LumenisX225@")
-system_engineer_credentials = Credentials("lumenisauto+SystemEngineer@gmail.com", "LumenisX225@")
-service_admin_credentials = Credentials("lumenisauto+ServiceAdmin@gmail.com", "LumenisX225@")
-service_manager_credentials = Credentials("lumenisauto+ServiceManager@gmail.com", "LumenisX225@")
-tech_support_credentials = Credentials("lumenisauto+TechSupport@gmail.com", "LumenisX225@")
+service_admin_credentials = Credentials("lumenisautoServiceAdmin@gmail.com", "Abc12345")
+service_manager_credentials = Credentials("lumenisautoServiceManager@gmail.com", "Abc12345")
 
 user_for_disabling_credentials = Credentials("lumenisauto+Disabled@gmail.com", "LumenisX225@")
 
