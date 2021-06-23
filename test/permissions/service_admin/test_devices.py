@@ -7,19 +7,19 @@ from src.const import Feature
 from src.site.login_page import LoginPage
 from src.site.pages import DevicesPage, UsersPage
 from test.devices.base_devices_test import BaseDevicesTest
-from test.test_data_provider import random_device, random_usa_customer, random_user, fota_admin_credentials
+from test.test_data_provider import random_device, random_usa_customer, random_user, service_admin_credentials
 
 
 @pytest.fixture(scope="class")
 def login():
-    LoginPage().open().login_as(fota_admin_credentials)
+    LoginPage().open().login_as(service_admin_credentials)
 
 
 @pytest.mark.usefixtures("login")
 @allure.feature(Feature.PERMISSIONS)
-class TestFotaAdminDevicesPermissions(BaseDevicesTest):
+class TestServiceAdminDevicesPermissions(BaseDevicesTest):
 
-    @allure.title("3.1.2.2 View devices in a table")
+    @allure.title("3.1.3.2 View devices in a table")
     @allure.severity(allure.severity_level.NORMAL)
     def test_devices_list(self):
         devices_page = DevicesPage().open()
@@ -29,7 +29,7 @@ class TestFotaAdminDevicesPermissions(BaseDevicesTest):
         assert_that(devices_page.table.get_rows()).is_not_empty()
 
     @allure.issue("FOTA admin can't view the device he added")
-    @allure.title("3.1.2.2 Create and view a new device")
+    @allure.title("3.1.3.2 Create and view a new device")
     @allure.severity(allure.severity_level.NORMAL)
     def test_create_view_device(self):
         new_device = random_device()
@@ -51,7 +51,7 @@ class TestFotaAdminDevicesPermissions(BaseDevicesTest):
         edit_dialog.general_tab.assert_customer_fields(new_customer)
 
     @allure.issue("FOTA admin can't view the device he added")
-    @allure.title("3.1.2.2 Edit device customer details")
+    @allure.title("3.1.3.2 Edit device customer details")
     @allure.severity(allure.severity_level.NORMAL)
     def test_edit_device_customer_details(self):
         device = random_device()
@@ -78,7 +78,7 @@ class TestFotaAdminDevicesPermissions(BaseDevicesTest):
         edit_dialog.general_tab.assert_device_fields(device)
         edit_dialog.general_tab.assert_customer_fields(new_customer)
 
-    @allure.title("3.1.2.2 Assign User")
+    @allure.title("3.1.3.2 Assign User")
     @allure.issue("The device isn't appeared for the user in the Users device assignment if assign the user"
                   " to the device on the devices tab")
     @allure.severity(allure.severity_level.NORMAL)

@@ -19,7 +19,7 @@ def login():
 
 @pytest.mark.usefixtures("login")
 @allure.feature(Feature.PERMISSIONS)
-class TestUsersPermissions(BaseUsersTest):
+class TestServiceAdminUsersPermissions(BaseUsersTest):
 
     @allure.title("3.1.3.1 Service admin: View all users")
     @allure.severity(allure.severity_level.NORMAL)
