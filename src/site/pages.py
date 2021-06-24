@@ -289,6 +289,10 @@ class _LeftPanel(object):
         self.devices_section = self.panel.s("a[href='/devices']")
         self.alarms_section = self.panel.s("a[href='/alarms']")
         self.qlik_section = self.panel.s("a[href='/qlik']")
+        self.connect_wise_section = self.panel.s("a[href='/connectWise']")
+        self.event_viewer_section = self.panel.s("a[href='/eventViewer']")
+        self.firmware_manager_section = self.panel.s("//div[@class='ant-menu-submenu-title']"
+                                                     "[.//span[text()='Firmware Manager']]")
 
     @allure.step
     def open_home(self) -> HomePage:
