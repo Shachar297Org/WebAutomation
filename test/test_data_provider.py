@@ -12,10 +12,9 @@ from src.util.random_util import random_first_name, random_last_name, \
 TEST_SUPER_ADMIN = "Victor savchyn"
 TEST_FOTA_ADMIN = "Victor AQA FOTA Admin"
 TEST_SYSTEM_ENGINEER = "Victor AQA System Engineer"
-TEST_SERVICE_ADMIN = "Victor AQA Service Admin"
-TEST_SERVICE_MANAGER = "Victor AQA Service Manager"
+TEST_SERVICE_ADMIN = "lumenisauto ServiceAdmin"
+TEST_SERVICE_MANAGER = "lumenisauto ServiceManager"
 TEST_TECH_SUPPORT = "Victor AQA Tech Support"
-
 TEST_USER_FOR_DISABLING = "Victor AQA User For Disabling"
 
 TEST_DEVICE_PREFIX = "AUTOTESTS-"

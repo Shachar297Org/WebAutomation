@@ -14,7 +14,7 @@ class BaseDevicesTest:
         assert_that(table.get_column_values(table.Headers.DEVICE_TYPE)).contains_only(
             expected.model + SEPARATOR + expected.device)
         assert_that(table.get_column_values(table.Headers.STATUS)).contains_only(table.INACTIVE_STATUS)
-        assert_that(table.is_device_editable(expected.serial_number)).described_as("Properties link").is_true()
+        assert_that(table.device_has_properties_button(expected.serial_number)).described_as("Properties link").is_true()
 
     @allure.step
     def assert_customer_in_table(self, table: DevicesTable, expected: Customer):

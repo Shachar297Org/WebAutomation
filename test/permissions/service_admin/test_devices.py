@@ -7,7 +7,8 @@ from src.const import Feature
 from src.site.login_page import LoginPage
 from src.site.pages import DevicesPage, UsersPage
 from test.devices.base_devices_test import BaseDevicesTest
-from test.test_data_provider import random_device, random_usa_customer, random_user, service_admin_credentials
+from test.test_data_provider import random_device, random_usa_customer, random_user, service_admin_credentials, \
+    TEST_SERVICE_ADMIN
 
 
 @pytest.fixture(scope="class")
@@ -85,6 +86,7 @@ class TestServiceAdminDevicesPermissions(BaseDevicesTest):
     def test_assign_user(self):
         test_device = random_device()
         test_user = random_user()
+        test_user.manager = TEST_SERVICE_ADMIN
 
         UsersPage().open().add_user(test_user)
 
