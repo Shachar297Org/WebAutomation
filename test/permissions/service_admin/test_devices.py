@@ -29,7 +29,6 @@ class TestServiceAdminDevicesPermissions(BaseDevicesTest):
         devices_page.table.table.should(be.visible).should(be.enabled)
         assert_that(devices_page.table.get_rows()).is_not_empty()
 
-    @allure.issue("FOTA admin can't view the device he added")
     @allure.title("3.1.3.2 Create and view a new device")
     @allure.severity(allure.severity_level.NORMAL)
     def test_create_view_device(self):
@@ -51,7 +50,6 @@ class TestServiceAdminDevicesPermissions(BaseDevicesTest):
         edit_dialog.general_tab.assert_device_fields(new_device)
         edit_dialog.general_tab.assert_customer_fields(new_customer)
 
-    @allure.issue("FOTA admin can't view the device he added")
     @allure.title("3.1.3.2 Edit device customer details")
     @allure.severity(allure.severity_level.NORMAL)
     def test_edit_device_customer_details(self):
