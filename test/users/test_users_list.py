@@ -106,7 +106,7 @@ class TestUsersList:
         for table_row in table.get_rows():
             assert_that(table.is_any_row_cell_contains_text_ignoring_case(table_row, substring)).is_true()
 
-        users_page.click_reset()
+        users_page.reset()
 
         assert_that(users_page.search_input.is_empty()).described_as("Search input to be empty after reset").is_true()
         assert_that(table.get_rows()).described_as("Table rows count after reset").is_length(init_rows_count)
@@ -123,6 +123,6 @@ class TestUsersList:
 
         assert_that(table.get_column_values(UsersTable.Headers.USER_GROUP)).contains_only(random_group)
 
-        users_page.click_reset()
+        users_page.reset()
 
         assert_that(table.get_rows()).described_as("Table rows count after reset").is_length(init_rows_count)

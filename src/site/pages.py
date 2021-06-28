@@ -10,10 +10,11 @@ from src.domain.device import Device, Customer
 from src.domain.user import User
 from src.site.components.base_table import PaginationElement
 from src.site.components.page_header import PageHeader
-from src.site.components.simple_components import SearchInput, SelectBox, TopRightNotification
-from src.site.components.tables import UsersTable, DevicesTable
+from src.site.components.simple_components import SearchInput, SelectBox, TopRightNotification, ResetButton
+from src.site.components.tables import UsersTable, DevicesTable, GroupsTable, LumenisXVersionTable
 from src.site.components.tree_selector import DeviceTypesTreeSelector, LocationTreeSelector
-from src.site.dialogs import CreateUserDialog, EditUserDialog, CreateDeviceDialog, DevicePropertiesDialog
+from src.site.dialogs import CreateUserDialog, EditUserDialog, CreateDeviceDialog, DevicePropertiesDialog, \
+    UploadLumenisXVersionDialog, CreateGroupDialog, EditGroupDialog
 from src.util.elements_util import JS_CLICK
 
 
@@ -80,7 +81,7 @@ class UsersPage(_BasePage):
         self.add_button = s("//button[span[text()='+']]")
         self.search_input = SearchInput("input[placeholder='Search']")
         self.user_group_select = SelectBox("#entityToolbarFilters_userGroupFilter")
-        self.reset_button = s("//button[span[text()='Reset']]")
+        self.reset_button = ResetButton(s("//button[span[text()='Reset']]"))
         self.reload_button = s("i.anticon-reload")
         self.table = UsersTable(".ant-table-wrapper")
         self.pagination_element = PaginationElement("ul.ant-table-pagination")
@@ -139,9 +140,8 @@ class UsersPage(_BasePage):
         return self.open_edit_user_dialog(email)
 
     @allure.step
-    def click_reset(self):
-        self.reset_button.click()
-        self.reset_button.wait.until(have.attribute("ant-click-animating-without-extra-node").value("false"))
+    def reset(self):
+        self.reset_button.reset()
         return self
 
     @allure.step
@@ -168,7 +168,7 @@ class DevicesPage(_BasePage):
                                                           "[.//text()='Device Types']")
         self.location_tree_picker = LocationTreeSelector(".//span[contains(@class, 'TreeSelector')]"
                                                          "[.//text()='Locations']")
-        self.reset_button = s("//button[span[text()='Reset']]")
+        self.reset_button = ResetButton(s("//button[span[text()='Reset']]"))
         self.reload_button = s("i.anticon-reload")
         self.table = DevicesTable(".ant-table-wrapper")
         self.pagination_element = PaginationElement("ul.ant-table-pagination")
@@ -182,7 +182,7 @@ class DevicesPage(_BasePage):
     @allure.step
     def wait_to_load(self):
         self.location_tree_picker.tree_selector.wait_until(be.visible)
-        self.reset_button.wait_until(be.clickable)
+        self.reset_button.button.wait_until(be.clickable)
         return self
 
     @allure.step
@@ -229,9 +229,8 @@ class DevicesPage(_BasePage):
         return self
 
     @allure.step
-    def click_reset(self):
-        self.reset_button.click()
-        self.reset_button.wait.until(have.attribute("ant-click-animating-without-extra-node").value("false"))
+    def reset(self):
+        self.reset_button.reset()
         return self
 
     @allure.step
@@ -249,7 +248,7 @@ class DevicesPage(_BasePage):
 class AlarmsPage(_BasePage):
     def __init__(self):
         super().__init__()
-        self.reset_button = s("//button[span[text()='Reset']]")
+        self.reset_button = ResetButton(s("//button[span[text()='Reset']]"))
         self.reload_button = s("i.anticon - reload")
 
     @allure.step
@@ -260,12 +259,12 @@ class AlarmsPage(_BasePage):
 
     @allure.step
     def wait_to_load(self):
-        self.reset_button.wait_until(be.visible)
+        self.reset_button.button.wait_until(be.visible)
         return self
 
     @allure.step
-    def _click_reset(self):
-        self.reset_button.click()
+    def reset(self):
+        self.reset_button.reset()
 
 
 class QlikPage(_BasePage):
@@ -277,6 +276,181 @@ class QlikPage(_BasePage):
 
     def wait_to_load(self):
         raise Exception("The method isn't implemented yet")
+
+
+class GroupsPage(_BasePage):
+    SEARCH_TEXT = "Search"
+    DEVICE_TYPES_TEXT = "Device Types"
+    LOCATIONS_TEXT = "Locations"
+
+    GROUP_CREATED_MESSAGE = "Created group successful"
+    GROUP_UPDATED_MESSAGE = "Updated group successful"
+    CREATION_FAILURE_MESSAGE = "Creation Failure"
+
+    def __init__(self):
+        super().__init__()
+        self.add_button = s("//button[span[text()='+']]")
+        self.search_input = SearchInput("input[placeholder='Search']")
+        self.device_tree_picker = DeviceTypesTreeSelector("//span[contains(@class, 'TreeSelector')]"
+                                                          "[.//text()='Device Types']")
+        self.location_tree_picker = LocationTreeSelector("//span[contains(@class, 'TreeSelector')]"
+                                                         "[.//text()='Locations']")
+        self.reset_button = ResetButton(s("//button[span[text()='Reset']]"))
+        self.reload_button = s("i.anticon-reload")
+        self.table = GroupsTable(".ant-table-wrapper")
+        self.pagination_element = PaginationElement("ul.ant-table-pagination")
+
+    @allure.step
+    def open(self):
+        browser.open('/groups')
+        self.wait_to_load()
+        return self
+
+    @allure.step
+    def wait_to_load(self):
+        self.location_tree_picker.tree_selector.wait_until(be.visible)
+        self.reset_button.button.wait_until(be.clickable)
+        return self
+
+    @allure.step
+    def sort_asc_by(self, column: str):
+        self.table.sort_asc(column)
+        return self
+
+    @allure.step
+    def sort_desc_by(self, column: str):
+        self.table.sort_desc(column)
+        return self
+
+    @allure.step
+    def search_by(self, text: str):
+        self.search_input.search(text)
+        self.table.wait_to_load()
+        return self
+
+    @allure.step
+    def click_add_group(self) -> CreateGroupDialog:
+        self.add_button.click()
+        return CreateGroupDialog().wait_to_load()
+
+    @allure.step
+    def click_edit_group(self, name) -> EditGroupDialog:
+        self.table.click_edit(name)
+        return EditGroupDialog().wait_to_load()
+
+    @allure.step
+    def click_assign_device(self, name) -> GroupDevicesDialog:
+        self.table.click_assign_devices(name)
+        return GroupDevicesDialog().wait_to_load() #TODO
+
+    @allure.step
+    def click_update_versions(self, name) -> UpdateGroupVersionsDialog:
+        self.table.click_update_versions(name)
+        return UpdateGroupVersionsDialog().wait_to_load() #TODO
+
+    @allure.step
+    def click_status(self, name) -> GroupDeviceStatusDialog:
+        self.table.click_status(name)
+        return GroupDeviceStatusDialog().wait_to_load() #TODO
+
+    @allure.step
+    def reset(self):
+        self.reset_button.reset()
+        return self
+
+    @allure.step
+    def reload(self):
+        self.reload_button.execute_script(JS_CLICK)
+        self.table.wait_to_load()
+        return GroupsPage()
+
+
+class LumenisXVersionPage(_BasePage):
+    SEARCH_TEXT = "Search"
+    VALID_TYPE_TEXT = "Valid Type"
+
+    VALID = "Valid"
+    INVALID = "Invalid"
+
+    CREATE_LUMENIS_VERSION_MESSAGE = "Create Lumenis version successful"
+    VERSION_UPDATED_MESSAGE = "Version updated successfully"
+
+    def __init__(self):
+        super().__init__()
+        self.add_button = s("//button[span[text()='+']]")
+        self.search_input = SearchInput("input[placeholder='Search']")
+        self.valid_type_menu = SelectBox("#entityToolbarFilters_validFilter")
+
+        self.reset_button = ResetButton(s("//button[span[text()='Reset']]"))
+        self.reload_button = s("i.anticon-reload")
+        self.table = LumenisXVersionTable(".ant-table-wrapper")
+        self.pagination_element = PaginationElement("ul.ant-table-pagination")
+
+    @allure.step
+    def open(self):
+        browser.open('/lumenisXVersions')
+        self.wait_to_load()
+        return self
+
+    @allure.step
+    def wait_to_load(self):
+        self.valid_type_menu.select.wait_until(be.visible)
+        self.reset_button.button.wait_until(be.clickable)
+        return self
+
+    @allure.step
+    def sort_asc_by(self, column: str):
+        self.table.sort_asc(column)
+        return self
+
+    @allure.step
+    def sort_desc_by(self, column: str):
+        self.table.sort_desc(column)
+        return self
+
+    @allure.step
+    def click_add_version(self) -> UploadLumenisXVersionDialog:
+        self.add_button.click()
+        return UploadLumenisXVersionDialog().wait_to_load()
+
+    @allure.step
+    def search_by(self, text: str):
+        self.search_input.search(text)
+        self.table.wait_to_load()
+        return self
+
+    @allure.step
+    def filter_valid(self):
+        self.valid_type_menu.select_item(LumenisXVersionPage.VALID)
+        return self
+
+    @allure.step
+    def filter_invalid(self):
+        self.valid_type_menu.select_item(LumenisXVersionPage.INVALID)
+        return self
+
+    @allure.step
+    def make_valid(self, name):
+        if not self.table.is_valid:
+            self.table.click_valid(name)
+        return self
+
+    @allure.step
+    def make_invalid(self, name):
+        if self.table.is_valid:
+            self.table.click_invalid(name)
+        return self
+
+    @allure.step
+    def reset(self):
+        self.reset_button.reset()
+        return self
+
+    @allure.step
+    def reload(self):
+        self.reload_button.execute_script(JS_CLICK)
+        self.table.wait_to_load()
+        return LumenisXVersionPage()
 
 
 class _LeftPanel(object):
@@ -293,6 +467,9 @@ class _LeftPanel(object):
         self.event_viewer_section = self.panel.s("a[href='/eventViewer']")
         self.firmware_manager_section = self.panel.s("//div[@class='ant-menu-submenu-title']"
                                                      "[.//span[text()='Firmware Manager']]")
+        self.groups_menu_item = self.panel.s("a[href='/groups']")
+        self.sw_versions_menu_item = self.panel.s("a[href='/swVersions']")
+        self.lumenisx_versions_menu_item = self.panel.s("a[href='/lumenisXVersions']")
 
     @allure.step
     def open_home(self) -> HomePage:
@@ -318,3 +495,25 @@ class _LeftPanel(object):
     def open_qlik(self) -> QlikPage:
         self.qlik_section.click()
         return QlikPage()
+
+    @allure.step
+    def open_groups(self) -> GroupsPage:
+        self.expand_firmware_manager_section()
+        self.groups_menu_item.click()
+        return GroupsPage()
+
+    @allure.step
+    def open_lumenisx_versions(self) -> HomePage:
+        self.expand_firmware_manager_section()
+        self.lumenisx_versions_menu_item.click()
+        return HomePage()
+
+    @allure.step
+    def expand_firmware_manager_section(self):
+        if not self._is_firmware_manager_section_expanded():
+            self.firmware_manager_section.click()
+            return self.firmware_manager_section.should(have.attribute('aria-expanded', 'true'))
+
+    @allure.step
+    def _is_firmware_manager_section_expanded(self) -> bool:
+        return self.firmware_manager_section.matching(have.attribute('aria-expanded', 'true'))

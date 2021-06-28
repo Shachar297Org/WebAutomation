@@ -2,6 +2,7 @@ import time
 
 import allure
 from selene.core import query
+from selene.core.entity import Element
 from selene.support.conditions import be, have
 from selene.support.conditions.be import not_
 from selene.support.shared.jquery_style import s, ss
@@ -168,3 +169,13 @@ class TopRightNotification:
 
     def should_not_be_visible(self):
         self.notification.should(be.not_.visible)
+
+
+class ResetButton:
+    def __init__(self, button_element: Element):
+        self.button = button_element
+
+    @allure.step
+    def reset(self):
+        self.button.click()
+        self.button.wait.until(have.attribute("ant-click-animating-without-extra-node").value("false"))

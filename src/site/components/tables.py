@@ -249,3 +249,70 @@ class AlarmHistoryTable(Table):
         ALARM_ID = "Alarm Id"
         DESCRIPTION = "Description"
         STATUS = "Status"
+
+
+class GroupsTable(Table):
+    _EDIT = "Edit"
+    _ASSIGN_DEVICES = "Assign Devices"
+    _UPDATE_VERSIONS = "Update Versions"
+    _STATUS = "STATUS"
+
+    @allure.step
+    def get_row_by_name(self, name: str) -> TableRowWrapper:
+        return self.get_row_by_column_value(self.Headers.NAME, name)
+
+    @allure.step
+    def get_rows_by_device_type(self, device_type: str) -> []:
+        return self.get_rows_by_column_value(self.Headers.DEVICE_TYPE, device_type)
+
+    @allure.step
+    def click_edit(self, name: str):
+        self.get_row_by_name(name).get_button(self._EDIT).click()
+
+    @allure.step
+    def click_assign_devices(self, name: str):
+        self.get_row_by_name(name).get_button(self._ASSIGN_DEVICES).click()
+
+    @allure.step
+    def click_update_versions(self, name: str):
+        self.get_row_by_name(name).get_button(self._UPDATE_VERSIONS).click()
+
+    @allure.step
+    def click_status(self, name: str):
+        self.get_row_by_name(name).get_button(self._STATUS).click()
+
+    class Headers:
+        NAME = "Name"
+        DEVICE_TYPE = "Device Type"
+        REGION = "Region"
+        COUNTRY = "Country"
+        SW_VERSION = "SW Version"
+        LUMX_VERSION = "LumX Version"
+        ACTION_BUTTON = ""
+
+
+class LumenisXVersionTable(Table):
+    _VALID = "Valid"
+    _INVALID = "Invalid"
+
+    @allure.step
+    def is_valid(self, version: str) -> bool:
+        return self.get_row_by_version(version).get_button(self._VALID).matching(be.disabled)
+
+    @allure.step
+    def click_valid(self, version: str):
+        self.get_row_by_version(version).get_button(self._VALID).click()
+
+    @allure.step
+    def click_invalid(self, version: str):
+        self.get_row_by_version(version).get_button(self._INVALID).click()
+
+    @allure.step
+    def get_row_by_version(self, name: str) -> TableRowWrapper:
+        return self.get_row_by_column_value(self.Headers.SOFT_VERSION, name)
+
+    class Headers:
+        SOFT_VERSION = "Soft Version"
+        UPLOAD_DATE = "Upload Date"
+        UPLOADED_BY = "Uploaded By"
+        VALID_INVALID_BUTTONS = ""
