@@ -8,7 +8,7 @@ from src.site.components.tables import UsersTable, DeviceAssignmentTable
 from src.site.login_page import LoginPage
 from src.site.pages import UsersPage
 from test.test_data_provider import random_user, super_admin_credentials, \
-    service_admin_credentials, TEST_SERVICE_ADMIN
+    service_admin_credentials, TEST_SERVICE_ADMIN, fota_admin_credentials
 from test.users.base_users_test import BaseUsersTest
 
 
@@ -25,16 +25,16 @@ class TestServiceAdminUsersPermissions(BaseUsersTest):
     @allure.severity(allure.severity_level.NORMAL)
     @allure.issue("Service admin can't see users with higher permissions")
     def test_users_list(self):
-        super_admin_user = super_admin_credentials.username
+        fota_admin_user = fota_admin_credentials.username
         users_page = UsersPage().open()
         table = users_page.table.wait_to_load()
 
-        users_page.search_by(super_admin_user)
+        users_page.search_by(fota_admin_user)
 
         assert_that(table.get_rows()).is_not_empty()
 
         for table_row in table.get_rows():
-            assert_that(table.is_any_row_cell_contains_text_ignoring_case(table_row, super_admin_user)).is_true()
+            assert_that(table.is_any_row_cell_contains_text_ignoring_case(table_row, fota_admin_user)).is_true()
 
     @allure.title("3.1.3.1 Service admin: Create a new user")
     @allure.issue("Some token is displayed for few secs instead of the manager in the Manager menu")
@@ -63,6 +63,7 @@ class TestServiceAdminUsersPermissions(BaseUsersTest):
         existing_region = Region.JAPAN
         existing_device_group = DeviceGroup.BODYCONTOURING
         new_user = random_user()
+        new_user.manager = TEST_SERVICE_ADMIN
         new_device_group = DeviceGroup.CLEARLIGHT
 
         users_page = UsersPage().open()

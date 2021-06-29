@@ -167,7 +167,8 @@ class TestCreateEditUsers(BaseUsersTest):
         existing_user = self.create_random_user_with_device(users_page, TEST_FOTA_ADMIN,
                                                             existing_region, existing_device_group)
 
-        edit_dialog = users_page.reload().search_by(existing_user.email) \
+        users_page.reload()
+        edit_dialog = users_page.search_by(existing_user.email)\
             .open_edit_user_dialog(existing_user.email)
 
         edit_dialog.set_user_fields(new_user)

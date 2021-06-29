@@ -45,7 +45,7 @@ class TestUsersList:
         assert_that(users_page.user_group_select.is_empty()).is_true()
         assert_that(users_page.user_group_select.get_placeholder()).is_equal_to(users_page.SELECT_USERS_GROUP_TEXT)
 
-        users_page.reset_button.should(be.visible).should(be.clickable)
+        users_page.reset_button.button.should(be.visible).should(be.clickable)
         users_page.reload_button.should(be.visible).should(be.clickable)
 
         users_page.table.table.should(be.visible).should(be.enabled)

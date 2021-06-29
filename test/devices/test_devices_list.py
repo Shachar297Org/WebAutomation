@@ -77,7 +77,7 @@ class TestDevicesList:
         assert_that(devices_page.location_tree_picker.get_placeholder()) \
             .is_equal_to(DevicesPage.LOCATIONS_TEXT)
 
-        devices_page.reset_button.should(be.visible).should(be.clickable)
+        devices_page.reset_button.button.should(be.visible).should(be.clickable)
         devices_page.reload_button.should(be.visible).should(be.clickable)
 
         devices_page.table.table.should(be.visible).should(be.enabled)

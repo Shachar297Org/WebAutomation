@@ -20,7 +20,7 @@ def is_input_disabled(input_element: Element) -> bool:
 
 
 def clear_text_input(input_element: Element) -> Element:
-    return input_element.press(Keys.CONTROL + "A").press(Keys.BACKSPACE)
+    return input_element.press(Keys.CONTROL + "A").press(Keys.BACKSPACE).clear()
 
 
 def reduce_timeout_decorator(func):

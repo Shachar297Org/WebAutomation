@@ -8,7 +8,7 @@ from selene.support.shared import browser
 
 from src.domain.device import Device, Customer
 from src.domain.user import User
-from src.site.components.base_table import PaginationElement
+from src.site.components.base_table import PaginationElement, Table
 from src.site.components.page_header import PageHeader
 from src.site.components.simple_components import SearchInput, SelectBox, TopRightNotification, ResetButton
 from src.site.components.tables import UsersTable, DevicesTable, GroupsTable, LumenisXVersionTable
@@ -51,6 +51,46 @@ class _BasePage:
         self.header.logout()
 
 
+class _BaseTablePage(_BasePage, abc.ABC):
+    SEARCH_TEXT = "Search"
+
+    def __init__(self):
+        super().__init__()
+        self.add_button = s("//button[span[text()='+']]")
+        self.search_input = SearchInput("input[placeholder='Search']")
+        self.reset_button = ResetButton(s("//button[span[text()='Reset']]"))
+        self.reload_button = s("i.anticon-reload")
+        self.table = Table(".ant-table-wrapper")
+        self.pagination_element = PaginationElement("ul.ant-table-pagination")
+
+    @allure.step
+    def sort_asc_by(self, column: str):
+        self.table.sort_asc(column)
+        return self
+
+    @allure.step
+    def sort_desc_by(self, column: str):
+        self.table.sort_desc(column)
+        return self
+
+    @allure.step
+    def search_by(self, text: str):
+        self.search_input.search(text)
+        self.table.wait_to_load()
+        return self
+
+    @allure.step
+    def reset(self):
+        self.reset_button.reset()
+        return self
+
+    @allure.step
+    def reload(self):
+        self.reload_button.execute_script(JS_CLICK)
+        self.table.wait_to_load()
+        return self
+
+
 class HomePage(_BasePage):
     def __init__(self):
         super().__init__()
@@ -68,8 +108,7 @@ class HomePage(_BasePage):
         return self
 
 
-class UsersPage(_BasePage):
-    SEARCH_TEXT = "Search"
+class UsersPage(_BaseTablePage):
     SELECT_USERS_GROUP_TEXT = "Select User Group..."
 
     USER_CREATED_MESSAGE = "Create User successful"
@@ -78,13 +117,8 @@ class UsersPage(_BasePage):
 
     def __init__(self):
         super().__init__()
-        self.add_button = s("//button[span[text()='+']]")
-        self.search_input = SearchInput("input[placeholder='Search']")
         self.user_group_select = SelectBox("#entityToolbarFilters_userGroupFilter")
-        self.reset_button = ResetButton(s("//button[span[text()='Reset']]"))
-        self.reload_button = s("i.anticon-reload")
         self.table = UsersTable(".ant-table-wrapper")
-        self.pagination_element = PaginationElement("ul.ant-table-pagination")
 
     @allure.step
     def open(self):
@@ -95,22 +129,6 @@ class UsersPage(_BasePage):
     @allure.step
     def wait_to_load(self):
         self.add_button.wait_until(be.visible)
-        return self
-
-    @allure.step
-    def sort_asc_by(self, column: str):
-        self.table.sort_asc(column)
-        return self
-
-    @allure.step
-    def sort_desc_by(self, column: str):
-        self.table.sort_desc(column)
-        return self
-
-    @allure.step
-    def search_by(self, text: str):
-        self.search_input.search(text)
-        self.table.wait_to_load()
         return self
 
     @allure.step
@@ -139,20 +157,8 @@ class UsersPage(_BasePage):
         self.search_by(email)
         return self.open_edit_user_dialog(email)
 
-    @allure.step
-    def reset(self):
-        self.reset_button.reset()
-        return self
 
-    @allure.step
-    def reload(self):
-        self.reload_button.execute_script(JS_CLICK)
-        self.table.wait_to_load()
-        return UsersPage()
-
-
-class DevicesPage(_BasePage):
-    SEARCH_TEXT = "Search"
+class DevicesPage(_BaseTablePage):
     DEVICE_TYPES_TEXT = "Device Types"
     LOCATIONS_TEXT = "Locations"
 
@@ -162,16 +168,11 @@ class DevicesPage(_BasePage):
 
     def __init__(self):
         super().__init__()
-        self.add_button = s("//button[span[text()='+']]")
-        self.search_input = SearchInput("input[placeholder='Search']")
         self.device_tree_picker = DeviceTypesTreeSelector(".//span[contains(@class, 'TreeSelector')]"
                                                           "[.//text()='Device Types']")
         self.location_tree_picker = LocationTreeSelector(".//span[contains(@class, 'TreeSelector')]"
                                                          "[.//text()='Locations']")
-        self.reset_button = ResetButton(s("//button[span[text()='Reset']]"))
-        self.reload_button = s("i.anticon-reload")
         self.table = DevicesTable(".ant-table-wrapper")
-        self.pagination_element = PaginationElement("ul.ant-table-pagination")
 
     @allure.step
     def open(self):
@@ -183,22 +184,6 @@ class DevicesPage(_BasePage):
     def wait_to_load(self):
         self.location_tree_picker.tree_selector.wait_until(be.visible)
         self.reset_button.button.wait_until(be.clickable)
-        return self
-
-    @allure.step
-    def sort_asc_by(self, column: str):
-        self.table.sort_asc(column)
-        return self
-
-    @allure.step
-    def sort_desc_by(self, column: str):
-        self.table.sort_desc(column)
-        return self
-
-    @allure.step
-    def search_by(self, text: str):
-        self.search_input.search(text)
-        self.table.wait_to_load()
         return self
 
     @allure.step
@@ -228,28 +213,10 @@ class DevicesPage(_BasePage):
         dialog.click_create()
         return self
 
-    @allure.step
-    def reset(self):
-        self.reset_button.reset()
-        return self
 
-    @allure.step
-    def reload(self):
-        self.reload_button.execute_script(JS_CLICK)
-        self.table.wait_to_load()
-        return DevicesPage()
-
-    @allure.step
-    def _click_add_device(self):
-        self.add_button.click()
-        return self
-
-
-class AlarmsPage(_BasePage):
+class AlarmsPage(_BaseTablePage):
     def __init__(self):
         super().__init__()
-        self.reset_button = ResetButton(s("//button[span[text()='Reset']]"))
-        self.reload_button = s("i.anticon - reload")
 
     @allure.step
     def open(self):
@@ -261,10 +228,6 @@ class AlarmsPage(_BasePage):
     def wait_to_load(self):
         self.reset_button.button.wait_until(be.visible)
         return self
-
-    @allure.step
-    def reset(self):
-        self.reset_button.reset()
 
 
 class QlikPage(_BasePage):
@@ -278,8 +241,7 @@ class QlikPage(_BasePage):
         raise Exception("The method isn't implemented yet")
 
 
-class GroupsPage(_BasePage):
-    SEARCH_TEXT = "Search"
+class GroupsPage(_BaseTablePage):
     DEVICE_TYPES_TEXT = "Device Types"
     LOCATIONS_TEXT = "Locations"
 
@@ -289,16 +251,11 @@ class GroupsPage(_BasePage):
 
     def __init__(self):
         super().__init__()
-        self.add_button = s("//button[span[text()='+']]")
-        self.search_input = SearchInput("input[placeholder='Search']")
         self.device_tree_picker = DeviceTypesTreeSelector("//span[contains(@class, 'TreeSelector')]"
                                                           "[.//text()='Device Types']")
         self.location_tree_picker = LocationTreeSelector("//span[contains(@class, 'TreeSelector')]"
                                                          "[.//text()='Locations']")
-        self.reset_button = ResetButton(s("//button[span[text()='Reset']]"))
-        self.reload_button = s("i.anticon-reload")
         self.table = GroupsTable(".ant-table-wrapper")
-        self.pagination_element = PaginationElement("ul.ant-table-pagination")
 
     @allure.step
     def open(self):
@@ -310,22 +267,6 @@ class GroupsPage(_BasePage):
     def wait_to_load(self):
         self.location_tree_picker.tree_selector.wait_until(be.visible)
         self.reset_button.button.wait_until(be.clickable)
-        return self
-
-    @allure.step
-    def sort_asc_by(self, column: str):
-        self.table.sort_asc(column)
-        return self
-
-    @allure.step
-    def sort_desc_by(self, column: str):
-        self.table.sort_desc(column)
-        return self
-
-    @allure.step
-    def search_by(self, text: str):
-        self.search_input.search(text)
-        self.table.wait_to_load()
         return self
 
     @allure.step
@@ -353,20 +294,8 @@ class GroupsPage(_BasePage):
     #     self.table.click_status(name)
     #     return GroupDeviceStatusDialog().wait_to_load() #TODO
 
-    @allure.step
-    def reset(self):
-        self.reset_button.reset()
-        return self
 
-    @allure.step
-    def reload(self):
-        self.reload_button.execute_script(JS_CLICK)
-        self.table.wait_to_load()
-        return GroupsPage()
-
-
-class LumenisXVersionPage(_BasePage):
-    SEARCH_TEXT = "Search"
+class LumenisXVersionPage(_BaseTablePage):
     VALID_TYPE_TEXT = "Valid Type"
 
     VALID = "Valid"
@@ -377,14 +306,8 @@ class LumenisXVersionPage(_BasePage):
 
     def __init__(self):
         super().__init__()
-        self.add_button = s("//button[span[text()='+']]")
-        self.search_input = SearchInput("input[placeholder='Search']")
         self.valid_type_menu = SelectBox("#entityToolbarFilters_validFilter")
-
-        self.reset_button = ResetButton(s("//button[span[text()='Reset']]"))
-        self.reload_button = s("i.anticon-reload")
         self.table = LumenisXVersionTable(".ant-table-wrapper")
-        self.pagination_element = PaginationElement("ul.ant-table-pagination")
 
     @allure.step
     def open(self):
@@ -399,25 +322,9 @@ class LumenisXVersionPage(_BasePage):
         return self
 
     @allure.step
-    def sort_asc_by(self, column: str):
-        self.table.sort_asc(column)
-        return self
-
-    @allure.step
-    def sort_desc_by(self, column: str):
-        self.table.sort_desc(column)
-        return self
-
-    @allure.step
     def click_add_version(self) -> UploadLumenisXVersionDialog:
         self.add_button.click()
         return UploadLumenisXVersionDialog().wait_to_load()
-
-    @allure.step
-    def search_by(self, text: str):
-        self.search_input.search(text)
-        self.table.wait_to_load()
-        return self
 
     @allure.step
     def filter_valid(self):
@@ -440,17 +347,6 @@ class LumenisXVersionPage(_BasePage):
         if self.table.is_valid:
             self.table.click_invalid(name)
         return self
-
-    @allure.step
-    def reset(self):
-        self.reset_button.reset()
-        return self
-
-    @allure.step
-    def reload(self):
-        self.reload_button.execute_script(JS_CLICK)
-        self.table.wait_to_load()
-        return LumenisXVersionPage()
 
 
 class _LeftPanel(object):
