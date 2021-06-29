@@ -316,3 +316,49 @@ class LumenisXVersionTable(Table):
         UPLOAD_DATE = "Upload Date"
         UPLOADED_BY = "Uploaded By"
         VALID_INVALID_BUTTONS = ""
+
+
+class GroupDevicesTable(Table):
+
+    def __init__(self, locator: str):
+        super().__init__(locator)
+        self.all_link = s("//*[text()='All']")
+
+    @allure.step
+    def get_row_by_serial_number(self, serial_number: str) -> TableRowWrapper:
+        return self.get_row_by_column_value(self.Headers.SERIAL_NUMBER, serial_number)
+
+    @allure.step
+    def get_rows_by_device_type(self, device_type: str) -> []:
+        return self.get_rows_by_column_value(self.Headers.DEVICE_TYPE, device_type)
+
+    @allure.step
+    def select_device(self, serial_number: str):
+        if not self.is_device_selected(serial_number):
+            self.get_device_checkbox(serial_number).click()
+
+    @allure.step
+    def deselect_device(self, serial_number: str):
+        if self.is_device_selected(serial_number):
+            self.get_device_checkbox(serial_number).click()
+
+    @allure.step
+    def is_device_selected(self, serial_number: str) -> bool:
+        return self.get_device_checkbox(serial_number).matching(have.css_class("ant-checkbox-checked"))
+
+    @allure.step
+    def get_device_checkbox(self, serial_number: str) -> Element:
+        return self.get_row_by_column_value(self.Headers.SERIAL_NUMBER, serial_number).row.s(".ant-checkbox")
+
+    @allure.step
+    def click_all(self):
+        self.all_link.click()
+
+    class Headers:
+        ASSIGN = "Assign"
+        SERIAL_NUMBER = "Serial Number"
+        DEVICE_TYPE = "Device Type"
+        CLINIC_ID = "Clinic ID"
+        CLINIC_NAME = "Clinic Name"
+        REGION = "Region"
+        COUNTRY = "Country"

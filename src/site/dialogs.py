@@ -11,12 +11,12 @@ from selene.support.shared.jquery_style import s
 from src.const import AmericasCountry
 from src.domain.device import Customer, Device
 from src.domain.user import User
-from src.site.components.base_table import PaginationElement
+from src.site.components.base_table import PaginationElement, Table
 from src.site.components.cascader_picker import RegionCountryCascaderPicker, DeviceTypeCascaderPicker
 from src.site.components.simple_components import SelectBox, SearchInput, ResetButton
 from src.site.components.tree_selector import LocationTreeSelector, DeviceTypesTreeSelector, TreeSelector
 from src.site.components.tables import DeviceAssignmentTable, PropertiesTable, AssignUserTable, V2CHistoryTable, \
-    AlarmHistoryTable
+    AlarmHistoryTable, GroupDevicesTable
 from src.util.elements_util import clear_text_input, JS_CLICK
 
 
@@ -853,6 +853,7 @@ class UploadLumenisXVersionDialog(_BaseDialog):
     def __init__(self):
         super().__init__()
         self.upload_button = self.dialog.s(".//button[span[text()='Click To Upload']]")
+        self.upload_input = self.dialog.s("input#creatLumenisXForm_upload")
         self.version_input = self.dialog.s("input#creatLumenisXForm_version")
         self.comments_textarea = self.dialog.s("textarea#creatLumenisXForm_comments")
         self.save_button = self.dialog.s(".//button[span[text()='Save']]")
@@ -888,3 +889,62 @@ class UploadLumenisXVersionDialog(_BaseDialog):
     @allure.step
     def click_save(self):
         self.save_button.click()
+
+
+class GroupDevicesDialog(_BaseDialog):
+    TITLE = "Group Devices"
+    SEARCH_PLACEHOLDER = "Search"
+    DEVICE_TYPES_PLACEHOLDER = "Device Types"
+    LOCATIONS_PLACEHOLDER = "Locations"
+
+    ASSIGNED_DEVICE_TO_GROUP_MESSAGE = "Assigned device(s) to group successfully"
+
+    def __init__(self):
+        super().__init__()
+        self.dialog = s("//*[@class='ant-modal-content'][.//div[contains(text(),'Group Devices')]]")
+        self.group_name = self.dialog.s("//*[contains(text(),'Group Name:')]")
+        self.search_input = SearchInput(".ant-modal-content input[placeholder='Search']")
+        self.device_tree_picker = DeviceTypesTreeSelector(
+            "//*[@class='ant-modal']//span[contains(@class, 'TreeSelector')][.//text()='Device Types']")
+        self.location_tree_picker = LocationTreeSelector(
+            "//*[@class='ant-modal']//span[contains(@class, 'TreeSelector')][.//text()='Locations']")
+
+        self.reset_button = ResetButton(self.dialog.s(".//button[span[text()='Reset']]"))
+        self.reload_button = self.dialog.s("i.anticon-reload")
+
+        self.table = GroupDevicesTable(".ant-modal-content .ant-table-wrapper")
+        self.pagination_element = PaginationElement(".ant-modal-content ul.ant-table-pagination")
+        self.update_device_assignment_button = self.dialog.s(".//button[span[text()='Update Device Assignment']]")
+
+    @allure.step
+    def wait_to_load(self):
+        self.device_tree_picker.tree_selector.wait_until(be.visible)
+        self.cancel_button.wait_until(be.clickable)
+        return self
+
+    @allure.step
+    def sort_asc_by(self, column: str):
+        self.table.sort_asc(column)
+        return self
+
+    @allure.step
+    def sort_desc_by(self, column: str):
+        self.table.sort_desc(column)
+        return self
+
+    @allure.step
+    def search_by(self, text: str):
+        self.search_input.search(text)
+        self.table.wait_to_load()
+        return self
+
+    @allure.step
+    def reset(self):
+        self.reset_button.reset()
+        return self
+
+    @allure.step
+    def reload(self):
+        self.reload_button.execute_script(JS_CLICK)
+        self.table.wait_to_load()
+        return self
