@@ -362,3 +362,18 @@ class GroupDevicesTable(Table):
         CLINIC_NAME = "Clinic Name"
         REGION = "Region"
         COUNTRY = "Country"
+
+
+class GroupDevicesStatusTable(Table):
+
+    @allure.step
+    def get_row_by_serial_number(self, serial_number: str) -> TableRowWrapper:
+        return self.get_row_by_column_value(self.Headers.SERIAL_NUMBER, serial_number)
+
+    class Headers:
+        SERIAL_NUMBER = "Serial Number"
+        DEVICE_TYPE = "Device Type"
+        CURR_SOFT_VER = "Curr Soft Ver"
+        SOFT_UPDATE_DATE = "Update Date"
+        CURR_LUM_VER = "Curr LumX Ver"
+        LUM_UPDATE_DATE = "Update Date"

@@ -948,3 +948,80 @@ class GroupDevicesDialog(_BaseDialog):
         self.reload_button.execute_script(JS_CLICK)
         self.table.wait_to_load()
         return self
+
+
+class UpdateGroupVersionsDialog(_BaseDialog):
+    TITLE = "Update Group Versions"
+    GROUP_NAME_LABEL = "Group Name"
+    SOFTWARE_VERSION_LABEL = "Software Version"
+    LUMENISX_VERSION_LABEL = "LumenisX Version"
+
+    VERSION_PUBLISHED_MESSAGE = "Version published to group successfully"
+
+    def __init__(self):
+        super().__init__()
+        self.dialog = s("//*[@class='ant-modal-content'][.//div[contains(text(),'Group Devices')]]")
+        self.group_name_input = self.dialog.s("input#updateGroupVersionForm_groupName")
+        self.software_version_menu = SelectBox("updateGroupVersionForm_softwareVersion")
+        self.lumenisx_version_menu = SelectBox("#updateGroupVersionForm_lumenisXVersion")
+
+        self.publish_update_button = self.dialog.s(".//button[span[text()='Publish Update']]")
+
+    @allure.step
+    def wait_to_load(self):
+        self.publish_update_button.should(be.visible)
+        return self
+
+    @allure.step
+    def get_group_name(self):
+        return self.group_name_input.get(query.value)
+
+    @allure.step
+    def select_lumenisx_version(self, version):
+        return self.lumenisx_version_menu.select_item(version)
+
+    @allure.step
+    def publish_update(self):
+        self.publish_update_button.click()
+
+
+class GroupDevicesStatus(_BaseDialog):
+    TITLE = "Group Devices Status"
+    GROUP_NAME_LABEL = "Group Name"
+    DESIRED_SW_VERSION_LABEL = "Desired Software Version"
+    DESIRED_LUMENIS_VERSION_LABEL = "Desired LumenisX Version"
+
+    ASSIGNED_DEVICE_TO_GROUP_MESSAGE = "Assigned device(s) to group successfully"
+
+    def __init__(self):
+        super().__init__()
+        self.dialog = s("//*[@class='ant-modal-content'][.//div[contains(text(),'Group Devices')]]")
+        self.group_name = self.dialog.s(".//span[.//*[contains(text(),'Group Name')]]//span[2]")
+        self.desired_sw_version = self.dialog.s(".//span[.//*[contains(text(),'Desired Software Version')]]//span[2]")
+        self.desired_lumenis_version = self.dialog.s(".//span[.//*[contains(text(),'Desired LumenisX Version')]]//span[2]")
+
+        self.table = GroupDevicesTable(".ant-modal-content .ant-table-wrapper")
+        self.pagination_element = PaginationElement(".ant-modal-content ul.ant-table-pagination")
+
+    @allure.step
+    def wait_to_load(self):
+        self.desired_lumenis_version.wait_until(be.visible)
+        return self
+
+    @allure.step
+    def sort_asc_by(self, column: str):
+        self.table.sort_asc(column)
+        return self
+
+    @allure.step
+    def sort_desc_by(self, column: str):
+        self.table.sort_desc(column)
+        return self
+
+    @allure.step
+    def get_group_name(self):
+        return self.group_name.get(query.text)
+
+    @allure.step
+    def get_desired_lumenis_version(self):
+        return self.desired_lumenis_version.get(query.text)
