@@ -14,7 +14,8 @@ from src.site.components.simple_components import SearchInput, SelectBox, TopRig
 from src.site.components.tables import UsersTable, DevicesTable, GroupsTable, LumenisXVersionTable
 from src.site.components.tree_selector import DeviceTypesTreeSelector, LocationTreeSelector
 from src.site.dialogs import CreateUserDialog, EditUserDialog, CreateDeviceDialog, DevicePropertiesDialog, \
-    UploadLumenisXVersionDialog, CreateGroupDialog, EditGroupDialog, GroupDevicesDialog
+    UploadLumenisXVersionDialog, CreateGroupDialog, EditGroupDialog, GroupDevicesDialog, UpdateGroupVersionsDialog, \
+    GroupDevicesStatusDialog
 from src.util.elements_util import JS_CLICK
 
 
@@ -283,16 +284,16 @@ class GroupsPage(_BaseTablePage):
     def click_assign_device(self, name) -> GroupDevicesDialog:
         self.table.click_assign_devices(name)
         return GroupDevicesDialog().wait_to_load()
-    #
-    # @allure.step
-    # def click_update_versions(self, name) -> UpdateGroupVersionsDialog:
-    #     self.table.click_update_versions(name)
-    #     return UpdateGroupVersionsDialog().wait_to_load() #TODO
-    #
-    # @allure.step
-    # def click_status(self, name) -> GroupDeviceStatusDialog:
-    #     self.table.click_status(name)
-    #     return GroupDeviceStatusDialog().wait_to_load() #TODO
+
+    @allure.step
+    def click_update_versions(self, name) -> UpdateGroupVersionsDialog:
+        self.table.click_update_versions(name)
+        return UpdateGroupVersionsDialog().wait_to_load()
+
+    @allure.step
+    def click_status(self, name) -> GroupDevicesStatusDialog:
+        self.table.click_status(name)
+        return GroupDevicesStatusDialog().wait_to_load()
 
 
 class LumenisXVersionPage(_BaseTablePage):

@@ -213,7 +213,7 @@ class TestDevicesList:
 
         devices_page.reset()
 
-        assert_that(devices_page.device_tree_picker.get_all_selected_items())\
+        assert_that(devices_page.location_tree_picker.get_all_selected_items())\
             .described_as("Search input to be empty after reset").is_empty()
 
     # For this test the Devices table need to contain at least 11 devices to enable the pagination element

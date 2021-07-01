@@ -985,7 +985,7 @@ class UpdateGroupVersionsDialog(_BaseDialog):
         self.publish_update_button.click()
 
 
-class GroupDevicesStatus(_BaseDialog):
+class GroupDevicesStatusDialog(_BaseDialog):
     TITLE = "Group Devices Status"
     GROUP_NAME_LABEL = "Group Name"
     DESIRED_SW_VERSION_LABEL = "Desired Software Version"
