@@ -255,7 +255,7 @@ class GroupsTable(Table):
     _EDIT = "Edit"
     _ASSIGN_DEVICES = "Assign Devices"
     _UPDATE_VERSIONS = "Update Versions"
-    _STATUS = "STATUS"
+    _STATUS = "Status"
 
     @allure.step
     def get_row_by_name(self, name: str) -> TableRowWrapper:
@@ -280,6 +280,22 @@ class GroupsTable(Table):
     @allure.step
     def click_status(self, name: str):
         self.get_row_by_name(name).get_button(self._STATUS).click()
+
+    @allure.step
+    def is_row_contains_edit_button(self, row) -> bool:
+        return row.has_button_with_text(self._EDIT)
+
+    @allure.step
+    def is_row_contains_assign_device_button(self, row) -> bool:
+        return row.has_button_with_text(self._ASSIGN_DEVICES)
+
+    @allure.step
+    def is_row_contains_update_version_button(self, row) -> bool:
+        return row.has_button_with_text(self._UPDATE_VERSIONS)
+
+    @allure.step
+    def is_row_contains_status_button(self, row) -> bool:
+        return row.has_button_with_text(self._STATUS)
 
     class Headers:
         NAME = "Name"

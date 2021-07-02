@@ -787,6 +787,10 @@ class DevicePropertiesDialog(_BaseDialog):
 
 
 class _BaseGroupDialog(_BaseDialog):
+    GROUP_NAME_LABEL = "Group Name"
+    DEVICE_TYPE_FAMILY_LABEL = "Device Type / Family"
+    LOCATIONS_LABEL = "Locations"
+    LOCATIONS_PLACEHOLDER = LOCATIONS_LABEL
 
     def __init__(self):
         super().__init__()
@@ -808,6 +812,17 @@ class _BaseGroupDialog(_BaseDialog):
     @allure.step
     def set_group_name(self, text: str):
         self.group_name_input.clear().type(text)
+        return self
+
+    @allure.step
+    def select_device(self, device: str):
+        self.device_type_tree_selector.open().dropdown_search(device)
+        self.device_type_tree_selector.select_filtered_item(device)
+        return self
+
+    @allure.step
+    def select_countries(self, region, *countries):
+        self.locations_tree_selector.select_countries(region, *countries).close()
         return self
 
 

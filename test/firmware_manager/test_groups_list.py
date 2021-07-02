@@ -21,7 +21,7 @@ def login(request):
 
 
 @pytest.mark.usefixtures("login")
-@allure.feature(Feature.DEVICES)
+@allure.feature(Feature.FW_MANAGER)
 class TestGroupsList:
     table_sortable_columns_provider = [
         GroupsTable.Headers.NAME,
