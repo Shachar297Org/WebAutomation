@@ -167,8 +167,8 @@ class TopRightNotification:
     def should_be_visible(self):
         self.notification.should(be.visible)
 
-    def should_not_be_visible(self):
-        self.notification.should(be.not_.visible)
+    def should_not_be_visible(self, timeout=8):
+        self.notification.should(be.not_.visible, timeout)
 
 
 class ResetButton:

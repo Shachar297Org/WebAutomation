@@ -247,7 +247,7 @@ class GroupsPage(_BaseTablePage):
     LOCATIONS_TEXT = "Locations"
 
     GROUP_CREATED_MESSAGE = "Create Group successful"
-    GROUP_UPDATED_MESSAGE = "Updated Group successful"
+    GROUP_UPDATED_MESSAGE = "Updated group successfully"
     CREATION_FAILURE_MESSAGE = "Creation Failure"
 
     def __init__(self):

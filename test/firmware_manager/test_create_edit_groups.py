@@ -93,3 +93,42 @@ class TestCreateEditGroups:
             .described_as("Update version button").is_true()
         assert_that(groups_page.table.is_row_contains_status_button(created_row)) \
             .described_as("Status button").is_true()
+
+    @allure.title("Edit a group")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_edit_group(self):
+        test_group_name = "autotests_" + random_string(8)
+        test_region = Region.APAC
+        test_country = APAC_Country.PAKISTAN
+        test_device = Acupulse30Wdevices.GA_0000070GR
+        headers = GroupsTable.Headers
+
+        groups_page = login_as(fota_admin_credentials)
+        create_dialog = groups_page.click_add_group()
+
+        create_dialog.set_group_name(test_group_name) \
+            .select_device(test_device) \
+            .select_countries(test_region, test_country) \
+            .click_create()
+        assert_that(groups_page.notification.get_message()).is_equal_to(GroupsPage.GROUP_CREATED_MESSAGE)
+        groups_page.notification.should_not_be_visible()
+
+        edited_group_name = "autotests_" + random_string(8)
+        groups_page.reload().search_by(test_group_name)
+        edit_dialog = groups_page.click_edit_group(test_group_name)
+
+        edit_dialog.group_name_input.should(be.enabled)
+        assert_that(edit_dialog.locations_tree_selector.is_disabled())\
+            .described_as("Locations tree selector to be disabled").is_true()
+        assert_that(edit_dialog.device_type_tree_selector.is_disabled()) \
+            .described_as("Device type tree selector to be disabled").is_true()
+
+        edit_dialog.set_group_name(edited_group_name).click_update()
+        assert_that(groups_page.notification.get_message()).is_equal_to(GroupsPage.GROUP_UPDATED_MESSAGE)
+        groups_page.reload().search_by(edited_group_name)
+        assert_that(groups_page.table.get_column_values(headers.NAME)).contains(edited_group_name)
+        edited_row = groups_page.table.get_row_by_name(edited_group_name)
+
+        assert_that(edited_row.get_cell_text(headers.DEVICE_TYPE)).contains(test_device)
+        assert_that(edited_row.get_cell_text(headers.REGION)).is_equal_to(test_region)
+        assert_that(edited_row.get_cell_text(headers.COUNTRY)).is_equal_to(test_country)
