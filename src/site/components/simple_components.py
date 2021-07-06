@@ -164,10 +164,15 @@ class TopRightNotification:
         self.close_button.click()
         self.message.wait.until(be.not_.visible)
 
+    @allure.step
+    def wait_to_disappear(self):
+        self.should_be_visible()
+        self.should_not_be_visible(8)
+
     def should_be_visible(self):
         self.notification.should(be.visible)
 
-    def should_not_be_visible(self, timeout=8):
+    def should_not_be_visible(self, timeout=5):
         self.notification.should(be.not_.visible, timeout)
 
 

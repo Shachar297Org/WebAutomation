@@ -170,6 +170,7 @@ class TreeSelector:
     def select_all(self):
         self.open()
         self._get_node_by_title(ALL_NODE).check()
+        return self
 
     @allure.step
     def deselect_all(self):

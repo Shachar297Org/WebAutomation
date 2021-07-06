@@ -16,7 +16,7 @@ from src.site.components.cascader_picker import RegionCountryCascaderPicker, Dev
 from src.site.components.simple_components import SelectBox, SearchInput, ResetButton
 from src.site.components.tree_selector import LocationTreeSelector, DeviceTypesTreeSelector, TreeSelector
 from src.site.components.tables import DeviceAssignmentTable, PropertiesTable, AssignUserTable, V2CHistoryTable, \
-    AlarmHistoryTable, GroupDevicesTable
+    AlarmHistoryTable, GroupDevicesTable, GroupDevicesStatusTable
 from src.util.elements_util import clear_text_input, JS_CLICK
 
 
@@ -821,6 +821,11 @@ class _BaseGroupDialog(_BaseDialog):
         return self
 
     @allure.step
+    def select_all_locations(self):
+        self.locations_tree_selector.select_all().close()
+        return self
+
+    @allure.step
     def select_countries(self, region, *countries):
         self.locations_tree_selector.select_countries(region, *countries).close()
         return self
@@ -917,7 +922,7 @@ class GroupDevicesDialog(_BaseDialog):
     def __init__(self):
         super().__init__()
         self.dialog = s("//*[@class='ant-modal-content'][.//div[contains(text(),'Group Devices')]]")
-        self.group_name = self.dialog.s("//*[contains(text(),'Group Name:')]")
+        self.group_name = self.dialog.s("//*[contains(text(),'Group Name:')]/parent::div")
         self.search_input = SearchInput(".ant-modal-content input[placeholder='Search']")
         self.device_tree_picker = DeviceTypesTreeSelector(
             "//*[@class='ant-modal']//span[contains(@class, 'TreeSelector')][.//text()='Device Types']")
@@ -963,6 +968,16 @@ class GroupDevicesDialog(_BaseDialog):
         self.reload_button.execute_script(JS_CLICK)
         self.table.wait_to_load()
         return self
+
+    @allure.step
+    def select_device_by_serial_number(self, device_serial_number):
+        self.search_by(device_serial_number)
+        self.table.select_device(device_serial_number)
+        return self
+
+    @allure.step
+    def click_update(self):
+        self.update_device_assignment_button.click()
 
 
 class UpdateGroupVersionsDialog(_BaseDialog):
@@ -1040,3 +1055,7 @@ class GroupDevicesStatusDialog(_BaseDialog):
     @allure.step
     def get_desired_lumenis_version(self):
         return self.desired_lumenis_version.get(query.text)
+
+    @allure.step
+    def get_devices(self) -> []:
+        return self.table.get_column_values(GroupDevicesStatusTable.Headers.SERIAL_NUMBER)
