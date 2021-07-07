@@ -8,7 +8,7 @@ from src.domain.credentials import Credentials
 from src.site.components.tables import GroupsTable, GroupDevicesTable
 from src.site.components.tree_selector import SEPARATOR
 from src.site.dialogs import get_element_label, assert_text_input_default_state, \
-    assert_tree_selector_default_state, CreateGroupDialog, GroupDevicesDialog
+    assert_tree_selector_default_state, CreateGroupDialog, GroupDevicesDialog, WarningDialog
 from src.site.login_page import LoginPage
 from src.site.pages import GroupsPage, DevicesPage
 from src.util.driver_util import clear_session_storage, clear_local_storage
@@ -131,39 +131,6 @@ class TestCreateEditGroups:
         assert_that(edited_row.get_cell_text(GroupsTable.Headers.REGION)).is_equal_to(test_region)
         assert_that(edited_row.get_cell_text(GroupsTable.Headers.COUNTRY)).is_equal_to(test_country)
 
-    @allure.title("3.6.4. Assign a device to the group")
-    @allure.severity(allure.severity_level.NORMAL)
-    def test_assign_device_to_group(self):
-        test_device = random_device()
-        test_group_name = "autotests_" + random_string(8)
-
-        login_as(super_admin_credentials)
-        DevicesPage().open() \
-            .add_device(test_device)
-
-        groups_page = GroupsPage().open()
-        create_dialog = groups_page.click_add_group()
-
-        create_dialog.set_group_name(test_group_name) \
-            .select_device(test_device.device) \
-            .select_all_locations() \
-            .click_create()
-        groups_page.notification.wait_to_disappear()
-
-        groups_page.reload().search_by(test_group_name)
-        group_devices_dialog = groups_page.click_assign_device(test_group_name)
-        group_devices_dialog.group_name.should(have.text(test_group_name))
-        assert_that(group_devices_dialog.table.get_column_values(GroupDevicesTable.Headers.DEVICE_TYPE)) \
-            .described_as("Device types").contains_only(test_device.device)
-        group_devices_dialog.select_device_by_serial_number(test_device.serial_number) \
-            .click_update()
-        assert_that(groups_page.notification.get_message()) \
-            .is_equal_to(GroupDevicesDialog.ASSIGNED_DEVICE_TO_GROUP_MESSAGE)
-
-        groups_page.reload().search_by(test_group_name)
-        status_dialog = groups_page.click_status(test_group_name)
-        assert_that(status_dialog.get_devices()).described_as("Added devices").contains_only(test_device.serial_number)
-
     @allure.title("Verify Groups page web elements")
     @allure.description_html("""
     <ol>
@@ -179,9 +146,9 @@ class TestCreateEditGroups:
     @allure.severity(allure.severity_level.NORMAL)
     def test_assign_device_dialog_elements(self):
         groups_page = login_as(fota_admin_credentials)
-        random_device = random_list_item(groups_page.table.get_column_values(GroupsTable.Headers.NAME))
-        group_devices_dialog = groups_page.click_assign_device(random_device)
-        group_devices_dialog.group_name.should(have.text(random_device))
+        device = random_list_item(groups_page.table.get_column_values(GroupsTable.Headers.NAME))
+        group_devices_dialog = groups_page.click_assign_device(device)
+        group_devices_dialog.group_name.should(have.text(device))
         headers = GroupDevicesTable.Headers
 
         group_devices_dialog.search_input.input.should(be.visible).should(be.enabled).should(be.blank)
@@ -211,3 +178,123 @@ class TestCreateEditGroups:
         assert_that(group_devices_dialog.table.get_headers()).contains(headers.SERIAL_NUMBER, headers.DEVICE_TYPE,
                                                                        headers.CLINIC_ID, headers.CLINIC_NAME,
                                                                        headers.REGION, headers.COUNTRY)
+
+    @allure.title("3.6.4. Assign a device to the group")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_assign_device_to_group(self):
+        test_device = random_device()
+        test_group_name = "autotests_" + random_string(8)
+
+        login_as(super_admin_credentials)
+        DevicesPage().open() \
+            .add_device(test_device)
+
+        groups_page = GroupsPage().open()
+        self.create_group(groups_page, test_group_name, test_device.device)
+
+        groups_page.reload().search_by(test_group_name)
+        group_devices_dialog = groups_page.click_assign_device(test_group_name)
+        group_devices_dialog.group_name.should(have.text(test_group_name))
+        assert_that(group_devices_dialog.table.get_column_values(GroupDevicesTable.Headers.DEVICE_TYPE)) \
+            .described_as("Device types").contains_only(test_device.device)
+        group_devices_dialog.select_device_by_serial_number(test_device.serial_number) \
+            .click_update()
+        assert_that(groups_page.notification.get_message()) \
+            .is_equal_to(GroupDevicesDialog.ASSIGNED_DEVICE_TO_GROUP_MESSAGE)
+
+        groups_page.reload().search_by(test_group_name)
+        status_dialog = groups_page.click_status(test_group_name)
+        assert_that(status_dialog.get_devices()).described_as("Added devices").contains_only(test_device.serial_number)
+
+    @allure.title("3.6.4. Assign already assigned device to group")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_assign_assigned_device_to_another_group(self):
+        test_device = random_device()
+        test_group_1 = "autotests_group_1_" + random_string(8)
+        test_group_2 = "autotests_group_2_" + random_string(8)
+
+        login_as(super_admin_credentials)
+        DevicesPage().open() \
+            .add_device(test_device)
+
+        groups_page = GroupsPage().open()
+        self.create_group(groups_page, test_group_1, test_device.device)
+        self.create_group(groups_page, test_group_2, test_device.device)
+
+        groups_page.reload().search_by(test_group_1)
+        group_devices_dialog = groups_page.click_assign_device(test_group_1)
+        group_devices_dialog.select_device_by_serial_number(test_device.serial_number) \
+            .click_update()
+        groups_page.notification.wait_to_disappear()
+
+        groups_page.search_by(test_group_2)
+        group_devices_dialog = groups_page.click_assign_device(test_group_2)
+        group_devices_dialog.search_by(test_device.serial_number)
+        assert_that(group_devices_dialog.table.is_warn_icon_displayed(test_device.serial_number))\
+            .described_as("warn icon to be displayed").is_true()
+        group_devices_dialog.table.select_device(test_device.serial_number)
+
+        warning_dialog = WarningDialog().wait_to_load()
+        warning_dialog.text.should(have.text(GroupDevicesDialog.get_expected_device_assigned_warning(
+            test_device.serial_number, test_group_1)))
+        warning_dialog.additional_text.should(have.text(GroupDevicesDialog.CONTINUE_TEXT))
+        warning_dialog.click_ok()
+        assert_that(group_devices_dialog.table.is_device_selected(test_device.serial_number)) \
+            .described_as("Device to be selected").is_true()
+
+        group_devices_dialog.click_update()
+        groups_page.search_by(test_group_1)
+        group_devices_dialog = groups_page.click_assign_device(test_group_1)
+        group_devices_dialog.search_by(test_device.serial_number)
+        assert_that(group_devices_dialog.table.is_device_selected(test_device.serial_number))\
+            .described_as("Device to be reassigned from the first group").is_false()
+
+    @allure.title("3.6.4. Assign all devices to group")
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_assign_all_devices_to_group(self):
+        test_device = random_device()
+        test_group_1 = "autotests_group_1_" + random_string(8)
+        test_group_2 = "autotests_group_2_" + random_string(8)
+
+        login_as(super_admin_credentials)
+        DevicesPage().open() \
+            .add_device(test_device)
+
+        groups_page = GroupsPage().open()
+        self.create_group(groups_page, test_group_1, test_device.device)
+        self.create_group(groups_page, test_group_2, test_device.device)
+
+        group_devices_dialog = groups_page.reload().search_by(test_group_1)\
+            .click_assign_device(test_group_1)
+        group_devices_dialog.select_device_by_serial_number(test_device.serial_number) \
+            .click_update()
+        groups_page.notification.wait_to_disappear()
+
+        group_devices_dialog = groups_page.search_by(test_group_2)\
+            .click_assign_device(test_group_2)
+        group_devices_dialog.table.click_all()
+
+        warning_dialog = WarningDialog().wait_to_load()
+        warning_dialog.text.should(have.text(GroupDevicesDialog.AT_LEAST_ONE_DEVICE_ASSIGNED_MESSAGE))
+        warning_dialog.additional_text.should(have.text(GroupDevicesDialog.CONTINUE_TEXT))
+        warning_dialog.click_ok()
+        for device_sn in group_devices_dialog.table.get_column_values(GroupDevicesTable.Headers.SERIAL_NUMBER):
+            assert_that(group_devices_dialog.table.is_device_selected(device_sn))\
+                .described_as(device_sn + " device to be selected").is_true()
+
+        group_devices_dialog.close()
+        group_devices_dialog = groups_page.search_by(test_group_2)\
+            .click_assign_device(test_group_2)
+        group_devices_dialog.search_by(test_device.serial_number)
+        assert_that(group_devices_dialog.table.is_device_selected(test_device.serial_number)) \
+            .described_as("Device to be not assigned if operation is canceled").is_false()
+
+    @staticmethod
+    def create_group(groups_page: GroupsPage, group_name: str, device_group):
+        create_dialog = groups_page.click_add_group()
+
+        create_dialog.set_group_name(group_name) \
+            .select_device(device_group) \
+            .select_all_locations() \
+            .click_create()
+        groups_page.notification.wait_to_disappear()

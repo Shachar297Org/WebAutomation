@@ -338,7 +338,7 @@ class GroupDevicesTable(Table):
 
     def __init__(self, locator: str):
         super().__init__(locator)
-        self.all_link = s("//*[text()='All']")
+        self.all_link = self.table.s(".//button[span[text()='All']]")
 
     @allure.step
     def get_row_by_serial_number(self, serial_number: str) -> TableRowWrapper:
@@ -364,7 +364,10 @@ class GroupDevicesTable(Table):
 
     @allure.step
     def get_device_checkbox(self, serial_number: str) -> Element:
-        return self.get_row_by_column_value(self.Headers.SERIAL_NUMBER, serial_number).row.s(".ant-checkbox")
+        return self.get_row_by_serial_number(serial_number).row.s(".ant-checkbox")
+
+    def is_warn_icon_displayed(self, serial_number: str) -> bool:
+        return self.get_row_by_serial_number(serial_number).row.s("span.anticon-warning").matching(be.visible)
 
     @allure.step
     def click_all(self):

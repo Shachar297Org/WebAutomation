@@ -918,6 +918,8 @@ class GroupDevicesDialog(_BaseDialog):
     LOCATIONS_PLACEHOLDER = "Locations"
 
     ASSIGNED_DEVICE_TO_GROUP_MESSAGE = "Assigned device(s) to group successfully"
+    CONTINUE_TEXT = "Are you sure you want to continue?"
+    AT_LEAST_ONE_DEVICE_ASSIGNED_MESSAGE = "At least one device is already assigned to a group"
 
     def __init__(self):
         super().__init__()
@@ -979,6 +981,10 @@ class GroupDevicesDialog(_BaseDialog):
     def click_update(self):
         self.update_device_assignment_button.click()
 
+    @staticmethod
+    def get_expected_device_assigned_warning(device: str, group: str) -> str:
+        return "Device {0} is already assigned to group {1}".format(device, group)
+
 
 class UpdateGroupVersionsDialog(_BaseDialog):
     TITLE = "Update Group Versions"
@@ -1028,7 +1034,8 @@ class GroupDevicesStatusDialog(_BaseDialog):
         self.dialog = s("//*[@class='ant-modal-content'][.//div[contains(text(),'Group Devices')]]")
         self.group_name = self.dialog.s(".//span[.//*[contains(text(),'Group Name')]]//span[2]")
         self.desired_sw_version = self.dialog.s(".//span[.//*[contains(text(),'Desired Software Version')]]//span[2]")
-        self.desired_lumenis_version = self.dialog.s(".//span[.//*[contains(text(),'Desired LumenisX Version')]]//span[2]")
+        self.desired_lumenis_version = self.dialog.s(
+            ".//span[.//*[contains(text(),'Desired LumenisX Version')]]//span[2]")
 
         self.table = GroupDevicesTable(".ant-modal-content .ant-table-wrapper")
         self.pagination_element = PaginationElement(".ant-modal-content ul.ant-table-pagination")
@@ -1059,3 +1066,30 @@ class GroupDevicesStatusDialog(_BaseDialog):
     @allure.step
     def get_devices(self) -> []:
         return self.table.get_column_values(GroupDevicesStatusTable.Headers.SERIAL_NUMBER)
+
+
+class WarningDialog(_BaseDialog):
+
+    def __init__(self):
+        super().__init__()
+        self.dialog = s("//*[@class='ant-modal-content'][.//div[contains(text(),'Warning')]]")
+        self.text = self.dialog.s(".//div[contains(@class, 'WarningModal__BodyText')]")
+        self.additional_text = self.dialog.s(".//div[contains(@class, 'WarningModal__BodyText')][2]")
+        self.ok_button = self.dialog.s(".//button[span[text()='OK']]")
+
+    @allure.step
+    def get_text(self) -> str:
+        return self.text.get(query.text)
+
+    @allure.step
+    def get_additional_text(self) -> str:
+        return self.additional_text.get(query.text)
+
+    @allure.step
+    def click_ok(self):
+        self.ok_button.click()
+
+    @allure.step
+    def wait_to_load(self):
+        self.dialog.should(be.visible, 10)
+        return self
