@@ -996,9 +996,9 @@ class UpdateGroupVersionsDialog(_BaseDialog):
 
     def __init__(self):
         super().__init__()
-        self.dialog = s("//*[@class='ant-modal-content'][.//div[contains(text(),'Group Devices')]]")
+        self.dialog = s("//*[@class='ant-modal-content'][.//div[contains(text(),'Update Group Versions')]]")
         self.group_name_input = self.dialog.s("input#updateGroupVersionForm_groupName")
-        self.software_version_menu = SelectBox("updateGroupVersionForm_softwareVersion")
+        self.software_version_menu = SelectBox("#updateGroupVersionForm_softwareVersion")
         self.lumenisx_version_menu = SelectBox("#updateGroupVersionForm_lumenisXVersion")
 
         self.publish_update_button = self.dialog.s(".//button[span[text()='Publish Update']]")

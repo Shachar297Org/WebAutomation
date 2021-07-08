@@ -6,12 +6,12 @@ from selene.support.conditions import be, have
 from src.const import Feature, Region, APAC_Country, DeviceGroup, AcupulseDeviceModels, Acupulse30Wdevices, \
     AmericasCountry
 from src.domain.credentials import Credentials
-from src.site.components.tables import GroupsTable, GroupDevicesTable
+from src.site.components.tables import GroupsTable, GroupDevicesTable, LumenisXVersionTable
 from src.site.components.tree_selector import SEPARATOR
 from src.site.dialogs import get_element_label, assert_text_input_default_state, \
-    assert_tree_selector_default_state, CreateGroupDialog, GroupDevicesDialog, WarningDialog
+    assert_tree_selector_default_state, CreateGroupDialog, GroupDevicesDialog, WarningDialog, UpdateGroupVersionsDialog
 from src.site.login_page import LoginPage
-from src.site.pages import GroupsPage, DevicesPage
+from src.site.pages import GroupsPage, DevicesPage, LumenisXVersionPage
 from src.util.driver_util import clear_session_storage, clear_local_storage
 from src.util.random_util import random_string, random_list_item
 from test.test_data_provider import fota_admin_credentials, random_device, super_admin_credentials, random_usa_customer
@@ -439,6 +439,41 @@ class TestCreateEditGroups:
         assert_that(group_devices_dialog.location_tree_picker.get_all_selected_items()) \
             .described_as("Search input to be empty after reset").is_empty()
 
+    @allure.severity(allure.severity_level.CRITICAL)
+    def test_update_group_version(self):
+        login_as(super_admin_credentials)
+        version_page = LumenisXVersionPage().open()
+        version_page.filter_valid()
+        valid_version = self.get_first_version_from_table(version_page.table)
+        version_page.filter_invalid()
+        invalid_version = self.get_first_version_from_table(version_page.table)
+
+        groups_page = GroupsPage().open()
+        groups_page.search_by(TEST_GROUP_PREFIX)
+        group = random_list_item(groups_page.table.get_column_values(GroupsTable.Headers.NAME))
+        versions_dialog = groups_page.click_update_versions(group)
+
+        versions_dialog.title.should(have.exact_text(UpdateGroupVersionsDialog.TITLE))
+        versions_dialog.group_name_input.should(be.visible).should(be.not_.enabled)
+        versions_dialog.software_version_menu.select.should(be.visible).should(be.enabled)
+        versions_dialog.lumenisx_version_menu.select.should(be.visible).should(be.enabled)
+        versions_dialog.publish_update_button.should(be.visible).should(be.clickable)
+        versions_dialog.cancel_button.should(be.visible).should(be.clickable)
+
+        versions_dialog.group_name_input.should(have.value(group))
+        assert_that(versions_dialog.lumenisx_version_menu.get_items()).contains(valid_version)\
+            .does_not_contain(invalid_version)
+        versions_dialog.select_lumenisx_version(valid_version)
+        versions_dialog.publish_update()
+
+        assert_that(groups_page.notification.get_message())\
+            .is_equal_to(UpdateGroupVersionsDialog.VERSION_PUBLISHED_MESSAGE)
+
+        groups_page.search_by(group)
+        actual_group_version = groups_page.table.wait_to_load().get_row_by_name(group)\
+            .get_cell_text(GroupsTable.Headers.LUMX_VERSION)
+        assert_that(actual_group_version).is_equal_to(valid_version)
+
     @staticmethod
     def create_group(groups_page: GroupsPage, group_name: str, device_group):
         create_dialog = groups_page.click_add_group()
@@ -454,3 +489,7 @@ class TestCreateEditGroups:
         groups_page.search_by(TEST_GROUP_PREFIX)
         device = random_list_item(groups_page.table.get_column_values(GroupsTable.Headers.NAME))
         return groups_page.click_assign_device(device)
+
+    @staticmethod
+    def get_first_version_from_table(table: LumenisXVersionTable):
+        return table.wait_to_load().get_rows()[0].get_cell_text(LumenisXVersionTable.Headers.SOFT_VERSION)
