@@ -3,7 +3,8 @@ import pytest
 from assertpy import assert_that
 from selene.support.conditions import be, have
 
-from src.const import Feature, Region, APAC_Country, DeviceGroup, AcupulseDeviceModels, Acupulse30Wdevices
+from src.const import Feature, Region, APAC_Country, DeviceGroup, AcupulseDeviceModels, Acupulse30Wdevices, \
+    AmericasCountry
 from src.domain.credentials import Credentials
 from src.site.components.tables import GroupsTable, GroupDevicesTable
 from src.site.components.tree_selector import SEPARATOR
@@ -13,7 +14,9 @@ from src.site.login_page import LoginPage
 from src.site.pages import GroupsPage, DevicesPage
 from src.util.driver_util import clear_session_storage, clear_local_storage
 from src.util.random_util import random_string, random_list_item
-from test.test_data_provider import fota_admin_credentials, random_device, super_admin_credentials
+from test.test_data_provider import fota_admin_credentials, random_device, super_admin_credentials, random_usa_customer
+
+TEST_GROUP_PREFIX = "autotests_"
 
 
 @pytest.fixture(autouse=True)
@@ -30,7 +33,25 @@ def login_as(credentials: Credentials):
 
 @allure.feature(Feature.FW_MANAGER)
 class TestCreateEditGroups:
+    table_columns_provider = [
+        GroupDevicesTable.Headers.SERIAL_NUMBER,
+        GroupDevicesTable.Headers.DEVICE_TYPE,
+        GroupDevicesTable.Headers.CLINIC_ID,
+        GroupDevicesTable.Headers.CLINIC_NAME,
+        GroupDevicesTable.Headers.REGION,
+        GroupDevicesTable.Headers.COUNTRY
+    ]
 
+    @allure.title("Verify 'Create Group' dialog web elements")
+    @allure.description_html("""
+    <ol>
+        <li>Open groups page in firmware manager section</li>
+        <li>Click on "+" button to open "Create new group" dialog</li>
+        <li>Verify that group title is correct</li>
+        <li>Verify that device and location tree pickers are visible, enabled, empty and have correct placeholder</li>
+        <li>Verify that "Create", "Cancel" buttons are visible and clickable</li>
+    </ol>
+    """)
     @allure.title("Verify 'Create Group' dialog web elements")
     @allure.severity(allure.severity_level.CRITICAL)
     def test_create_group_dialog_elements(self):
@@ -53,10 +74,18 @@ class TestCreateEditGroups:
         dialog.create_button.should(be.visible).should(be.clickable)
         dialog.cancel_button.should(be.visible).should(be.clickable)
 
+    @allure.description_html("""
+    <ol>
+        <li>In the “Firmware Manager/Groups” tab click on the blue plus button – A “Create Group” Window will open</li>
+        <li>Enter the “Group Name”, and select the “Device Type / Family” and “Locations”</li>
+        <li>Click on the “Create” button – A message will appear “Create Group successful”</li>
+        <li>Verify the created group</li>
+    </ol>
+    """)
     @allure.title("3.6.2. Create a new group")
     @allure.severity(allure.severity_level.CRITICAL)
     def test_create_group(self):
-        test_group_name = "autotests_" + random_string(8)
+        test_group_name = TEST_GROUP_PREFIX + random_string(8)
         test_region = Region.APAC
         test_country1 = APAC_Country.CHINA
         test_country2 = APAC_Country.INDIA
@@ -94,10 +123,19 @@ class TestCreateEditGroups:
         assert_that(groups_page.table.is_row_contains_status_button(created_row)) \
             .described_as("Status button").is_true()
 
+    @allure.description_html("""
+    <ol>
+        <li>Create a new group</li>
+        <li>On the created group click on Edit – A “Edit Group” window will open</li>
+        <li>Verify you can edit “Group Name”</li>
+        <li>Click on the “Update” button – “Updated group successfully” message will appear</li>
+        <li>Verify the edited group</li>
+    </ol>
+    """)
     @allure.title("3.6.3. Edit a group")
     @allure.severity(allure.severity_level.NORMAL)
     def test_edit_group(self):
-        test_group_name = "autotests_" + random_string(8)
+        test_group_name = TEST_GROUP_PREFIX + random_string(8)
         test_region = Region.APAC
         test_country = APAC_Country.PAKISTAN
         test_device = Acupulse30Wdevices.GA_0000070GR
@@ -183,7 +221,7 @@ class TestCreateEditGroups:
     @allure.severity(allure.severity_level.NORMAL)
     def test_assign_device_to_group(self):
         test_device = random_device()
-        test_group_name = "autotests_" + random_string(8)
+        test_group_name = TEST_GROUP_PREFIX + random_string(8)
 
         login_as(super_admin_credentials)
         DevicesPage().open() \
@@ -210,12 +248,12 @@ class TestCreateEditGroups:
     @allure.severity(allure.severity_level.NORMAL)
     def test_assign_assigned_device_to_another_group(self):
         test_device = random_device()
-        test_group_1 = "autotests_group_1_" + random_string(8)
-        test_group_2 = "autotests_group_2_" + random_string(8)
+        test_group_1 = TEST_GROUP_PREFIX + "group_1_" + random_string(8)
+        test_group_2 = TEST_GROUP_PREFIX + "group_2_" + random_string(8)
 
         login_as(super_admin_credentials)
         DevicesPage().open() \
-            .add_device(test_device)
+            .add_device(test_device, random_usa_customer())
 
         groups_page = GroupsPage().open()
         self.create_group(groups_page, test_group_1, test_device.device)
@@ -230,7 +268,7 @@ class TestCreateEditGroups:
         groups_page.search_by(test_group_2)
         group_devices_dialog = groups_page.click_assign_device(test_group_2)
         group_devices_dialog.search_by(test_device.serial_number)
-        assert_that(group_devices_dialog.table.is_warn_icon_displayed(test_device.serial_number))\
+        assert_that(group_devices_dialog.table.is_warn_icon_displayed(test_device.serial_number)) \
             .described_as("warn icon to be displayed").is_true()
         group_devices_dialog.table.select_device(test_device.serial_number)
 
@@ -246,15 +284,15 @@ class TestCreateEditGroups:
         groups_page.search_by(test_group_1)
         group_devices_dialog = groups_page.click_assign_device(test_group_1)
         group_devices_dialog.search_by(test_device.serial_number)
-        assert_that(group_devices_dialog.table.is_device_selected(test_device.serial_number))\
+        assert_that(group_devices_dialog.table.is_device_selected(test_device.serial_number)) \
             .described_as("Device to be reassigned from the first group").is_false()
 
     @allure.title("3.6.4. Assign all devices to group")
     @allure.severity(allure.severity_level.NORMAL)
     def test_assign_all_devices_to_group(self):
         test_device = random_device()
-        test_group_1 = "autotests_group_1_" + random_string(8)
-        test_group_2 = "autotests_group_2_" + random_string(8)
+        test_group_1 = TEST_GROUP_PREFIX + "group_1_" + random_string(8)
+        test_group_2 = TEST_GROUP_PREFIX + "group_2_" + random_string(8)
 
         login_as(super_admin_credentials)
         DevicesPage().open() \
@@ -264,13 +302,13 @@ class TestCreateEditGroups:
         self.create_group(groups_page, test_group_1, test_device.device)
         self.create_group(groups_page, test_group_2, test_device.device)
 
-        group_devices_dialog = groups_page.reload().search_by(test_group_1)\
+        group_devices_dialog = groups_page.reload().search_by(test_group_1) \
             .click_assign_device(test_group_1)
         group_devices_dialog.select_device_by_serial_number(test_device.serial_number) \
             .click_update()
         groups_page.notification.wait_to_disappear()
 
-        group_devices_dialog = groups_page.search_by(test_group_2)\
+        group_devices_dialog = groups_page.search_by(test_group_2) \
             .click_assign_device(test_group_2)
         group_devices_dialog.table.click_all()
 
@@ -279,15 +317,127 @@ class TestCreateEditGroups:
         warning_dialog.additional_text.should(have.text(GroupDevicesDialog.CONTINUE_TEXT))
         warning_dialog.click_ok()
         for device_sn in group_devices_dialog.table.get_column_values(GroupDevicesTable.Headers.SERIAL_NUMBER):
-            assert_that(group_devices_dialog.table.is_device_selected(device_sn))\
+            assert_that(group_devices_dialog.table.is_device_selected(device_sn)) \
                 .described_as(device_sn + " device to be selected").is_true()
 
         group_devices_dialog.close()
-        group_devices_dialog = groups_page.search_by(test_group_2)\
+        group_devices_dialog = groups_page.search_by(test_group_2) \
             .click_assign_device(test_group_2)
         group_devices_dialog.search_by(test_device.serial_number)
         assert_that(group_devices_dialog.table.is_device_selected(test_device.serial_number)) \
             .described_as("Device to be not assigned if operation is canceled").is_false()
+
+    @allure.title("3.6.4 Verify that you can sort device rows by any column")
+    @allure.description_html("""
+        <ol>
+            <li>Open groups page</li>
+            <li>Open 'Group Devices' dialog</li>
+            <li>Sort devices in the ascending order - Verify devices are sorted</li>
+            <li>Sort devices in the descending order - Verify devices are sorted</li>
+        </ol>
+        """)
+    @allure.severity(allure.severity_level.NORMAL)
+    @pytest.mark.parametrize("column", table_columns_provider)
+    def test_sort_devices(self, column):
+        groups_page = login_as(super_admin_credentials)
+        group_devices_dialog = self.open_random_device(groups_page)
+        table = group_devices_dialog.table.wait_to_load()
+
+        assert_that(table.is_column_sorted(column)).described_as("is column sorted by default").is_false()
+
+        group_devices_dialog.sort_asc_by(column)
+        sorted_asc_values = table.get_column_values(column)
+
+        assert_that(table.is_up_icon_blue(column)).described_as("is blue sort icon up displayed").is_true()
+        assert_that(sorted_asc_values).is_sorted(key=str.lower)
+
+        group_devices_dialog.sort_desc_by(column)
+        sorted_desc_values = table.get_column_values(column)
+
+        assert_that(table.is_down_icon_blue(column)).described_as("is blue sort icon down displayed").is_true()
+        assert_that(sorted_desc_values).is_sorted(key=str.lower, reverse=True)
+
+    @allure.title("3.6.4 Verify that you can search in the search field by all fields")
+    @allure.description_html("""
+        <ol>
+            <li>Open groups page</li>
+            <li>Open 'Group Devices' dialog</li>
+            <li>Filter devices by a column value - Verify devices are filtered</li>
+        </ol>
+        """)
+    @allure.severity(allure.severity_level.NORMAL)
+    @pytest.mark.parametrize("column", table_columns_provider)
+    def test_filter_devices_by_column_value(self, column):
+        groups_page = login_as(super_admin_credentials)
+        group_devices_dialog = self.open_random_device(groups_page)
+        table = group_devices_dialog.table.wait_to_load()
+
+        group_devices_dialog.sort_desc_by(column)
+        item = table.get_column_values(column)[0].split()[0]
+
+        group_devices_dialog.search_by(item)
+
+        assert_that(table.get_rows()).is_not_empty()
+
+        for table_row in table.get_rows():
+            assert_that(table.is_any_row_cell_contains_text_ignoring_case(table_row, item)).is_true()
+
+    @allure.title("3.6.4 Verify that rows can be filtered by “Device Type” in the designated field ")
+    @allure.description_html("""
+    <ol>
+        <li>Open groups page</li>
+        <li>Open 'Group Devices' dialog</li>
+        <li>Filter devices by device model - Verify devices are filtered</li>
+        <li>Click 'Reset'</li>
+        <li>Verify devices aren't filtered</li>
+    </ol>
+    """)
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_filter_devices_by_device_model(self):
+        test_device_group = DeviceGroup.ACUPULSE
+        test_device_model = AcupulseDeviceModels.ACUPULSE_30W
+
+        groups_page = login_as(super_admin_credentials)
+        group_devices_dialog = self.open_random_device(groups_page)
+        table = group_devices_dialog.table.wait_to_load()
+
+        group_devices_dialog.device_tree_picker.select_device_models(test_device_group, test_device_model).close()
+
+        assert_that(table.wait_to_load().get_column_values(GroupsTable.Headers.DEVICE_TYPE)) \
+            .is_subset_of([Acupulse30Wdevices.GA_0000070CN, Acupulse30Wdevices.GA_0000070GR,
+                           Acupulse30Wdevices.RG_0000070, Acupulse30Wdevices.GA_0000070,
+                           Acupulse30Wdevices.GA_0000070DE])
+
+        group_devices_dialog.reset()
+
+        assert_that(group_devices_dialog.device_tree_picker.get_all_selected_items()) \
+            .described_as("Search input to be empty after reset").is_empty()
+
+    @allure.title("3.6.4 Verify that rows can be filtered by “Locations” in the designated field")
+    @allure.description_html("""
+    <ol>
+        <li>Open groups page</li>
+        <li>Open 'Group Devices' dialog</li>
+        <li>Filter devices by location - Verify groups are filtered</li>
+        <li>Click 'Reset'</li>
+        <li>Verify devices aren't filtered</li>
+    </ol>
+    """)
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_filter_devices_by_locations(self):
+        test_country = AmericasCountry.USA
+        groups_page = login_as(super_admin_credentials)
+        group_devices_dialog = self.open_random_device(groups_page)
+        table = group_devices_dialog.table.wait_to_load()
+
+        group_devices_dialog.location_tree_picker.select_countries(Region.AMERICAS, test_country).close()
+
+        assert_that(table.get_column_values(GroupsTable.Headers.COUNTRY)).contains_only(test_country)
+
+        group_devices_dialog.reset()
+
+        assert_that(group_devices_dialog.location_tree_picker.get_all_selected_items()) \
+            .described_as("Search input to be empty after reset").is_empty()
 
     @staticmethod
     def create_group(groups_page: GroupsPage, group_name: str, device_group):
@@ -298,3 +448,9 @@ class TestCreateEditGroups:
             .select_all_locations() \
             .click_create()
         groups_page.notification.wait_to_disappear()
+
+    @staticmethod
+    def open_random_device(groups_page: GroupsPage) -> GroupDevicesDialog:
+        groups_page.search_by(TEST_GROUP_PREFIX)
+        device = random_list_item(groups_page.table.get_column_values(GroupsTable.Headers.NAME))
+        return groups_page.click_assign_device(device)
