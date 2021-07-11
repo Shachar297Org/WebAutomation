@@ -123,7 +123,7 @@ class DevicesTable(Table):
         self._get_row_properties_button(serial_number).click()
 
     @allure.step
-    def is_device_editable(self, serial_number: str) -> bool:
+    def device_has_properties_button(self, serial_number: str) -> bool:
         return self.get_row_by_serial_number(serial_number).has_button_with_text(self._PROPERTIES_TEXT)
 
     @allure.step

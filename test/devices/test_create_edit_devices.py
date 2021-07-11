@@ -5,15 +5,15 @@ from selene.support.conditions import have, be
 
 from src.const import Feature
 from src.const.Acupulse30Wdevices import RG_0000070
-from src.domain.device import Customer, Device
-from src.site.components.cascader_picker import SEPARATOR, CascaderPicker
+from src.site.components.cascader_picker import CascaderPicker
+from src.site.components.tables import DevicesTable, PropertiesTable, AssignUserTable
 from src.site.dialogs import CreateDeviceDialog, get_element_label, assert_text_input_default_state, \
     get_element_error_message, DevicePropertiesDialog
 from src.site.login_page import LoginPage
-from src.site.components.tables import DevicesTable, PropertiesTable, AssignUserTable
 from src.site.pages import DevicesPage, UsersPage
 from src.util.elements_util import is_input_disabled
 from src.util.random_util import random_company, random_alpha_numeric_string, random_gmail_alias_from, random_list_item
+from test.devices.base_devices_test import BaseDevicesTest
 from test.test_data_provider import super_admin_credentials, random_device, random_usa_customer, TEST_DEVICE_PREFIX, \
     TEST_GMAIL_ACCOUNT, random_user
 
@@ -28,7 +28,7 @@ def login(request):
 
 @pytest.mark.usefixtures("login")
 @allure.feature(Feature.DEVICES)
-class TestCreateEditDevices:
+class TestCreateEditDevices(BaseDevicesTest):
 
     @allure.title("Verify 'Create Device' dialog web elements")
     @allure.description_html("""
@@ -130,7 +130,8 @@ class TestCreateEditDevices:
         <li>In the Region/Country field choose Americas/USA – A new field will appear with a list of US states</li>
         <li>Click on the Create Device button - Create Device successful message will appear</li>
         <li>Verify that the new Device created has been added to the Device list</li>
-        <li>Open device properties and verify that the device and customer fields are correctly displayed on the "General" tab</li>
+        <li>Open device properties and verify that the device and customer fields are correctly displayed on the
+         "General" tab</li>
     </ol>
     """)
     @allure.severity(allure.severity_level.NORMAL)
@@ -350,20 +351,6 @@ class TestCreateEditDevices:
         assert_that(devices_page.notification.get_message()).is_equal_to(DevicesPage.CREATION_FAILURE_MESSAGE)
 
     @allure.step
-    def assert_device_in_table(self, table: DevicesTable, expected: Device):
-        assert_that(table.get_column_values(table.Headers.SERIAL_NUMBER)).contains_only(expected.serial_number)
-        assert_that(table.get_column_values(table.Headers.DEVICE_TYPE)).contains_only(
-            expected.model + SEPARATOR + expected.device)
-        assert_that(table.get_column_values(table.Headers.STATUS)).contains_only(table.INACTIVE_STATUS)
-        assert_that(table.is_device_editable(expected.serial_number)).described_as("Properties link").is_true()
-
-    @allure.step
-    def assert_customer_in_table(self, table: DevicesTable, expected: Customer):
-        assert_that(table.get_column_values(table.Headers.CLINIC_ID)).contains_only(expected.clinic_id)
-        assert_that(table.get_column_values(table.Headers.CLINIC_NAME)).contains_only(expected.clinic_name)
-        assert_that(table.get_column_values(table.Headers.COUNTRY)).contains_only(expected.region_country)
-
-    @allure.step
     def assert_cascader_picker_default_state(self, picker: CascaderPicker, expected_label: str):
         picker.picker.should(be.visible)
         picker.input.should(be.visible).should(be.clickable).should(be.blank)
@@ -393,7 +380,8 @@ class TestDeviceProperties:
         <li>Mark a created user – The Check box will turn blue</li>
         <li>Click on the “Update User Assignment” button - Update Device successful message will appear</li>
         <li>Go back to Properties window – the User you added is marked</li>
-        <li>Go to Users Tab change the ?? of the User- the User wont be selected in the Assign  tab of the Device – the user isn’t selected</li>
+        <li>Go to Users Tab change the ?? of the User- the User wont be selected in the Assign  tab of the Device – the
+         user isn’t selected</li>
         <li>Open user page, search and open created user and check that the device is in the assigned devices list</li>
     </ol>
     """)
