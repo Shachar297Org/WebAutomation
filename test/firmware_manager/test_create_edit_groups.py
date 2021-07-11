@@ -14,7 +14,8 @@ from src.site.login_page import LoginPage
 from src.site.pages import GroupsPage, DevicesPage, LumenisXVersionPage
 from src.util.driver_util import clear_session_storage, clear_local_storage
 from src.util.random_util import random_string, random_list_item
-from test.test_data_provider import fota_admin_credentials, random_device, super_admin_credentials, random_usa_customer
+from test.test_data_provider import fota_admin_credentials, random_device, super_admin_credentials, random_usa_customer, \
+    random_customer
 
 TEST_GROUP_PREFIX = "autotests_"
 
@@ -221,11 +222,12 @@ class TestCreateEditGroups:
     @allure.severity(allure.severity_level.NORMAL)
     def test_assign_device_to_group(self):
         test_device = random_device()
+        test_customer = random_customer()
         test_group_name = TEST_GROUP_PREFIX + random_string(8)
 
         login_as(super_admin_credentials)
         DevicesPage().open() \
-            .add_device(test_device)
+            .add_device(test_device, test_customer)
 
         groups_page = GroupsPage().open()
         self.create_group(groups_page, test_group_name, test_device.device)
@@ -235,8 +237,16 @@ class TestCreateEditGroups:
         group_devices_dialog.group_name.should(have.text(test_group_name))
         assert_that(group_devices_dialog.table.get_column_values(GroupDevicesTable.Headers.DEVICE_TYPE)) \
             .described_as("Device types").contains_only(test_device.device)
-        group_devices_dialog.select_device_by_serial_number(test_device.serial_number) \
-            .click_update()
+
+        test_device_row = group_devices_dialog.table.get_row_by_serial_number(test_device.serial_number)
+        headers = GroupDevicesTable.Headers
+        assert_that(test_device_row.get_cell_text(headers.DEVICE_TYPE)).is_equal_to(test_device.device)
+        assert_that(test_device_row.get_cell_text(headers.CLINIC_ID)).is_equal_to(test_customer.clinic_id)
+        assert_that(test_device_row.get_cell_text(headers.CLINIC_NAME)).is_equal_to(test_customer.clinic_name)
+        assert_that(test_device_row.get_cell_text(headers.REGION)).is_equal_to(Region.EMEA)
+        assert_that(test_device_row.get_cell_text(headers.COUNTRY)).is_equal_to(test_customer.region_country)
+
+        group_devices_dialog.select_device_by_serial_number(test_device.serial_number).click_update()
         assert_that(groups_page.notification.get_message()) \
             .is_equal_to(GroupDevicesDialog.ASSIGNED_DEVICE_TO_GROUP_MESSAGE)
 
