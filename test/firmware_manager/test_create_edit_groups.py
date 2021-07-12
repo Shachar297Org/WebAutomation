@@ -14,8 +14,8 @@ from src.site.login_page import LoginPage
 from src.site.pages import GroupsPage, DevicesPage, LumenisXVersionPage
 from src.util.driver_util import clear_session_storage, clear_local_storage
 from src.util.random_util import random_string, random_list_item
-from test.test_data_provider import fota_admin_credentials, random_device, super_admin_credentials, random_usa_customer, \
-    random_customer
+from test.test_data_provider import fota_admin_credentials, random_device, super_admin_credentials,\
+    random_usa_customer, random_customer
 
 TEST_GROUP_PREFIX = "autotests_"
 
@@ -218,6 +218,17 @@ class TestCreateEditGroups:
                                                                        headers.CLINIC_ID, headers.CLINIC_NAME,
                                                                        headers.REGION, headers.COUNTRY)
 
+    @allure.description_html("""
+    <ol>
+        <li>Create a new device with customer fields</li>
+        <li>Create a new group with the device type to match the created device</li>
+        <li>On the Groups page click "Assign device"</li>
+        <li>Verify that group name displayed is correct</li>
+        <li>Verify that the device row contains all correct data</li>
+        <li>Click update - verify notification message</li>
+        <li>Verify that the device is assigned to te group</li>
+    </ol>
+    """)
     @allure.title("3.6.4. Assign a device to the group")
     @allure.severity(allure.severity_level.NORMAL)
     def test_assign_device_to_group(self):
@@ -254,6 +265,21 @@ class TestCreateEditGroups:
         status_dialog = groups_page.click_status(test_group_name)
         assert_that(status_dialog.get_devices()).described_as("Added devices").contains_only(test_device.serial_number)
 
+    @allure.description_html("""
+    <ol>
+        <li>Create a new device</li>
+        <li>Create a new group 1</li>
+        <li>Create a new group 2</li>
+        <li>Assign the device to the group 1</li>
+        <li>On the Groups page click "Assign device" for the group 2</li>
+        <li>Verify that a Device that is already assigned another group will be marked with a warning red triangle</li>
+        <li>Click on the assigned device – A warning message will appear “At least one device is already assigned
+         to a group, Are you sure you want to continue?” </li>
+         <li>Click "Yes"</li>
+        <li>Verify that the device is assigned now to te group 2</li>
+        <li>Verify that the device isn't assigned to te group 1 anymore</li>
+    </ol>
+    """)
     @allure.title("3.6.4. Assign already assigned device to group")
     @allure.severity(allure.severity_level.NORMAL)
     def test_assign_assigned_device_to_another_group(self):
@@ -297,6 +323,20 @@ class TestCreateEditGroups:
         assert_that(group_devices_dialog.table.is_device_selected(test_device.serial_number)) \
             .described_as("Device to be reassigned from the first group").is_false()
 
+    @allure.description_html("""
+    <ol>
+        <li>Create a new device</li>
+        <li>Create a new group 1</li>
+        <li>Create a new group 2</li>
+        <li>Assign the device to the group 1</li>
+        <li>On the Groups page click "Assign device" for the group 2</li>
+        <li>Click on the “All” button – A warning message will appear “At least one device is already assigned
+         to a group, Are you sure you want to continue?” </li>
+        <li>Click "Yes" - verify that all devices are selected</li>
+        <li>Close the dialog</li>
+        <li>Verify that the device isn't assigned to te group 2 if the assign operation wasn't completed</li>
+    </ol>
+    """)
     @allure.title("3.6.4. Assign all devices to group")
     @allure.severity(allure.severity_level.NORMAL)
     def test_assign_all_devices_to_group(self):
@@ -339,13 +379,13 @@ class TestCreateEditGroups:
 
     @allure.title("3.6.4 Verify that you can sort device rows by any column")
     @allure.description_html("""
-        <ol>
-            <li>Open groups page</li>
-            <li>Open 'Group Devices' dialog</li>
-            <li>Sort devices in the ascending order - Verify devices are sorted</li>
-            <li>Sort devices in the descending order - Verify devices are sorted</li>
-        </ol>
-        """)
+    <ol>
+        <li>Open groups page</li>
+        <li>Open 'Group Devices' dialog</li>
+        <li>Sort devices in the ascending order - Verify devices are sorted</li>
+        <li>Sort devices in the descending order - Verify devices are sorted</li>
+    </ol>
+    """)
     @allure.severity(allure.severity_level.NORMAL)
     @pytest.mark.parametrize("column", table_columns_provider)
     def test_sort_devices(self, column):
@@ -449,6 +489,19 @@ class TestCreateEditGroups:
         assert_that(group_devices_dialog.location_tree_picker.get_all_selected_items()) \
             .described_as("Search input to be empty after reset").is_empty()
 
+    @allure.title("3.6.5 Update Group Versions")
+    @allure.description_html("""
+    <ol>
+        <li>On one of the Groups, click on “Update Versions” – A “Update Group Versions” window will open</li>
+        <li>Click on the “LumenisX version” dropdown list – A list of valid LumX versions is will display
+             in ascending order</li>
+        <li>Verify versions dialog webelements</li>
+        <li>Verify that only version that are defined “Valid” on the “LumenisX Version“ window appear in the list'</li>
+        <li>Select a Version from the list and click on the “Publish Update” button – A message “Version published
+             to group successfully” will appear</li>
+        <li>On the Groups page table verify that the version is added to the group</li>
+    </ol>
+    """)
     @allure.severity(allure.severity_level.CRITICAL)
     def test_update_group_version(self):
         login_as(super_admin_credentials)
@@ -484,6 +537,22 @@ class TestCreateEditGroups:
             .get_cell_text(GroupsTable.Headers.LUMX_VERSION)
         assert_that(actual_group_version).is_equal_to(valid_version)
 
+    @allure.title("3.6.6 Group Devices Status")
+    @allure.description_html("""
+    <ol>
+        <li>Create a new device</li>
+        <li>Select some group and update the LumenisX version</li>
+        <li>Assign the device to the group</li>
+        <li>In the group row click on “Status” – A “Group Devices Status” window will open</li>
+        <li>Verify that:</li>
+        <li>1. These titles will appear: “Group Name”, “Desired Software Version”, “Desired LumenisX Version”</li>
+        <li>2. The following fields are displayed: “Serial Number”, “Device Type”, “Curr Soft Ver”, “0pdate Date”,
+             “Curr LumX Ver”, “Update Date”.</li>
+        <li>Verify all data in the above fields are correct</li>
+        <li>Verify in “Group Devices Status” window that the “Desired LumenisX Version” field gets updated
+              to the version you have published</li>
+    </ol>
+    """)
     @allure.severity(allure.severity_level.NORMAL)
     def test_group_device_status(self):
         test_device = random_device()
