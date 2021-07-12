@@ -6,7 +6,7 @@ from selene.support.conditions import be, have
 from src.const import Feature, Region, APAC_Country, DeviceGroup, AcupulseDeviceModels, Acupulse30Wdevices, \
     AmericasCountry
 from src.domain.credentials import Credentials
-from src.site.components.tables import GroupsTable, GroupDevicesTable, LumenisXVersionTable
+from src.site.components.tables import GroupsTable, GroupDevicesTable, LumenisXVersionTable, GroupDevicesStatusTable
 from src.site.components.tree_selector import SEPARATOR
 from src.site.dialogs import get_element_label, assert_text_input_default_state, \
     assert_tree_selector_default_state, CreateGroupDialog, GroupDevicesDialog, WarningDialog, UpdateGroupVersionsDialog
@@ -473,8 +473,8 @@ class TestCreateEditGroups:
         versions_dialog.group_name_input.should(have.value(group))
         assert_that(versions_dialog.lumenisx_version_menu.get_items()).contains(valid_version)\
             .does_not_contain(invalid_version)
-        versions_dialog.select_lumenisx_version(valid_version)
-        versions_dialog.publish_update()
+        versions_dialog.select_lumenisx_version(valid_version)\
+            .publish_update()
 
         assert_that(groups_page.notification.get_message())\
             .is_equal_to(UpdateGroupVersionsDialog.VERSION_PUBLISHED_MESSAGE)
@@ -483,6 +483,48 @@ class TestCreateEditGroups:
         actual_group_version = groups_page.table.wait_to_load().get_row_by_name(group)\
             .get_cell_text(GroupsTable.Headers.LUMX_VERSION)
         assert_that(actual_group_version).is_equal_to(valid_version)
+
+    @allure.severity(allure.severity_level.NORMAL)
+    def test_group_device_status(self):
+        test_device = random_device()
+
+        login_as(super_admin_credentials)
+        version_page = LumenisXVersionPage().open()
+        version_page.filter_valid()
+        version = self.get_first_version_from_table(version_page.table)
+
+        DevicesPage().open().add_device(test_device)
+
+        groups_page = GroupsPage().open()
+        groups_page.search_by(TEST_GROUP_PREFIX)
+        group = random_list_item(groups_page.table.get_column_values(GroupsTable.Headers.NAME))
+        versions_dialog = groups_page.click_update_versions(group)
+        versions_dialog.select_lumenisx_version(version)\
+            .publish_update()
+        groups_page.notification.wait_to_disappear()
+
+        group_devices_dialog = groups_page.reload().search_by(group) \
+            .click_assign_device(group)
+        group_devices_dialog.select_device_by_serial_number(test_device.serial_number) \
+            .click_update()
+        groups_page.notification.wait_to_disappear()
+
+        groups_page.search_by(group)
+        device_status_dialog = groups_page.click_status(group)
+        device_row = device_status_dialog.table.wait_to_load().get_row_by_serial_number(test_device.serial_number)
+
+        assert_that(device_row.get_cell_text(GroupDevicesStatusTable.Headers.SERIAL_NUMBER)).described_as("Device SN")\
+            .is_equal_to(test_device.serial_number)
+        assert_that(device_row.get_cell_text(GroupDevicesStatusTable.Headers.DEVICE_TYPE)).described_as("Device type")\
+            .is_equal_to(test_device.device)
+        assert_that(device_row.get_cell_text(GroupDevicesStatusTable.Headers.CURR_SOFT_VER)).is_empty()
+        assert_that(device_row.get_cell_text(GroupDevicesStatusTable.Headers.SOFT_UPDATE_DATE)).is_empty()
+        assert_that(device_row.get_cell_text(GroupDevicesStatusTable.Headers.CURR_LUM_VER)).is_empty()
+        assert_that(device_row.get_cell_text(GroupDevicesStatusTable.Headers.LUM_UPDATE_DATE)).is_empty()
+
+        assert_that(device_status_dialog.get_group_name()).described_as("Group name").is_equal_to(group)
+        assert_that(device_status_dialog.get_desired_lumenis_version()).described_as("Desired Lumenis version")\
+            .is_equal_to(version)
 
     @staticmethod
     def create_group(groups_page: GroupsPage, group_name: str, device_group):

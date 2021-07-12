@@ -1014,7 +1014,8 @@ class UpdateGroupVersionsDialog(_BaseDialog):
 
     @allure.step
     def select_lumenisx_version(self, version):
-        return self.lumenisx_version_menu.select_item(version)
+        self.lumenisx_version_menu.select_item(version)
+        return self
 
     @allure.step
     def publish_update(self):
