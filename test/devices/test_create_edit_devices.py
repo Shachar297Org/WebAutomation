@@ -494,7 +494,7 @@ class TestDeviceProperties:
 
         assert_that(table.get_column_values(AssignUserTable.Headers.USER_GROUP)).contains_only(random_group)
 
-        assign_tab.click_reset()
+        assign_tab.reset()
 
         assert_that(table.get_rows()).described_as("Table rows count after reset").is_length(init_rows_count)
 

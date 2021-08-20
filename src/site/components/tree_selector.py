@@ -102,6 +102,7 @@ class TreeSelector:
         self.tree_selector = s(tree_selector_locator)
 
         self.search_input = self.tree_selector.s("input.ant-select-search__field")
+        self.dropdown_search_input = s(".ant-select-dropdown input.ant-select-search__field")
         self.selected_items = self.tree_selector.ss("li.ant-select-selection__choice")
         self.placeholder = self.tree_selector.s(".ant-select-search__field__placeholder")
         self.clear_button = self.tree_selector.s("i.ant-select-clear-icon")
@@ -119,14 +120,20 @@ class TreeSelector:
     @allure.step
     def close(self):
         self.tree_selector.press_escape()
+        self.tree_selector.should(have.no.css_class("ant-select-open"))
 
     @allure.step
     def is_opened(self) -> bool:
         return self.tree_selector.matching(have.css_class("ant-select-open"))
 
     @allure.step
-    def filter(self, text):
+    def search(self, text):
         self.search_input.set_value(text)
+        return self
+
+    @allure.step
+    def dropdown_search(self, text):
+        self.dropdown_search_input.set_value(text)
         return self
 
     @allure.step
@@ -163,11 +170,16 @@ class TreeSelector:
     def select_all(self):
         self.open()
         self._get_node_by_title(ALL_NODE).check()
+        return self
 
     @allure.step
     def deselect_all(self):
         self.open()
         self._get_node_by_title(ALL_NODE).uncheck()
+
+    @allure.step
+    def select_filtered_item(self, item: str):
+        s(".//span[@class='ant-select-tree-title'][text()='" + item + "']").click()
 
     @allure.step
     def _select_first_level_items(self, *titles):

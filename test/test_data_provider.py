@@ -64,8 +64,8 @@ def random_customer():
                     street_number=random_numeric_string(1),
                     city=random_city(),
                     postal_zip=random_zip_code(),
-                    region_country=random_list_item(EMEA_Country.POLAND, EMEA_Country.GERMANY, EMEA_Country.AUSTRIA,
-                                                    EMEA_Country.UKRAINE, EMEA_Country.UNITED_KINGDOM),
+                    region_country=random_list_item([EMEA_Country.POLAND, EMEA_Country.GERMANY, EMEA_Country.AUSTRIA,
+                                                    EMEA_Country.UKRAINE, EMEA_Country.UNITED_KINGDOM]),
                     comments=random_alpha_numeric_string(20))
 
 

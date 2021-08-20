@@ -249,3 +249,150 @@ class AlarmHistoryTable(Table):
         ALARM_ID = "Alarm Id"
         DESCRIPTION = "Description"
         STATUS = "Status"
+
+
+class GroupsTable(Table):
+    _EDIT = "Edit"
+    _ASSIGN_DEVICES = "Assign Devices"
+    _UPDATE_VERSIONS = "Update Versions"
+    _STATUS = "Status"
+
+    @allure.step
+    def get_row_by_name(self, name: str) -> TableRowWrapper:
+        return self.get_row_by_column_value(self.Headers.NAME, name)
+
+    @allure.step
+    def get_rows_by_device_type(self, device_type: str) -> []:
+        return self.get_rows_by_column_value(self.Headers.DEVICE_TYPE, device_type)
+
+    @allure.step
+    def click_edit(self, name: str):
+        self.get_row_by_name(name).get_button(self._EDIT).click()
+
+    @allure.step
+    def click_assign_devices(self, name: str):
+        self.get_row_by_name(name).get_button(self._ASSIGN_DEVICES).click()
+
+    @allure.step
+    def click_update_versions(self, name: str):
+        self.get_row_by_name(name).get_button(self._UPDATE_VERSIONS).click()
+
+    @allure.step
+    def click_status(self, name: str):
+        self.get_row_by_name(name).get_button(self._STATUS).click()
+
+    @allure.step
+    def is_row_contains_edit_button(self, row) -> bool:
+        return row.has_button_with_text(self._EDIT)
+
+    @allure.step
+    def is_row_contains_assign_device_button(self, row) -> bool:
+        return row.has_button_with_text(self._ASSIGN_DEVICES)
+
+    @allure.step
+    def is_row_contains_update_version_button(self, row) -> bool:
+        return row.has_button_with_text(self._UPDATE_VERSIONS)
+
+    @allure.step
+    def is_row_contains_status_button(self, row) -> bool:
+        return row.has_button_with_text(self._STATUS)
+
+    class Headers:
+        NAME = "Name"
+        DEVICE_TYPE = "Device Type"
+        REGION = "Region"
+        COUNTRY = "Country"
+        SW_VERSION = "SW Version"
+        LUMX_VERSION = "LumX Version"
+        ACTION_BUTTON = ""
+
+
+class LumenisXVersionTable(Table):
+    _VALID = "Valid"
+    _INVALID = "Invalid"
+
+    @allure.step
+    def is_valid(self, version: str) -> bool:
+        return self.get_row_by_version(version).get_button(self._VALID).matching(be.disabled)
+
+    @allure.step
+    def click_valid(self, version: str):
+        self.get_row_by_version(version).get_button(self._VALID).click()
+
+    @allure.step
+    def click_invalid(self, version: str):
+        self.get_row_by_version(version).get_button(self._INVALID).click()
+
+    @allure.step
+    def get_row_by_version(self, name: str) -> TableRowWrapper:
+        return self.get_row_by_column_value(self.Headers.SOFT_VERSION, name)
+
+    class Headers:
+        SOFT_VERSION = "Soft Version"
+        UPLOAD_DATE = "Upload Date"
+        UPLOADED_BY = "Uploaded By"
+        VALID_INVALID_BUTTONS = ""
+
+
+class GroupDevicesTable(Table):
+
+    def __init__(self, locator: str):
+        super().__init__(locator)
+        self.all_link = self.table.s(".//button[span[text()='All']]")
+
+    @allure.step
+    def get_row_by_serial_number(self, serial_number: str) -> TableRowWrapper:
+        return self.get_row_by_column_value(self.Headers.SERIAL_NUMBER, serial_number)
+
+    @allure.step
+    def get_rows_by_device_type(self, device_type: str) -> []:
+        return self.get_rows_by_column_value(self.Headers.DEVICE_TYPE, device_type)
+
+    @allure.step
+    def select_device(self, serial_number: str):
+        if not self.is_device_selected(serial_number):
+            self.get_device_checkbox(serial_number).click()
+
+    @allure.step
+    def deselect_device(self, serial_number: str):
+        if self.is_device_selected(serial_number):
+            self.get_device_checkbox(serial_number).click()
+
+    @allure.step
+    def is_device_selected(self, serial_number: str) -> bool:
+        return self.get_device_checkbox(serial_number).matching(have.css_class("ant-checkbox-checked"))
+
+    @allure.step
+    def get_device_checkbox(self, serial_number: str) -> Element:
+        return self.get_row_by_serial_number(serial_number).row.s(".ant-checkbox")
+
+    def is_warn_icon_displayed(self, serial_number: str) -> bool:
+        return self.get_row_by_serial_number(serial_number).row.s("span.anticon-warning").matching(be.visible)
+
+    @allure.step
+    def click_all(self):
+        self.all_link.click()
+
+    class Headers:
+        ASSIGN = "Assign"
+        SERIAL_NUMBER = "Serial Number"
+        DEVICE_TYPE = "Device Type"
+        CLINIC_ID = "Clinic ID"
+        CLINIC_NAME = "Clinic Name"
+        REGION = "Region"
+        COUNTRY = "Country"
+
+
+class GroupDevicesStatusTable(Table):
+
+    @allure.step
+    def get_row_by_serial_number(self, serial_number: str) -> TableRowWrapper:
+        return self.get_row_by_column_value(self.Headers.SERIAL_NUMBER, serial_number)
+
+    class Headers:
+        SERIAL_NUMBER = "Serial Number"
+        DEVICE_TYPE = "Device Type"
+        CURR_SOFT_VER = "Curr Soft Ver"
+        SOFT_UPDATE_DATE = "Update Date"
+        CURR_LUM_VER = "Curr LumX Ver"
+        LUM_UPDATE_DATE = "Update Date"

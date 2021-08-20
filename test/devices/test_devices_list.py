@@ -77,7 +77,7 @@ class TestDevicesList:
         assert_that(devices_page.location_tree_picker.get_placeholder()) \
             .is_equal_to(DevicesPage.LOCATIONS_TEXT)
 
-        devices_page.reset_button.should(be.visible).should(be.clickable)
+        devices_page.reset_button.button.should(be.visible).should(be.clickable)
         devices_page.reload_button.should(be.visible).should(be.clickable)
 
         devices_page.table.table.should(be.visible).should(be.enabled)
@@ -162,7 +162,7 @@ class TestDevicesList:
         for table_row in table.get_rows():
             assert_that(table.is_any_row_cell_contains_text_ignoring_case(table_row, substring)).is_true()
 
-        devices_page.click_reset()
+        devices_page.reset()
 
         assert_that(devices_page.search_input.is_empty()).described_as("Search input to be empty after reset").is_true()
         assert_that(table.get_rows()).described_as("Table rows count after reset").is_length(init_rows_count)
@@ -187,7 +187,7 @@ class TestDevicesList:
         assert_that(table.get_column_values(DevicesTable.Headers.DEVICE_TYPE))\
             .contains_only(test_device_model + SEPARATOR + test_device)
 
-        devices_page.click_reset()
+        devices_page.reset()
 
         assert_that(devices_page.device_tree_picker.get_all_selected_items())\
             .described_as("Search input to be empty after reset").is_empty()
@@ -211,9 +211,9 @@ class TestDevicesList:
 
         assert_that(table.get_column_values(DevicesTable.Headers.COUNTRY)).contains_only(test_country)
 
-        devices_page.click_reset()
+        devices_page.reset()
 
-        assert_that(devices_page.device_tree_picker.get_all_selected_items())\
+        assert_that(devices_page.location_tree_picker.get_all_selected_items())\
             .described_as("Search input to be empty after reset").is_empty()
 
     # For this test the Devices table need to contain at least 11 devices to enable the pagination element

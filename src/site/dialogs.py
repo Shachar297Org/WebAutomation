@@ -11,12 +11,12 @@ from selene.support.shared.jquery_style import s
 from src.const import AmericasCountry
 from src.domain.device import Customer, Device
 from src.domain.user import User
-from src.site.components.base_table import PaginationElement
+from src.site.components.base_table import PaginationElement, Table
 from src.site.components.cascader_picker import RegionCountryCascaderPicker, DeviceTypeCascaderPicker
-from src.site.components.simple_components import SelectBox, SearchInput
+from src.site.components.simple_components import SelectBox, SearchInput, ResetButton
 from src.site.components.tree_selector import LocationTreeSelector, DeviceTypesTreeSelector, TreeSelector
 from src.site.components.tables import DeviceAssignmentTable, PropertiesTable, AssignUserTable, V2CHistoryTable, \
-    AlarmHistoryTable
+    AlarmHistoryTable, GroupDevicesTable, GroupDevicesStatusTable
 from src.util.elements_util import clear_text_input, JS_CLICK
 
 
@@ -145,7 +145,7 @@ class _BaseCreateEditUserDialog(_BaseDialog):
 
     @allure.step
     def set_first_name(self, text: str):
-        clear_text_input(self.first_name_input).clear().type(text)
+        clear_text_input(self.first_name_input).type(text)
         return self
 
     @allure.step
@@ -154,7 +154,7 @@ class _BaseCreateEditUserDialog(_BaseDialog):
 
     @allure.step
     def set_last_name(self, text: str):
-        clear_text_input(self.last_name_input).clear().type(text)
+        clear_text_input(self.last_name_input).type(text)
         return self
 
     @allure.step
@@ -163,7 +163,7 @@ class _BaseCreateEditUserDialog(_BaseDialog):
 
     @allure.step
     def set_email(self, text: str):
-        clear_text_input(self.email_input).clear().type(text)
+        clear_text_input(self.email_input).type(text)
         return self
 
     @allure.step
@@ -172,7 +172,7 @@ class _BaseCreateEditUserDialog(_BaseDialog):
 
     @allure.step
     def set_phone_number(self, text: str):
-        clear_text_input(self.phone_number_input).clear().type(text)
+        clear_text_input(self.phone_number_input).type(text)
         return self
 
     @allure.step
@@ -641,7 +641,7 @@ class DevicePropertiesDialog(_BaseDialog):
             super().__init__()
             self.search_input = SearchInput(self._ACTIVE_TAB_CSS + " input[placeholder='Search']")
             self.user_group_select = SelectBox(self._ACTIVE_TAB_CSS + " #entityToolbarFilters_userGroupFilter")
-            self.reset_button = self.active_tab.s(".//button[span[text()='Reset']]")
+            self.reset_button = ResetButton(self.active_tab.s(".//button[span[text()='Reset']]"))
             self.reload_button = self.active_tab.s("i.anticon-reload")
             self.table = AssignUserTable(self._ACTIVE_TAB_CSS + " .ant-table-wrapper")
             self.pagination_element = PaginationElement(self._ACTIVE_TAB_CSS + " ul.ant-table-pagination")
@@ -665,9 +665,8 @@ class DevicePropertiesDialog(_BaseDialog):
             return self
 
         @allure.step
-        def click_reset(self):
-            self.reset_button.click()
-            self.reset_button.wait.until(have.attribute("ant-click-animating-without-extra-node").value("false"))
+        def reset(self):
+            self.reset_button.reset()
             return self
 
         @allure.step
@@ -736,7 +735,7 @@ class DevicePropertiesDialog(_BaseDialog):
             super().__init__()
             self.search_input = SearchInput(self._ACTIVE_TAB_CSS + " input[placeholder='Search']")
             self.status_select = SelectBox(self._ACTIVE_TAB_CSS + " #entityToolbarFilters_alarmStateOption")
-            self.reset_button = self.active_tab.s(".//button[span[text()='Reset']]")
+            self.reset_button = ResetButton(self.active_tab.s(".//button[span[text()='Reset']]"))
             self.reload_button = self.active_tab.s(".ant-modal-content i.anticon-reload")
             self.table = AlarmHistoryTable(self._ACTIVE_TAB_CSS + " .ant-table-wrapper")
 
@@ -753,9 +752,8 @@ class DevicePropertiesDialog(_BaseDialog):
             return self
 
         @allure.step
-        def click_reset(self):
-            self.reset_button.click()
-            self.reset_button.wait.until(have.attribute("ant-click-animating-without-extra-node").value("false"))
+        def reset(self):
+            self.reset_button.reset()
             return self
 
         @allure.step
@@ -786,3 +784,313 @@ class DevicePropertiesDialog(_BaseDialog):
         @allure.step
         def click_reactivate_device(self):
             self.reactivate_device_button.click()
+
+
+class _BaseGroupDialog(_BaseDialog):
+    GROUP_NAME_LABEL = "Group Name"
+    DEVICE_TYPE_FAMILY_LABEL = "Device Type / Family"
+    LOCATIONS_LABEL = "Locations"
+    LOCATIONS_PLACEHOLDER = LOCATIONS_LABEL
+
+    def __init__(self):
+        super().__init__()
+        self.group_name_input = self.dialog.s("input#createGroupForm_name")
+        self.device_type_tree_selector = DeviceTypesTreeSelector(
+            "//*[contains(@class, 'ant-form-item')][.//text()='Device Type / Family']//span[contains(@class, 'TreeSelector')]")
+        self.locations_tree_selector = LocationTreeSelector(
+            "//*[@class='ant-modal-body']//span[contains(@class, 'TreeSelector')][.//text()='Locations']")
+
+    @allure.step
+    def wait_to_load(self):
+        self.group_name_input.wait_until(be.visible)
+        return self
+
+    @allure.step
+    def get_group_name(self) -> str:
+        return self.group_name_input.get(query.value)
+
+    @allure.step
+    def set_group_name(self, text: str):
+        self.group_name_input.clear().type(text)
+        return self
+
+    @allure.step
+    def select_device(self, device: str):
+        self.device_type_tree_selector.open().dropdown_search(device)
+        self.device_type_tree_selector.select_filtered_item(device)
+        return self
+
+    @allure.step
+    def select_all_locations(self):
+        self.locations_tree_selector.select_all().close()
+        return self
+
+    @allure.step
+    def select_countries(self, region, *countries):
+        self.locations_tree_selector.select_countries(region, *countries).close()
+        return self
+
+
+class CreateGroupDialog(_BaseGroupDialog):
+    TITLE = "Create Group"
+
+    def __init__(self):
+        super().__init__()
+        self.create_button = self.dialog.s(".//button[span[text()='Create']]")
+
+    @allure.step
+    def wait_to_load(self):
+        super().wait_to_load()
+        self.create_button.wait_until(be.clickable)
+        return self
+
+    @allure.step
+    def click_create(self):
+        self.create_button.click()
+
+
+class EditGroupDialog(_BaseGroupDialog):
+    TITLE = "Edit Group"
+
+    def __init__(self):
+        super().__init__()
+        self.update_button = self.dialog.s(".//button[span[text()='Update']]")
+
+    @allure.step
+    def wait_to_load(self):
+        super().wait_to_load()
+        self.update_button.wait_until(be.clickable)
+        return self
+
+    @allure.step
+    def click_update(self):
+        self.update_button.click()
+
+
+class UploadLumenisXVersionDialog(_BaseDialog):
+    TITLE = "Upload LumenisX Version"
+
+    def __init__(self):
+        super().__init__()
+        self.upload_button = self.dialog.s(".//button[span[text()='Click To Upload']]")
+        self.upload_input = self.dialog.s("input#creatLumenisXForm_upload")
+        self.version_input = self.dialog.s("input#creatLumenisXForm_version")
+        self.comments_textarea = self.dialog.s("textarea#creatLumenisXForm_comments")
+        self.save_button = self.dialog.s(".//button[span[text()='Save']]")
+
+    @allure.step
+    def wait_to_load(self):
+        self.version_input.wait_until(be.visible)
+        self.save_button.wait_until(be.clickable)
+        return self
+
+    @allure.step
+    def click_upload(self):
+        self.upload_button.click()
+
+    @allure.step
+    def get_version(self) -> str:
+        return self.version_input.get(query.value)
+
+    @allure.step
+    def set_version(self, text: str):
+        self.version_input.clear().type(text)
+        return self
+
+    @allure.step
+    def get_comments(self) -> str:
+        return self.comments_textarea.get(query.value)
+
+    @allure.step
+    def set_comments(self, text: str):
+        self.comments_textarea.clear().type(text)
+        return self
+
+    @allure.step
+    def click_save(self):
+        self.save_button.click()
+
+
+class GroupDevicesDialog(_BaseDialog):
+    TITLE = "Group Devices"
+    SEARCH_PLACEHOLDER = "Search"
+    DEVICE_TYPES_PLACEHOLDER = "Device Types"
+    LOCATIONS_PLACEHOLDER = "Locations"
+
+    ASSIGNED_DEVICE_TO_GROUP_MESSAGE = "Assigned device(s) to group successfully"
+    CONTINUE_TEXT = "Are you sure you want to continue?"
+    AT_LEAST_ONE_DEVICE_ASSIGNED_MESSAGE = "At least one device is already assigned to a group"
+
+    def __init__(self):
+        super().__init__()
+        self.dialog = s("//*[@class='ant-modal-content'][.//div[contains(text(),'Group Devices')]]")
+        self.group_name = self.dialog.s("//*[contains(text(),'Group Name:')]/parent::div")
+        self.search_input = SearchInput(".ant-modal-content input[placeholder='Search']")
+        self.device_tree_picker = DeviceTypesTreeSelector(
+            "//*[@class='ant-modal']//span[contains(@class, 'TreeSelector')][.//text()='Device Types']")
+        self.location_tree_picker = LocationTreeSelector(
+            "//*[@class='ant-modal']//span[contains(@class, 'TreeSelector')][.//text()='Locations']")
+
+        self.reset_button = ResetButton(self.dialog.s(".//button[span[text()='Reset']]"))
+        self.reload_button = self.dialog.s("i.anticon-reload")
+
+        self.table = GroupDevicesTable(".ant-modal-content .ant-table-wrapper")
+        self.pagination_element = PaginationElement(".ant-modal-content ul.ant-table-pagination")
+        self.update_device_assignment_button = self.dialog.s(".//button[span[text()='Update Device Assignment']]")
+
+    @allure.step
+    def wait_to_load(self):
+        self.device_tree_picker.tree_selector.wait_until(be.visible)
+        self.cancel_button.wait_until(be.clickable)
+        return self
+
+    @allure.step
+    def sort_asc_by(self, column: str):
+        self.table.sort_asc(column)
+        return self
+
+    @allure.step
+    def sort_desc_by(self, column: str):
+        self.table.sort_desc(column)
+        return self
+
+    @allure.step
+    def search_by(self, text: str):
+        self.search_input.search(text)
+        self.table.wait_to_load()
+        return self
+
+    @allure.step
+    def reset(self):
+        self.reset_button.reset()
+        return self
+
+    @allure.step
+    def reload(self):
+        self.reload_button.execute_script(JS_CLICK)
+        self.table.wait_to_load()
+        return self
+
+    @allure.step
+    def select_device_by_serial_number(self, device_serial_number):
+        self.search_by(device_serial_number)
+        self.table.select_device(device_serial_number)
+        return self
+
+    @allure.step
+    def click_update(self):
+        self.update_device_assignment_button.click()
+
+    @staticmethod
+    def get_expected_device_assigned_warning(device: str, group: str) -> str:
+        return "Device {0} is already assigned to group {1}".format(device, group)
+
+
+class UpdateGroupVersionsDialog(_BaseDialog):
+    TITLE = "Update Group Versions"
+    GROUP_NAME_LABEL = "Group Name"
+    SOFTWARE_VERSION_LABEL = "Software Version"
+    LUMENISX_VERSION_LABEL = "LumenisX Version"
+
+    VERSION_PUBLISHED_MESSAGE = "Version published to group successfully"
+
+    def __init__(self):
+        super().__init__()
+        self.dialog = s("//*[@class='ant-modal-content'][.//div[contains(text(),'Update Group Versions')]]")
+        self.group_name_input = self.dialog.s("input#updateGroupVersionForm_groupName")
+        self.software_version_menu = SelectBox("#updateGroupVersionForm_softwareVersion")
+        self.lumenisx_version_menu = SelectBox("#updateGroupVersionForm_lumenisXVersion")
+
+        self.publish_update_button = self.dialog.s(".//button[span[text()='Publish Update']]")
+
+    @allure.step
+    def wait_to_load(self):
+        self.publish_update_button.should(be.visible)
+        return self
+
+    @allure.step
+    def get_group_name(self):
+        return self.group_name_input.get(query.value)
+
+    @allure.step
+    def select_lumenisx_version(self, version):
+        self.lumenisx_version_menu.select_item(version)
+        return self
+
+    @allure.step
+    def publish_update(self):
+        self.publish_update_button.click()
+
+
+class GroupDevicesStatusDialog(_BaseDialog):
+    TITLE = "Group Devices Status"
+    GROUP_NAME_LABEL = "Group Name"
+    DESIRED_SW_VERSION_LABEL = "Desired Software Version"
+    DESIRED_LUMENIS_VERSION_LABEL = "Desired LumenisX Version"
+
+    ASSIGNED_DEVICE_TO_GROUP_MESSAGE = "Assigned device(s) to group successfully"
+
+    def __init__(self):
+        super().__init__()
+        self.dialog = s("//*[@class='ant-modal-content'][.//div[contains(text(),'Group Devices')]]")
+        self.group_name = self.dialog.s(".//span[.//*[contains(text(),'Group Name')]]//span[2]")
+        self.desired_sw_version = self.dialog.s(".//span[.//*[contains(text(),'Desired Software Version')]]//span[2]")
+        self.desired_lumenis_version = self.dialog.s(
+            ".//span[.//*[contains(text(),'Desired LumenisX Version')]]//span[2]")
+
+        self.table = GroupDevicesTable(".ant-modal-content .ant-table-wrapper")
+        self.pagination_element = PaginationElement(".ant-modal-content ul.ant-table-pagination")
+
+    @allure.step
+    def wait_to_load(self):
+        self.desired_lumenis_version.wait_until(be.visible)
+        return self
+
+    @allure.step
+    def sort_asc_by(self, column: str):
+        self.table.sort_asc(column)
+        return self
+
+    @allure.step
+    def sort_desc_by(self, column: str):
+        self.table.sort_desc(column)
+        return self
+
+    @allure.step
+    def get_group_name(self):
+        return self.group_name.get(query.text)
+
+    @allure.step
+    def get_desired_lumenis_version(self):
+        return self.desired_lumenis_version.get(query.text)
+
+    @allure.step
+    def get_devices(self) -> []:
+        return self.table.get_column_values(GroupDevicesStatusTable.Headers.SERIAL_NUMBER)
+
+
+class WarningDialog(_BaseDialog):
+
+    def __init__(self):
+        super().__init__()
+        self.dialog = s("//*[@class='ant-modal-content'][.//div[contains(text(),'Warning')]]")
+        self.text = self.dialog.s(".//div[contains(@class, 'WarningModal__BodyText')]")
+        self.additional_text = self.dialog.s(".//div[contains(@class, 'WarningModal__BodyText')][2]")
+        self.ok_button = self.dialog.s(".//button[span[text()='OK']]")
+
+    @allure.step
+    def get_text(self) -> str:
+        return self.text.get(query.text)
+
+    @allure.step
+    def get_additional_text(self) -> str:
+        return self.additional_text.get(query.text)
+
+    @allure.step
+    def click_ok(self):
+        self.ok_button.click()
+
+    @allure.step
+    def wait_to_load(self):
+        self.dialog.should(be.visible, 10)
+        return self
