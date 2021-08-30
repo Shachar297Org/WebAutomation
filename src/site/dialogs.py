@@ -11,12 +11,12 @@ from selene.support.shared.jquery_style import s
 from src.const import AmericasCountry
 from src.domain.device import Customer, Device
 from src.domain.user import User
-from src.site.components.base_table import PaginationElement, Table
+from src.site.components.base_table import PaginationElement
 from src.site.components.cascader_picker import RegionCountryCascaderPicker, DeviceTypeCascaderPicker
 from src.site.components.simple_components import SelectBox, SearchInput, ResetButton
-from src.site.components.tree_selector import LocationTreeSelector, DeviceTypesTreeSelector, TreeSelector
 from src.site.components.tables import DeviceAssignmentTable, PropertiesTable, AssignUserTable, V2CHistoryTable, \
     AlarmHistoryTable, GroupDevicesTable, GroupDevicesStatusTable
+from src.site.components.tree_selector import LocationTreeSelector, DeviceTypesTreeSelector, TreeSelector
 from src.util.elements_util import clear_text_input, JS_CLICK
 
 
@@ -469,6 +469,7 @@ class _BaseDeviceDialog(_BaseDialog, ABC):
 
     @allure.step
     def get_comment(self) -> str:
+        self.comments_textarea.should(be.not_.blank)
         return self.comments_textarea.get(query.value)
 
     @allure.step
@@ -796,7 +797,8 @@ class _BaseGroupDialog(_BaseDialog):
         super().__init__()
         self.group_name_input = self.dialog.s("input#createGroupForm_name")
         self.device_type_tree_selector = DeviceTypesTreeSelector(
-            "//*[contains(@class, 'ant-form-item')][.//text()='Device Type / Family']//span[contains(@class, 'TreeSelector')]")
+            "//*[contains(@class, 'ant-form-item')][.//text()='Device Type / Family']//"
+            "span[contains(@class, 'TreeSelector')]")
         self.locations_tree_selector = LocationTreeSelector(
             "//*[@class='ant-modal-body']//span[contains(@class, 'TreeSelector')][.//text()='Locations']")
 

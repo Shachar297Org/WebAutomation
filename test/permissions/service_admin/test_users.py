@@ -7,8 +7,7 @@ from src.const.UserGroup import SERVICE_MANAGER, SERVICE_TECHNICIAN, TECH_SUPPOR
 from src.site.components.tables import UsersTable, DeviceAssignmentTable
 from src.site.login_page import LoginPage
 from src.site.pages import UsersPage
-from test.test_data_provider import random_user, super_admin_credentials, \
-    service_admin_credentials, TEST_SERVICE_ADMIN, fota_admin_credentials
+from test.test_data_provider import random_user, service_admin_credentials, TEST_SERVICE_ADMIN, fota_admin_credentials
 from test.users.base_users_test import BaseUsersTest
 
 
@@ -23,7 +22,7 @@ class TestServiceAdminUsersPermissions(BaseUsersTest):
 
     @allure.title("3.1.3.1 Service admin: View all users")
     @allure.severity(allure.severity_level.NORMAL)
-    @allure.issue("Service admin can't see users with higher permissions")
+    @allure.issue("LD-404")
     def test_users_list(self):
         fota_admin_user = fota_admin_credentials.username
         users_page = UsersPage().open()
@@ -37,7 +36,7 @@ class TestServiceAdminUsersPermissions(BaseUsersTest):
             assert_that(table.is_any_row_cell_contains_text_ignoring_case(table_row, fota_admin_user)).is_true()
 
     @allure.title("3.1.3.1 Service admin: Create a new user")
-    @allure.issue("Some token is displayed for few secs instead of the manager in the Manager menu")
+    @allure.issue("LD-387")
     @allure.severity(allure.severity_level.NORMAL)
     def test_create_view_user(self):
         users_page = UsersPage().open()

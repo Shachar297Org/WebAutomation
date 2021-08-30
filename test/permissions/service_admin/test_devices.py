@@ -78,8 +78,7 @@ class TestServiceAdminDevicesPermissions(BaseDevicesTest):
         edit_dialog.general_tab.assert_customer_fields(new_customer)
 
     @allure.title("3.1.3.2 Assign User")
-    @allure.issue("The device isn't appeared for the user in the Users device assignment if assign the user"
-                  " to the device on the devices tab")
+    @allure.issue("LD-392")
     @allure.severity(allure.severity_level.NORMAL)
     def test_assign_user(self):
         test_device = random_device()

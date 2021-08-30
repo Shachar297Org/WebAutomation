@@ -95,7 +95,7 @@ class TestDevicesList:
     </ol>
     """)
     @allure.severity(allure.severity_level.NORMAL)
-    @allure.issue("wrong device type sorting order")
+    @allure.issue("LD-388")
     @pytest.mark.parametrize("column", table_columns_provider)
     def test_sort_devices(self, column):
         devices_page = DevicesPage().open()
@@ -123,7 +123,7 @@ class TestDevicesList:
     </ol>
     """)
     @allure.severity(allure.severity_level.NORMAL)
-    @allure.issue("filtering doesn't work by status and device type")
+    @allure.issue("LD-398")
     @pytest.mark.parametrize("column", table_columns_provider)
     def test_filter_devices_by_column_value(self, column):
         devices_page = DevicesPage().open()
@@ -228,7 +228,8 @@ class TestDevicesList:
         <li>Verify that the active page number is 2 - next 10 items are displayed</li>
         <li>Verify that the left arrow became enabled</li>
         <li>Open the first page again</li>
-        <li>Verify that the active page number is 1 - the same 10 items are displayed that were displayed before on the first page</li>
+        <li>Verify that the active page number is 1 - the same 10 items are displayed that were displayed before,
+         on the first page</li>
         <li>Verify that the left arrow became disabled</li>
     </ol>
     """)

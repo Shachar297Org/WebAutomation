@@ -13,13 +13,13 @@
 
 ## Run the tests
 ```
- pytest <tests path>
+ pytest <tests path> --allure-link-pattern'=issue:https://lumenisx.atlassian.net/browse/{}'
 ```
 
 ### Examples 
 ```
- pytest test - running all tests
- pytest test.users - running all tests in the users package
+ pytest test --allure-link-pattern'=issue:https://lumenisx.atlassian.net/browse/{}' - running all tests
+ pytest test/users --allure-link-pattern'=issue:https://lumenisx.atlassian.net/browse/{}' - running all tests in the users package
 ```
 ####TODO Add more examples 
 

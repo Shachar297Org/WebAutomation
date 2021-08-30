@@ -28,7 +28,7 @@ class TestFotaAdminDevicesPermissions(BaseDevicesTest):
         devices_page.table.table.should(be.visible).should(be.enabled)
         assert_that(devices_page.table.get_rows()).is_not_empty()
 
-    @allure.issue("FOTA admin can't view the device he added")
+    @allure.issue("LD-390")
     @allure.title("3.1.2.2 Create and view a new device")
     @allure.severity(allure.severity_level.NORMAL)
     def test_create_view_device(self):
@@ -50,7 +50,7 @@ class TestFotaAdminDevicesPermissions(BaseDevicesTest):
         edit_dialog.general_tab.assert_device_fields(new_device)
         edit_dialog.general_tab.assert_customer_fields(new_customer)
 
-    @allure.issue("FOTA admin can't view the device he added")
+    @allure.issue("LD-390")
     @allure.title("3.1.2.2 Edit device customer details")
     @allure.severity(allure.severity_level.NORMAL)
     def test_edit_device_customer_details(self):
@@ -79,8 +79,8 @@ class TestFotaAdminDevicesPermissions(BaseDevicesTest):
         edit_dialog.general_tab.assert_customer_fields(new_customer)
 
     @allure.title("3.1.2.2 Assign User")
-    @allure.issue("The device isn't appeared for the user in the Users device assignment if assign the user"
-                  " to the device on the devices tab")
+    @allure.issue("LD-390")
+    @allure.issue("LD-392")
     @allure.severity(allure.severity_level.NORMAL)
     def test_assign_user(self):
         test_device = random_device()
