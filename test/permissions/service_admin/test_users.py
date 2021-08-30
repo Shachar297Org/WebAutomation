@@ -7,8 +7,7 @@ from src.const.UserGroup import SERVICE_MANAGER, SERVICE_TECHNICIAN, TECH_SUPPOR
 from src.site.components.tables import UsersTable, DeviceAssignmentTable
 from src.site.login_page import LoginPage
 from src.site.pages import UsersPage
-from test.test_data_provider import random_user, super_admin_credentials, \
-    service_admin_credentials, TEST_SERVICE_ADMIN, fota_admin_credentials
+from test.test_data_provider import random_user, service_admin_credentials, TEST_SERVICE_ADMIN, fota_admin_credentials
 from test.users.base_users_test import BaseUsersTest
 
 

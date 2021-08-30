@@ -150,7 +150,7 @@ class TestCreateEditUsers(BaseUsersTest):
 
         # tooltip = dialog.device_table.get_row_by_region(expected_region).hover_column_cell(
         #     DeviceAssignmentTable.Headers.DEVICE_TYPES).wait_to_be_loaded()
-        # # TODO debug why tooltip isn't hovered
+        # # TODO doesn't work on Chrome v 92.0 Check on newer version. Works on Firefox
         # assert_that(tooltip.get_items_text()).described_as("Tooltip device type values").contains_only(
         #     expected_device_tooltip_prefix + test_device1, expected_device_tooltip_prefix + test_device2,
         #     expected_device_tooltip_prefix + test_device3, expected_device_tooltip_prefix + test_device4)

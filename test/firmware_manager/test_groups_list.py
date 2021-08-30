@@ -224,7 +224,8 @@ class TestGroupsList:
         <li>Verify that the active page number is 2 - next 10 items are displayed</li>
         <li>Verify that the left arrow became enabled</li>
         <li>Open the first page again</li>
-        <li>Verify that the active page number is 1 - the same 10 items are displayed that were displayed before on the first page</li>
+        <li>Verify that the active page number is 1 - the same 10 items are displayed that were displayed before,
+         on the first page</li>
         <li>Verify that the left arrow became disabled</li>
     </ol>
     """)
