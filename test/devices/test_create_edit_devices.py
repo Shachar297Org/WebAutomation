@@ -165,7 +165,7 @@ class TestCreateEditDevices(BaseDevicesTest):
         <li>Open device properties and verify that the device and customer fields are correctly displayed</li>
     </ol>
     """)
-    @allure.issue("error on creating a device using customer none-ASCII parameters")
+    @allure.issue("LD-396")
     @allure.severity(allure.severity_level.NORMAL)
     def test_create_device_using_none_ascii_customer_parameters(self):
         new_device = random_device()
@@ -385,8 +385,7 @@ class TestDeviceProperties:
         <li>Open user page, search and open created user and check that the device is in the assigned devices list</li>
     </ol>
     """)
-    @allure.issue("The device isn't appeared for the user in the Users device assignment if assign the user"
-                  " to the device on  the devices tab")
+    @allure.issue("LD-392")
     @allure.severity(allure.severity_level.NORMAL)
     def test_assign_user(self):
         test_device = random_device()
@@ -433,7 +432,7 @@ class TestDeviceProperties:
         <li>Sort users in the descending order - Verify users are sorted</li>
     </ol>
     """)
-    @allure.issue("wrong sorting order if the item contains more than 1 word. The second word isn't considered")
+    @allure.issue("LD-388")
     @allure.severity(allure.severity_level.NORMAL)
     def test_sort_users_on_properties_assign_tab(self):
         assign_tab = self.open_assign_user_dialog()

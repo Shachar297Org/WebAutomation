@@ -55,7 +55,7 @@ class TestUsersList:
 
     @allure.title("Verify that you can sort the user rows by any column")
     @allure.severity(allure.severity_level.NORMAL)
-    @allure.issue("wrong sorting order if the item contains more than 1 word. The second word isn't considered")
+    @allure.issue("LD-388")
     @pytest.mark.parametrize("column", table_columns_provider)
     def test_sort_users(self, column):
         users_page = UsersPage().open()

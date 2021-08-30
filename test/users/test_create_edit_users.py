@@ -61,7 +61,7 @@ class TestCreateEditUsers(BaseUsersTest):
         dialog.cancel_button.should(be.visible).should(be.clickable)
 
     @allure.title("Create a new user")
-    @allure.issue("Some token is displayed for few secs instead of the manager in the Manager menu")
+    @allure.issue("LD-387")
     @allure.severity(allure.severity_level.CRITICAL)
     def test_create_user(self):
         users_page = login_as(fota_admin_credentials)
@@ -283,7 +283,7 @@ class TestCreateEditUsers(BaseUsersTest):
         assert_that(users_page.notification.get_message()).is_equal_to(UsersPage.USER_UPDATED_MESSAGE)
 
     @allure.title("Reset password test")
-    @allure.issue("Reset password link is absent")
+    @pytest.mark.skip(reason="Reset password link is absent due to the temporary issue caused by the rollback from MFA")
     @allure.severity(allure.severity_level.NORMAL)
     def test_reset_users_password(self):
         users_page = login_as(super_admin_credentials)

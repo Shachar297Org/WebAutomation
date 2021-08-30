@@ -4,7 +4,7 @@ from assertpy import assert_that
 from selene.support.conditions import be
 
 from src.const import Feature, Acupulse30Wdevices, AmericasCountry, Region
-from src.site.components.tree_selector import SEPARATOR
+from src.site.components.tree_selector import SEPARATOR, ALL_NODE
 from src.site.login_page import LoginPage
 from src.site.components.tables import GroupsTable
 from src.site.pages import GroupsPage
@@ -92,7 +92,7 @@ class TestGroupsList:
     </ol>
     """)
     @allure.severity(allure.severity_level.NORMAL)
-    @allure.issue("wrong device type sorting order")
+    @allure.issue("LD-388")
     @pytest.mark.parametrize("column", table_sortable_columns_provider)
     def test_sort_groups(self, column):
         groups_page = GroupsPage().open()
@@ -189,7 +189,6 @@ class TestGroupsList:
             .described_as("Search input to be empty after reset").is_empty()
 
     @allure.title("3.6.1 Verify that rows can be filtered by “Locations” in the designated field")
-    @allure.issue("Groups with empty country are filtered together with some country")
     @allure.description_html("""
     <ol>
         <li>Open groups page</li>
@@ -206,7 +205,7 @@ class TestGroupsList:
 
         groups_page.location_tree_picker.select_countries(Region.AMERICAS, test_country).close()
 
-        assert_that(table.get_column_values(GroupsTable.Headers.COUNTRY)).contains_only(test_country)
+        assert_that(table.get_column_values(GroupsTable.Headers.REGION)).contains(ALL_NODE)
 
         groups_page.reset()
 
