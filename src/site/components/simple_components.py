@@ -89,7 +89,8 @@ class SelectBox:
 
     @allure.step
     def wait_to_be_enabled(self):
-        self.select.should(have.css_class("ant-select-enabled"))
+        timeout_sec = 15
+        self.select.should(have.css_class("ant-select-enabled"), timeout_sec)
         return self
 
     @allure.step

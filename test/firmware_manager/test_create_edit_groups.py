@@ -389,7 +389,7 @@ class TestCreateEditGroups:
     @allure.severity(allure.severity_level.NORMAL)
     @pytest.mark.parametrize("column", table_columns_provider)
     def test_sort_devices(self, column):
-        groups_page = login_as(super_admin_credentials)
+        groups_page = login_as(fota_admin_credentials)
         group_devices_dialog = self.open_random_device(groups_page)
         table = group_devices_dialog.table.wait_to_load()
 
@@ -447,7 +447,7 @@ class TestCreateEditGroups:
         test_device_group = DeviceGroup.ACUPULSE
         test_device_model = AcupulseDeviceModels.ACUPULSE_30W
 
-        groups_page = login_as(super_admin_credentials)
+        groups_page = login_as(fota_admin_credentials)
         group_devices_dialog = self.open_random_device(groups_page)
         table = group_devices_dialog.table.wait_to_load()
 
@@ -476,7 +476,7 @@ class TestCreateEditGroups:
     @allure.severity(allure.severity_level.NORMAL)
     def test_filter_devices_by_locations(self):
         test_country = AmericasCountry.USA
-        groups_page = login_as(super_admin_credentials)
+        groups_page = login_as(fota_admin_credentials)
         group_devices_dialog = self.open_random_device(groups_page)
         table = group_devices_dialog.table.wait_to_load()
 
@@ -504,7 +504,7 @@ class TestCreateEditGroups:
     """)
     @allure.severity(allure.severity_level.CRITICAL)
     def test_update_group_version(self):
-        login_as(super_admin_credentials)
+        login_as(fota_admin_credentials)
         version_page = LumenisXVersionPage().open()
         version_page.filter_valid()
         valid_version = self.get_first_version_from_table(version_page.table)
@@ -607,7 +607,7 @@ class TestCreateEditGroups:
 
     @staticmethod
     def open_random_device(groups_page: GroupsPage) -> GroupDevicesDialog:
-        groups_page.search_by(TEST_GROUP_PREFIX)
+        groups_page.search_by(TEST_GROUP_PREFIX + "group")
         device = random_list_item(groups_page.table.get_column_values(GroupsTable.Headers.NAME))
         return groups_page.click_assign_device(device)
 
