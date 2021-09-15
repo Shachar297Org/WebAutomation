@@ -4,8 +4,8 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-selene = "==2.0.0a38"
-pytest = "==6.2.4"
+selene = "==2.0.0a39"
+pytest = "==6.2.5"
 pytest-env = "==0.6.2"
 allure-pytest = "==2.9.43"
 assertpy = "==1.1"
