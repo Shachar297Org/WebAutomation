@@ -63,7 +63,7 @@ class Table(object):
     @allure.step
     def wait_to_load(self):
         self.table_body.wait.until(be.visible)
-        self.spinner.should(be.not_.visible, 10)
+        self.spinner.should(be.not_.visible, 20)
         return self
 
     @allure.step

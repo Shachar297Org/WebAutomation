@@ -142,7 +142,7 @@ class DevicesTable(Table):
     class Headers:
         SERIAL_NUMBER = "Serial Number"
         DEVICE_TYPE = "Device Type"
-        STATUS = "Status"
+        STATUS = "Activation Status"
         CLINIC_ID = "Clinic ID"
         CLINIC_NAME = "Clinic Name"
         COUNTRY = "Country"
@@ -178,8 +178,8 @@ class PropertiesTable:
     class Property:
         DEVICE_TYPE = "Device Type"
         DEVICE_SERIAL_NUMBER = "Device Serial Number"
-        STATUS = "Status"
-        CREATION_TIME = "Creation Time"
+        STATUS = "Activation Status"
+        CREATION_TIME = "Registration Time (UTC)"
         LUMENIS_APP_VERSION = "Lumenis Application Version"
         LUMENISX_PLATFORM_VERSION = "LumenisXPlatform Version"
         START_EVENT_LOCAL_TIMESTAMP = "Start Event Local Timestamp"
