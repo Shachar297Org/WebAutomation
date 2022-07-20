@@ -34,7 +34,7 @@ class BaseUsersTest:
         assert_that(edit_dialog.get_email()).is_equal_to(expected.email)
         assert_that(edit_dialog.get_phone_number()).is_equal_to(expected.phone_number)
         assert_that(edit_dialog.get_user_group()).is_equal_to(expected.user_group)
-        assert_that(edit_dialog.get_manager()).is_equal_to(expected.manager)
+        #assert_that(edit_dialog.get_manager()).is_equal_to(expected.manager)
 
     @allure.step
     def create_random_user_with_device(self, users_page: UsersPage, manager: str, region: str,

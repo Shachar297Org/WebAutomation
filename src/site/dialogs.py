@@ -872,6 +872,8 @@ class EditGroupDialog(_BaseGroupDialog):
 class UploadLumenisXVersionDialog(_BaseDialog):
     TITLE = "Upload LumenisX Version"
 
+    LUMENISX_VERSION_UPLOADED_MESSAGE = "Create LumenisX Version successful"
+
     def __init__(self):
         super().__init__()
         self.upload_button = self.dialog.s(".//button[span[text()='Click To Upload']]")
@@ -891,6 +893,10 @@ class UploadLumenisXVersionDialog(_BaseDialog):
         self.upload_button.click()
 
     @allure.step
+    def upload(self, path):
+        self.upload_input.send_keys(path)
+
+    @allure.step
     def get_version(self) -> str:
         return self.version_input.get(query.value)
 
@@ -907,6 +913,109 @@ class UploadLumenisXVersionDialog(_BaseDialog):
     def set_comments(self, text: str):
         self.comments_textarea.clear().type(text)
         return self
+
+    @allure.step
+    def click_save(self):
+        self.save_button.click()
+
+
+class UploadSWVersionDialog(_BaseDialog):
+    TITLE = "Upload SW Version"
+    
+    SW_VERSION_UPLOADED_MESSAGE = "Create Software Version successful"
+
+    def __init__(self):
+        super().__init__()
+        self.device_type_tree_selector = DeviceTypesTreeSelector(
+            "//*[@class='ant-modal']//span[contains(@class, 'TreeSelector')][.//text()='Device Types']")
+        self.upload_button = self.dialog.s(".//button[span[text()='Click To Upload']]")
+        self.upload_input = self.dialog.s("input#creatSwVersionsForm_upload")
+        self.version_input = self.dialog.s("input#creatSwVersionsForm_version")
+        self.file_type = self.dialog.s("input#creatSwVersionsForm_fileType")
+        self.install_type_select = SelectBox(".ant-modal-content #creatSwVersionsForm_installTypeSelector")
+        self.supported_version = self.dialog.s("input#creatSwVersionsForm_supportedVersions")
+        self.comments_textarea = self.dialog.s("textarea#creatSwVersionsForm_comments")
+        self.save_button = self.dialog.s(".//button[span[text()='Save']]")
+
+    @allure.step
+    def wait_to_load(self):
+        self.version_input.wait_until(be.visible)
+        self.save_button.wait_until(be.clickable)
+        return self
+
+    @allure.step
+    def wait_to_disappear(self):
+        self.dialog.wait_until(be.not_.visible)
+        return self
+
+    @allure.step
+    def click_upload(self):
+        self.upload_button.click()
+
+    @allure.step
+    def upload(self, path):
+        self.upload_input.send_keys(path)
+
+    @allure.step
+    def get_version(self) -> str:
+        return self.version_input.get(query.value)
+
+    @allure.step
+    def set_version(self, text: str):
+        self.version_input.clear().type(text)
+        return self
+
+    @allure.step
+    def get_comments(self) -> str:
+        return self.comments_textarea.get(query.value)
+
+    @allure.step
+    def set_comments(self, text: str):
+        self.comments_textarea.clear().type(text)
+        return self
+
+    @allure.step
+    def get_file_type(self) -> str:
+        return self.file_type.get(query.value)
+
+    @allure.step
+    def set_file_type(self, text: str):
+        self.file_type.clear().type(text)
+        return self
+
+    @allure.step
+    def get_supported_version(self) -> str:
+        return self.supported_version.get(query.value)
+
+    @allure.step
+    def set_supported_version(self, text: str):
+        self.supported_version.clear().type(text)
+        return self
+
+    @allure.step
+    def get_supported_version(self) -> str:
+        return self.supported_version.get(query.value)
+
+    @allure.step
+    def set_supported_version(self, text: str):
+        self.supported_version.clear().type(text)
+        return self
+
+    @allure.step
+    def get_install_type(self) -> str:
+        return self.install_type_select.get_selected_item()
+
+    @allure.step
+    def select_install_type(self, text: str):
+        self.install_type_select.select_item(text)
+        return self
+
+    @allure.step
+    def select_device(self, device: str):
+        self.device_type_tree_selector.open().dropdown_search(device)
+        self.device_type_tree_selector.select_filtered_item(device)
+        return self
+
 
     @allure.step
     def click_save(self):
@@ -975,6 +1084,7 @@ class GroupDevicesDialog(_BaseDialog):
 
     @allure.step
     def select_device_by_serial_number(self, device_serial_number):
+        
         self.search_by(device_serial_number)
         self.table.select_device(device_serial_number)
         return self
@@ -1011,12 +1121,22 @@ class UpdateGroupVersionsDialog(_BaseDialog):
         return self
 
     @allure.step
+    def wait_to_disapear(self):
+        self.publish_update_button.should(be.not_.visible)
+        return self
+
+    @allure.step
     def get_group_name(self):
         return self.group_name_input.get(query.value)
 
     @allure.step
     def select_lumenisx_version(self, version):
         self.lumenisx_version_menu.select_item(version)
+        return self
+    
+    @allure.step
+    def select_sw_version(self, version):
+        self.software_version_menu.select_item(version)
         return self
 
     @allure.step
@@ -1045,7 +1165,7 @@ class GroupDevicesStatusDialog(_BaseDialog):
 
     @allure.step
     def wait_to_load(self):
-        self.desired_lumenis_version.wait_until(be.visible)
+        self.dialog.wait_until(be.visible)
         return self
 
     @allure.step
@@ -1067,8 +1187,23 @@ class GroupDevicesStatusDialog(_BaseDialog):
         return self.desired_lumenis_version.get(query.text)
 
     @allure.step
-    def get_devices(self) -> []:
+    def get_devices(self):
         return self.table.get_column_values(GroupDevicesStatusTable.Headers.SERIAL_NUMBER)
+
+    @allure.step
+    def check_sw_versions(self):
+        sw_col_values = self.table.get_column_values(GroupDevicesStatusTable.Headers.CURR_SOFT_VER)
+        result = len(set(sw_col_values)) == 1 and sw_col_values[0] == self.desired_sw_version.text
+
+        return result
+
+    @allure.step
+    def check_lumx_versions(self):
+        lumx_col_values = self.table.get_column_values(GroupDevicesStatusTable.Headers.CURR_LUM_VER)
+        result = len(set(lumx_col_values)) == 1 and lumx_col_values[0] == self.desired_lumenis_version.text
+        
+        return result
+
 
 
 class WarningDialog(_BaseDialog):

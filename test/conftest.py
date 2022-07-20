@@ -23,6 +23,7 @@ chrome_headless = bool(os.getenv("SELENE_CHROME_HEADLESS", False))
 
 @pytest.fixture(autouse=True, scope="session")
 def setup_driver():
+    print(config)
     if remote:
         driver = _get_remote_web_driver()
     else:

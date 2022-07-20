@@ -15,7 +15,7 @@ from src.site.components.tables import UsersTable, DevicesTable, GroupsTable, Lu
 from src.site.components.tree_selector import DeviceTypesTreeSelector, LocationTreeSelector
 from src.site.dialogs import CreateUserDialog, EditUserDialog, CreateDeviceDialog, DevicePropertiesDialog, \
     UploadLumenisXVersionDialog, CreateGroupDialog, EditGroupDialog, GroupDevicesDialog, UpdateGroupVersionsDialog, \
-    GroupDevicesStatusDialog
+    GroupDevicesStatusDialog, UploadSWVersionDialog
 from src.util.elements_util import JS_CLICK
 
 
@@ -212,6 +212,8 @@ class DevicesPage(_BaseTablePage):
             dialog.set_customer_fields(customer)
 
         dialog.click_create()
+        dialog.dialog.wait_until(be.not_.visible)
+        
         return self
 
 
@@ -335,6 +337,60 @@ class LumenisXVersionPage(_BaseTablePage):
     @allure.step
     def filter_invalid(self):
         self.valid_type_menu.select_item(LumenisXVersionPage.INVALID)
+        return self
+
+    @allure.step
+    def make_valid(self, name):
+        if not self.table.is_valid:
+            self.table.click_valid(name)
+        return self
+
+    @allure.step
+    def make_invalid(self, name):
+        if self.table.is_valid:
+            self.table.click_invalid(name)
+        return self
+
+
+class SwVersionPage(_BaseTablePage):
+    VALID_TYPE_TEXT = "Valid Type"
+
+    VALID = "Valid"
+    INVALID = "Invalid"
+
+    CREATE_LUMENIS_VERSION_MESSAGE = "Create Software Version successful"
+    VERSION_UPDATED_MESSAGE = "Version updated successfully"
+
+    def __init__(self):
+        super().__init__()
+        self.valid_type_menu = SelectBox("#entityToolbarFilters_validFilter")
+        self.table = LumenisXVersionTable(".ant-table-wrapper")
+
+    @allure.step
+    def open(self):
+        browser.open('/swVersions')
+        self.wait_to_load()
+        return self
+
+    @allure.step
+    def wait_to_load(self):
+        self.valid_type_menu.select.wait_until(be.visible)
+        self.reset_button.button.wait_until(be.clickable)
+        return self
+
+    @allure.step
+    def click_add_version(self) -> UploadSWVersionDialog:
+        self.add_button.click()
+        return UploadSWVersionDialog().wait_to_load()
+
+    @allure.step
+    def filter_valid(self):
+        self.valid_type_menu.select_item(SwVersionPage.VALID)
+        return self
+
+    @allure.step
+    def filter_invalid(self):
+        self.valid_type_menu.select_item(SwVersionPage.INVALID)
         return self
 
     @allure.step
