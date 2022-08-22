@@ -1,0 +1,30 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["--swPath=D:/SWFOTA/swDesiredVersionCheck3.0.0_Force_Signed.exe", "--swVersion=3.0.0", "--deviceFamily=TEST-SWFOTA-C", "--deviceType=GA-0000180", "--deviceModel='Acupulse=-=40W=ST'", 
+                        "--swFileType=TESTER_APP", "--swSupportedVersion=*", "--swInstallType=Force", "--numberOfDevices=1", "--times=2"],
+            "justMyCode": true,
+            "env": {
+                "_PYTEST_RAISE": "1"
+            },
+        },
+        {
+            "name": "Python: pytest",
+            "type": "python",
+            "request": "launch",
+            "module": "pytest",
+            "cwd": "${workspaceRoot}",
+            "envFile": "${workspaceRoot}/.env",
+            "console": "integratedTerminal",
+        }
+    ]
+}

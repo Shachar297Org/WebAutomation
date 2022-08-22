@@ -418,7 +418,7 @@ class TestDeviceProperties:
         users_page.search_by(test_user.email)
         edit_user_dialog = users_page.open_edit_user_dialog(test_user.email)
 
-        device_rows = edit_user_dialog.device_table.get_rows()
+        device_rows = edit_user_dialog.device_table.get_rows().wait_to_load()
         assert_that(device_rows).is_not_empty()
         for row in device_rows:
             assert_that(edit_user_dialog.device_table.is_any_row_cell_contains_text_ignoring_case(

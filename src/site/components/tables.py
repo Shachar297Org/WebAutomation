@@ -334,6 +334,47 @@ class LumenisXVersionTable(Table):
         VALID_INVALID_BUTTONS = ""
 
 
+class SWVersionTable(Table):
+    _VALID = "Valid"
+    _INVALID = "Invalid"
+
+    @allure.step
+    def is_valid(self, version: str) -> bool:
+        return self.get_row_by_version(version).get_button(self._VALID).matching(be.disabled)
+
+    @allure.step
+    def click_valid(self, version: str):
+        self.get_row_by_version(version).get_button(self._VALID).click()
+
+    @allure.step
+    def click_invalid(self, version: str):
+        self.get_row_by_version(version).get_button(self._INVALID).click()
+
+    @allure.step
+    def version_exists(self, version: str) -> bool:
+        self.get_row_by_version(version).get_button(self._INVALID).click()
+
+    @allure.step
+    def get_row_by_version(self, name: str) -> TableRowWrapper:
+        return self.get_row_by_column_value(self.Headers.VERSION, name)
+
+    @allure.step
+    def get_row_by_version_and_type(self, name: str, type: str) -> TableRowWrapper:
+        rows = self.get_rows_by_column_value(self.Headers.VERSION, name)
+        for row in rows:
+            if row.get_cell_text(self.Headers.TYPE) == type and row.get_button(self._VALID).matching(be.disabled):
+                return row
+        
+        return None
+
+    class Headers:
+        TYPE = "Type"
+        VERSION = "Version"
+        UPLOAD_DATE = "Upload Date"
+        UPLOADED_BY = "Uploaded By"
+        VALID_INVALID_BUTTONS = ""
+
+
 class GroupDevicesTable(Table):
 
     def __init__(self, locator: str):

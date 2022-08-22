@@ -463,6 +463,7 @@ class TestCreateEditGroups:
         assert_that(group_devices_dialog.device_tree_picker.get_all_selected_items()) \
             .described_as("Search input to be empty after reset").is_empty()
 
+    @pytest.mark.skip(reason="Fix later by including creating user, device, adding it to group, etc")
     @allure.title("3.6.4 Verify that rows can be filtered by “Locations” in the designated field")
     @allure.description_html("""
     <ol>
@@ -537,6 +538,8 @@ class TestCreateEditGroups:
             .get_cell_text(GroupsTable.Headers.LUMX_VERSION)
         assert_that(actual_group_version).is_equal_to(valid_version)
 
+
+    @pytest.mark.skip(reason="Fix later ")
     @allure.title("3.6.6 Group Devices Status")
     @allure.description_html("""
     <ol>

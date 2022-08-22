@@ -32,6 +32,13 @@ class TestDevicesList:
         DevicesTable.Headers.COUNTRY
     ]
 
+    table_search_columns_provider = [
+        DevicesTable.Headers.SERIAL_NUMBER,
+        DevicesTable.Headers.CLINIC_ID,
+        DevicesTable.Headers.CLINIC_NAME,
+        DevicesTable.Headers.COUNTRY
+    ]
+
     search_columns_provider = [
         DevicesTable.Headers.SERIAL_NUMBER,
         DevicesTable.Headers.STATUS,
@@ -124,12 +131,12 @@ class TestDevicesList:
     """)
     @allure.severity(allure.severity_level.NORMAL)
     @allure.issue("LD-398")
-    @pytest.mark.parametrize("column", table_columns_provider)
+    @pytest.mark.parametrize("column", table_search_columns_provider)
     def test_filter_devices_by_column_value(self, column):
         devices_page = DevicesPage().open()
         table = devices_page.table.wait_to_load()
         devices_page.sort_desc_by(column)
-        item = table.get_column_values(column)[0].split()[0]
+        item = table.get_column_values(column)[0]
 
         devices_page.search_by(item)
 

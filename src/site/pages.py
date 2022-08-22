@@ -11,7 +11,7 @@ from src.domain.user import User
 from src.site.components.base_table import PaginationElement, Table
 from src.site.components.page_header import PageHeader
 from src.site.components.simple_components import SearchInput, SelectBox, TopRightNotification, ResetButton
-from src.site.components.tables import UsersTable, DevicesTable, GroupsTable, LumenisXVersionTable
+from src.site.components.tables import UsersTable, DevicesTable, GroupsTable, LumenisXVersionTable, SWVersionTable
 from src.site.components.tree_selector import DeviceTypesTreeSelector, LocationTreeSelector
 from src.site.dialogs import CreateUserDialog, EditUserDialog, CreateDeviceDialog, DevicePropertiesDialog, \
     UploadLumenisXVersionDialog, CreateGroupDialog, EditGroupDialog, GroupDevicesDialog, UpdateGroupVersionsDialog, \
@@ -285,7 +285,7 @@ class GroupsPage(_BaseTablePage):
     @allure.step
     def click_assign_device(self, name) -> GroupDevicesDialog:
         self.table.click_assign_devices(name)
-        return GroupDevicesDialog().wait_to_load()
+        return GroupDevicesDialog()
 
     @allure.step
     def click_update_versions(self, name) -> UpdateGroupVersionsDialog:
@@ -363,8 +363,11 @@ class SwVersionPage(_BaseTablePage):
 
     def __init__(self):
         super().__init__()
+        self.device_tree_picker = DeviceTypesTreeSelector("//span[contains(@class, 'TreeSelector')]"
+                                                          "[.//text()='Device Types']")
+        self.search_input = SearchInput("input[placeholder='Search']")
         self.valid_type_menu = SelectBox("#entityToolbarFilters_validFilter")
-        self.table = LumenisXVersionTable(".ant-table-wrapper")
+        self.table = SWVersionTable(".ant-table-wrapper")
 
     @allure.step
     def open(self):
@@ -403,6 +406,16 @@ class SwVersionPage(_BaseTablePage):
     def make_invalid(self, name):
         if self.table.is_valid:
             self.table.click_invalid(name)
+        return self
+
+    @allure.step
+    def search(self, name: str, device: Device):
+        self.search_input.search(name)
+        self.table.wait_to_load()
+        
+        self.device_tree_picker.open().select_devices(device.group, device.model, device.device)
+        self.table.wait_to_load()
+
         return self
 
 

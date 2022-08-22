@@ -88,10 +88,13 @@ class TestFotaAdminDevicesPermissions(BaseDevicesTest):
 
         UsersPage().open().add_user(test_user)
 
-        devices_page = DevicesPage().open().add_device(test_device)
+        devices_page = DevicesPage().open().add_device(test_device).wait_to_load()
 
-        properties_dialog = devices_page.reload().search_by(test_device.serial_number) \
-            .open_device_properties(test_device.serial_number)
+        devices_page = DevicesPage().open()
+
+        devices_page = devices_page.reload().search_by(test_device.serial_number)
+        properties_dialog = devices_page.open_device_properties(test_device.serial_number)
+
         assign_tab = properties_dialog.assign_tab.open()
 
         assign_tab.search_by(test_user.name)
