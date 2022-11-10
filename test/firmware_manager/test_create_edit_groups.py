@@ -258,6 +258,8 @@ class TestCreateEditGroups:
         assert_that(test_device_row.get_cell_text(headers.COUNTRY)).is_equal_to(test_customer.region_country)
 
         group_devices_dialog.select_device_by_serial_number(test_device.serial_number).click_update()
+
+        group_devices_dialog.dialog.wait_until(be.not_.visible)
         assert_that(groups_page.notification.get_message()) \
             .is_equal_to(GroupDevicesDialog.ASSIGNED_DEVICE_TO_GROUP_MESSAGE)
 
@@ -317,6 +319,8 @@ class TestCreateEditGroups:
             .described_as("Device to be selected").is_true()
 
         group_devices_dialog.click_update()
+        group_devices_dialog.dialog.wait_until(be.not_.visible)
+
         groups_page.search_by(test_group_1)
         group_devices_dialog = groups_page.click_assign_device(test_group_1)
         group_devices_dialog.search_by(test_device.serial_number)

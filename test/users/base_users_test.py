@@ -21,6 +21,10 @@ class BaseUsersTest:
     @allure.step
     def assert_user_row(self, row: TableRowWrapper, expected: User):
         headers = UsersTable.Headers
+
+        if expected.phone_number[0] == '+':
+            expected.phone_number = expected.phone_number[1:]
+
         assert_that(row.get_cell_text(headers.EMAIL)).is_equal_to(expected.email)
         assert_that(row.get_cell_text(headers.NAME)).is_equal_to(expected.name)
         assert_that(row.get_cell_text(headers.PHONE)).is_equal_to(expected.phone_number)

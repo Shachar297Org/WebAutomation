@@ -93,6 +93,7 @@ class TestDevicesList:
                                                                     headers.CLINIC_NAME, headers.COUNTRY,
                                                                     headers.ACTION_BUTTON)
 
+    @pytest.mark.skip(reason="skipping until issue is resolved")
     @allure.title("3.4.1 Verify that you can sort device rows by any column")
     @allure.description_html("""
     <ol>

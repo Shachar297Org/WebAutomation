@@ -28,6 +28,7 @@ class TestFotaAdminDevicesPermissions(BaseDevicesTest):
         devices_page.table.table.should(be.visible).should(be.enabled)
         assert_that(devices_page.table.get_rows()).is_not_empty()
 
+    @pytest.mark.skip(reason="not an issue, by design")
     @allure.issue("LD-390")
     @allure.title("3.1.2.2 Create and view a new device")
     @allure.severity(allure.severity_level.NORMAL)
@@ -50,6 +51,7 @@ class TestFotaAdminDevicesPermissions(BaseDevicesTest):
         edit_dialog.general_tab.assert_device_fields(new_device)
         edit_dialog.general_tab.assert_customer_fields(new_customer)
 
+    @pytest.mark.skip(reason="not an issue, by design")
     @allure.issue("LD-390")
     @allure.title("3.1.2.2 Edit device customer details")
     @allure.severity(allure.severity_level.NORMAL)
@@ -78,6 +80,7 @@ class TestFotaAdminDevicesPermissions(BaseDevicesTest):
         edit_dialog.general_tab.assert_device_fields(device)
         edit_dialog.general_tab.assert_customer_fields(new_customer)
 
+    @pytest.mark.skip(reason="not an issue, by design")
     @allure.title("3.1.2.2 Assign User")
     @allure.issue("LD-390")
     @allure.issue("LD-392")

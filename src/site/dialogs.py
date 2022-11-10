@@ -246,7 +246,7 @@ class EditUserDialog(_BaseCreateEditUserDialog):
 
     @allure.step
     def wait_to_load(self):
-        self.manager_select.select.wait_until(be.visible)
+        #self.manager_select.select.wait_until(be.visible)
         self.update_button.wait_until(be.clickable)
         return self
 
@@ -618,7 +618,8 @@ class DevicePropertiesDialog(_BaseDialog):
 
         @allure.step
         def wait_to_load(self):
-            self.update_customer_button.wait_until(be.clickable)
+            #self.update_customer_button.wait_until(be.clickable)
+            self.cancel_button.wait_until(be.clickable)
             return self
 
         @allure.step

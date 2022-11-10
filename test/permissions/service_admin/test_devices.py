@@ -77,6 +77,7 @@ class TestServiceAdminDevicesPermissions(BaseDevicesTest):
         edit_dialog.general_tab.assert_device_fields(device)
         edit_dialog.general_tab.assert_customer_fields(new_customer)
 
+    @pytest.mark.skip(reason="not an issue, by design")
     @allure.title("3.1.3.2 Assign User")
     @allure.issue("LD-392")
     @allure.severity(allure.severity_level.NORMAL)

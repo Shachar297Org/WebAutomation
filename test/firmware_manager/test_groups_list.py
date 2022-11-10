@@ -83,6 +83,7 @@ class TestGroupsList:
                                                                    headers.SW_VERSION, headers.LUMX_VERSION,
                                                                    headers.ACTION_BUTTON)
 
+    @pytest.mark.skip(reason="not an issue, by design")
     @allure.title("3.6.1 Verify that you can sort groups rows by any column")
     @allure.description_html("""
     <ol>
@@ -153,7 +154,7 @@ class TestGroupsList:
 
         groups_page.search_by(substring)
 
-        assert_that(table.get_rows()).is_not_empty()
+        assert_that(table.get_rows(False)).is_not_empty()
 
         for table_row in table.get_rows():
             assert_that(table.is_any_row_cell_contains_text_ignoring_case(table_row, substring)).is_true()

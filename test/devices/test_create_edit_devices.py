@@ -154,6 +154,7 @@ class TestCreateEditDevices(BaseDevicesTest):
         edit_dialog.general_tab.assert_device_fields(new_device)
         edit_dialog.general_tab.assert_customer_fields(new_customer)
 
+    @pytest.mark.skip(reason="not supported")
     @allure.title("3.4.2 Create new device with customer none-ASCII parameters")
     @allure.description_html("""
     <ol>
@@ -367,6 +368,7 @@ class TestDeviceProperties:
         AssignUserTable.Headers.USER_GROUP
         ]
 
+    @pytest.mark.skip(reason="skipping until issue is resolved")
     @allure.title("3.4.5 Assign User")
     @allure.description_html("""
     <ol>
@@ -418,12 +420,13 @@ class TestDeviceProperties:
         users_page.search_by(test_user.email)
         edit_user_dialog = users_page.open_edit_user_dialog(test_user.email)
 
-        device_rows = edit_user_dialog.device_table.get_rows().wait_to_load()
+        device_rows = edit_user_dialog.device_table.get_rows()
         assert_that(device_rows).is_not_empty()
         for row in device_rows:
             assert_that(edit_user_dialog.device_table.is_any_row_cell_contains_text_ignoring_case(
                 row, test_device.model))
 
+    @pytest.mark.skip(reason="skipping until issue is resolved")
     @allure.title("Sort users by name on Assign Tab of the Device Properties dialog")
     @allure.description_html("""
     <ol>

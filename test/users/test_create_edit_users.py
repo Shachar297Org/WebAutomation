@@ -51,7 +51,7 @@ class TestCreateEditUsers(BaseUsersTest):
         assert_tree_selector_default_state(dialog.device_tree_picker, CreateUserDialog.DEVICE_TYPES_PLACEHOLDER)
 
         dialog.device_table.table.should(be.visible).should(be.enabled)
-        assert_that(dialog.device_table.get_rows()).described_as("Device table to be empty").is_empty()
+        assert_that(dialog.device_table.get_rows(False)).described_as("Device table to be empty").is_empty()
         assert_that(dialog.device_table.get_headers()).contains_only(headers.REGION, headers.DEVICE_TYPES,
                                                                      headers.ACTION_BUTTON)
 
@@ -196,7 +196,7 @@ class TestCreateEditUsers(BaseUsersTest):
             .contains_only(new_device_group)
 
         edit_dialog.device_table.click_remove(new_device_group)
-        assert_that(edit_dialog.device_table.get_rows()).is_empty()
+        assert_that(edit_dialog.device_table.get_rows(False)).is_empty()
 
         edit_dialog.click_update()
 

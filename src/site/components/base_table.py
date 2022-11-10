@@ -67,8 +67,11 @@ class Table(object):
         return self
 
     @allure.step
-    def get_rows(self):
-        return self._get_wrapped_rows(self.table_body.ss("tr"))
+    def get_rows(self, wait = True):
+        if wait == True:
+            self.wait_to_load()
+        rows = self._get_wrapped_rows(self.table_body.ss("tr"))
+        return rows
 
     @allure.step
     def get_headers(self) -> []:

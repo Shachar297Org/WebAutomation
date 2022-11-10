@@ -20,6 +20,7 @@ def login():
 @allure.feature(Feature.PERMISSIONS)
 class TestFotaAdminUsersPermissions(BaseUsersTest):
 
+    @pytest.mark.skip(reason="not an issue, by design")
     @allure.title("3.1.2.1 FOTA admin: View all users")
     @allure.severity(allure.severity_level.NORMAL)
     @allure.issue("LD-404")

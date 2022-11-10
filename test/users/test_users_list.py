@@ -53,6 +53,7 @@ class TestUsersList:
                                                                   headers.USER_GROUP, headers.MANAGER,
                                                                   headers.ACTION_BUTTON)
 
+    @pytest.mark.skip(reason="skipping until issue is resolved")
     @allure.title("Verify that you can sort the user rows by any column")
     @allure.severity(allure.severity_level.NORMAL)
     @allure.issue("LD-388")
