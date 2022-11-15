@@ -31,3 +31,4 @@ def reduce_timeout_decorator(func):
         config.timeout = existing_implicit_wait
 
     return wrapper
+

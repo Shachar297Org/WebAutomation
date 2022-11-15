@@ -88,8 +88,8 @@ class TestDevicesList:
         devices_page.reload_button.should(be.visible).should(be.clickable)
 
         devices_page.table.table.should(be.visible).should(be.enabled)
-        assert_that(devices_page.table.get_headers()).contains_only(headers.SERIAL_NUMBER, headers.DEVICE_TYPE,
-                                                                    headers.STATUS, headers.CLINIC_ID,
+        assert_that(devices_page.table.get_headers()).contains_only(headers.LAST_EVENT, headers.SERIAL_NUMBER, headers.DEVICE_TYPE,
+                                                                    headers.STATUS, headers.CLASSIFICATION, headers.CLINIC_ID,
                                                                     headers.CLINIC_NAME, headers.COUNTRY,
                                                                     headers.ACTION_BUTTON)
 

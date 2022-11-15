@@ -467,6 +467,7 @@ class TestDeviceProperties:
     @allure.severity(allure.severity_level.NORMAL)
     @pytest.mark.parametrize("column", assign_table_columns_provider)
     def test_filter_users_by_column_value_on_properties_assign_tab(self, column):
+        
         assign_tab = self.open_assign_user_dialog()
         table = assign_tab.table.wait_to_load()
         random_item = random_list_item(table.get_column_values(column)).split()[0]
@@ -544,9 +545,9 @@ class TestDeviceProperties:
 
     @allure.step
     def open_assign_user_dialog(self) -> DevicePropertiesDialog.AssignTab:
-        devices_page = DevicesPage().open().search_by(TEST_DEVICE_PREFIX)
-
-        first_device = devices_page.table.get_column_values(AssignUserTable.Headers.NAME)[0]
+        devices_page = DevicesPage().open()
+        devices_page.search_by(TEST_DEVICE_PREFIX)
+        first_device = devices_page.table.get_column_values(DevicesTable.Headers.SERIAL_NUMBER)[0]
         dialog = devices_page.open_device_properties(first_device)
         dialog.assign_tab.open()
         return dialog.assign_tab

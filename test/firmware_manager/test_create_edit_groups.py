@@ -17,6 +17,9 @@ from src.util.random_util import random_string, random_list_item
 from test.test_data_provider import fota_admin_credentials, random_device, super_admin_credentials,\
     random_usa_customer, random_customer
 
+import time
+
+
 TEST_GROUP_PREFIX = "autotests_"
 
 
@@ -162,7 +165,10 @@ class TestCreateEditGroups:
 
         edit_dialog.set_group_name(edited_group_name).click_update()
         assert_that(groups_page.notification.get_message()).is_equal_to(GroupsPage.GROUP_UPDATED_MESSAGE)
-        groups_page.reload().search_by(edited_group_name)
+
+        groups_page = GroupsPage().open()
+        groups_page.search_by(edited_group_name)
+
         assert_that(groups_page.table.get_column_values(GroupsTable.Headers.NAME)).contains(edited_group_name)
         edited_row = groups_page.table.get_row_by_name(edited_group_name)
 
@@ -284,6 +290,7 @@ class TestCreateEditGroups:
     """)
     @allure.title("3.6.4. Assign already assigned device to group")
     @allure.severity(allure.severity_level.NORMAL)
+    @pytest.mark.execution_timeout(200)
     def test_assign_assigned_device_to_another_group(self):
         test_device = random_device()
         test_group_1 = TEST_GROUP_PREFIX + "group_1_" + random_string(8)
@@ -393,7 +400,9 @@ class TestCreateEditGroups:
     @allure.severity(allure.severity_level.NORMAL)
     @pytest.mark.parametrize("column", table_columns_provider)
     def test_sort_devices(self, column):
-        groups_page = login_as(fota_admin_credentials)
+        groups_page = login_as(super_admin_credentials)
+        groups_page = GroupsPage().open()
+
         group_devices_dialog = self.open_random_device(groups_page)
         table = group_devices_dialog.table.wait_to_load()
 
@@ -423,6 +432,7 @@ class TestCreateEditGroups:
     @pytest.mark.parametrize("column", table_columns_provider)
     def test_filter_devices_by_column_value(self, column):
         groups_page = login_as(super_admin_credentials)
+        groups_page = GroupsPage().open()
         group_devices_dialog = self.open_random_device(groups_page)
         table = group_devices_dialog.table.wait_to_load()
 
@@ -452,12 +462,14 @@ class TestCreateEditGroups:
         test_device_model = AcupulseDeviceModels.ACUPULSE_30W
 
         groups_page = login_as(fota_admin_credentials)
+        groups_page = GroupsPage().open()
+
         group_devices_dialog = self.open_random_device(groups_page)
         table = group_devices_dialog.table.wait_to_load()
 
         group_devices_dialog.device_tree_picker.select_device_models(test_device_group, test_device_model).close()
 
-        assert_that(table.wait_to_load().get_column_values(GroupsTable.Headers.DEVICE_TYPE)) \
+        assert_that(table.get_column_values(GroupsTable.Headers.DEVICE_TYPE)) \
             .is_subset_of([Acupulse30Wdevices.GA_0000070CN, Acupulse30Wdevices.GA_0000070GR,
                            Acupulse30Wdevices.RG_0000070, Acupulse30Wdevices.GA_0000070,
                            Acupulse30Wdevices.GA_0000070DE])
@@ -615,7 +627,9 @@ class TestCreateEditGroups:
     @staticmethod
     def open_random_device(groups_page: GroupsPage) -> GroupDevicesDialog:
         groups_page.search_by(TEST_GROUP_PREFIX + "group")
-        device = random_list_item(groups_page.table.get_column_values(GroupsTable.Headers.NAME))
+        time.sleep(1)
+        columns = groups_page.table.get_column_values(GroupsTable.Headers.NAME)
+        device = random_list_item(columns)
         return groups_page.click_assign_device(device)
 
     @staticmethod

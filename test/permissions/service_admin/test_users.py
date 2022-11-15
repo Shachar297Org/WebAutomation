@@ -89,7 +89,9 @@ class TestServiceAdminUsersPermissions(BaseUsersTest):
 
         assert_that(users_page.notification.get_message()).is_equal_to(UsersPage.USER_UPDATED_MESSAGE)
 
-        users_page.reload().search_by(new_user.email)
+        users_page = UsersPage().open()
+ 
+        users_page.search_by(new_user.email)
 
         assert_that(users_page.table.get_column_values(UsersTable.Headers.EMAIL)).contains_only(new_user.email)
         user_row = users_page.table.get_row_by_email(new_user.email)

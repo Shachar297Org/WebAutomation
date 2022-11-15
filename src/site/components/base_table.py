@@ -62,12 +62,12 @@ class Table(object):
 
     @allure.step
     def wait_to_load(self):
-        self.table_body.wait.until(be.visible)
-        self.spinner.should(be.not_.visible, 20)
+        self.spinner.wait.until(be.not_.visible)
+        self.table_body.should(be.visible, 20)
         return self
 
     @allure.step
-    def get_rows(self, wait = True):
+    def get_rows(self, wait = False):
         if wait == True:
             self.wait_to_load()
         rows = self._get_wrapped_rows(self.table_body.ss("tr"))

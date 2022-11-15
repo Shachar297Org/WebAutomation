@@ -1094,6 +1094,10 @@ class GroupDevicesDialog(_BaseDialog):
     def click_update(self):
         self.update_device_assignment_button.click()
 
+    @allure.step
+    def devices_loaded(self):
+        return self.dialog.s(".ant-empty-image").matching(be.not_.visible)
+
     @staticmethod
     def get_expected_device_assigned_warning(device: str, group: str) -> str:
         return "Device {0} is already assigned to group {1}".format(device, group)

@@ -154,7 +154,7 @@ class TestGroupsList:
 
         groups_page.search_by(substring)
 
-        assert_that(table.get_rows(False)).is_not_empty()
+        assert_that(table.get_rows()).is_not_empty()
 
         for table_row in table.get_rows():
             assert_that(table.is_any_row_cell_contains_text_ignoring_case(table_row, substring)).is_true()

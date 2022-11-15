@@ -140,9 +140,11 @@ class DevicesTable(Table):
             .get_button(self._PROPERTIES_TEXT)
 
     class Headers:
+        LAST_EVENT = "Last Event"
         SERIAL_NUMBER = "Serial Number"
         DEVICE_TYPE = "Device Type"
         STATUS = "Activation Status"
+        CLASSIFICATION = "Classification"
         CLINIC_ID = "Clinic ID"
         CLINIC_NAME = "Clinic Name"
         COUNTRY = "Country"
@@ -409,6 +411,9 @@ class GroupDevicesTable(Table):
 
     def is_warn_icon_displayed(self, serial_number: str) -> bool:
         return self.get_row_by_serial_number(serial_number).row.s("span.anticon-warning").matching(be.visible)
+
+    def is_warn_icon_displayed(self, serial_number: str) -> bool:
+        return self.get_row_by_serial_number(serial_number).row.s("span.anticon-warning").matching(be.visible) 
 
     @allure.step
     def click_all(self):

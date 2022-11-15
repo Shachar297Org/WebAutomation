@@ -97,7 +97,8 @@ class TestFunctionalBiot(BaseUsersTest, BaseDevicesTest):
         assert_that(devices_page.notification.get_message()).is_equal_to(DevicesPage.DEVICE_CREATED_MESSAGE)
         devices_page.notification.wait_to_disappear()
 
-        devices_page.reload().search_by(new_device.serial_number)
+        devices_page = DevicesPage().open()
+        devices_page.search_by(new_device.serial_number)
 
         self.assert_device_in_table(devices_page.table, new_device)
 
